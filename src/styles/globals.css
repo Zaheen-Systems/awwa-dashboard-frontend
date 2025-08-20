@@ -1,0 +1,218 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@custom-variant dark (&:is(.dark *));
+
+:root {
+  --font-size: 14px;
+  
+  /* New Color Palette from Image */
+  --navy-primary: #2C5F7C; /* Dark navy blue */
+  --turquoise-secondary: #4EAAC9; /* Light blue/turquoise */
+  --orange-accent: #FF8C42; /* Bright orange */
+  --charcoal-text: #3C3C3C; /* Dark gray */
+  --light-gray: #BDC3C7; /* Light gray for borders */
+  --background-light: #F8F9FA; /* Very light background */
+  --header-background: #E8F4F8; /* Light blue-tinted header */
+  --text-muted: #6C757D; /* Muted text color */
+  
+  /* AWWA Color Palette - Updated */
+  --awwa-primary: #2C5F7C; /* Navy Blue */
+  --awwa-secondary: #4EAAC9; /* Turquoise */
+  --awwa-accent: #FF8C42; /* Orange */
+  --awwa-background: #F8F9FA; /* Light Background */
+  --awwa-header: #E8F4F8; /* Light Blue Header */
+  --awwa-text-dark: #3C3C3C; /* Charcoal Gray */
+  --awwa-text-light: #6C757D; /* Muted Slate */
+  --awwa-positive: #4EAAC9; /* Turquoise */
+  --awwa-warning: #FF8C42; /* Orange */
+  --awwa-danger: #DC3545; /* Red for danger */
+  --awwa-disabled: #BDC3C7; /* Light Gray */
+  
+  /* Original Shadcn Variables - Updated */
+  --background: #ffffff;
+  --foreground: #3C3C3C;
+  --card: #ffffff;
+  --card-foreground: #3C3C3C;
+  --popover: #ffffff;
+  --popover-foreground: #3C3C3C;
+  --primary: #2C5F7C; /* Navy Blue */
+  --primary-foreground: #ffffff;
+  --secondary: #4EAAC9; /* Turquoise */
+  --secondary-foreground: #ffffff;
+  --muted: #BDC3C7; /* Light Gray */
+  --muted-foreground: #6C757D; /* Muted text */
+  --accent: #FF8C42; /* Orange */
+  --accent-foreground: #ffffff;
+  --destructive: #DC3545; /* Red for destructive actions */
+  --destructive-foreground: #ffffff;
+  --border: rgba(60, 60, 60, 0.15);
+  --input: transparent;
+  --input-background: #ffffff;
+  --switch-background: #BDC3C7;
+  --font-weight-medium: 500;
+  --font-weight-normal: 400;
+  --ring: rgba(44, 95, 124, 0.5);
+  --chart-1: #2C5F7C;
+  --chart-2: #4EAAC9;
+  --chart-3: #FF8C42;
+  --chart-4: #BDC3C7;
+  --chart-5: #6C757D;
+  --radius: 0.625rem;
+  --sidebar: #F8F9FA;
+  --sidebar-foreground: #3C3C3C;
+  --sidebar-primary: #2C5F7C;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #E8F4F8;
+  --sidebar-accent-foreground: #3C3C3C;
+  --sidebar-border: #BDC3C7;
+  --sidebar-ring: rgba(44, 95, 124, 0.5);
+}
+
+.dark {
+  --background: #1a1a1a;
+  --foreground: #f5f5f5;
+  --card: #1a1a1a;
+  --card-foreground: #f5f5f5;
+  --popover: #1a1a1a;
+  --popover-foreground: #f5f5f5;
+  --primary: #4EAAC9;
+  --primary-foreground: #ffffff;
+  --secondary: #2C5F7C;
+  --secondary-foreground: #ffffff;
+  --muted: #3C3C3C;
+  --muted-foreground: #BDC3C7;
+  --accent: #FF8C42;
+  --accent-foreground: #ffffff;
+  --destructive: #DC3545;
+  --destructive-foreground: #ffffff;
+  --border: rgba(189, 195, 199, 0.2);
+  --input: rgba(189, 195, 199, 0.1);
+  --ring: rgba(78, 170, 201, 0.5);
+  --font-weight-medium: 500;
+  --font-weight-normal: 400;
+  --chart-1: #4EAAC9;
+  --chart-2: #FF8C42;
+  --chart-3: #2C5F7C;
+  --chart-4: #BDC3C7;
+  --chart-5: #6C757D;
+  --sidebar: #2C2C2C;
+  --sidebar-foreground: #f5f5f5;
+  --sidebar-primary: #4EAAC9;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #3C3C3C;
+  --sidebar-accent-foreground: #f5f5f5;
+  --sidebar-border: #3C3C3C;
+  --sidebar-ring: rgba(78, 170, 201, 0.5);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-input-background: var(--input-background);
+  --color-switch-background: var(--switch-background);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+/**
+ * Base typography. This is not applied to elements which have an ancestor with a Tailwind text class.
+ */
+@layer base {
+  :where(:not(:has([class*=" text-"]), :not(:has([class^="text-"])))) {
+    h1 {
+      font-size: var(--text-2xl);
+      font-weight: var(--font-weight-medium);
+      line-height: 1.5;
+    }
+
+    h2 {
+      font-size: var(--text-xl);
+      font-weight: var(--font-weight-medium);
+      line-height: 1.5;
+    }
+
+    h3 {
+      font-size: var(--text-lg);
+      font-weight: var(--font-weight-medium);
+      line-height: 1.5;
+    }
+
+    h4 {
+      font-size: var(--text-base);
+      font-weight: var(--font-weight-medium);
+      line-height: 1.5;
+    }
+
+    p {
+      font-size: var(--text-base);
+      font-weight: var(--font-weight-normal);
+      line-height: 1.5;
+    }
+
+    label {
+      font-size: var(--text-base);
+      font-weight: var(--font-weight-medium);
+      line-height: 1.5;
+    }
+
+    button {
+      font-size: var(--text-base);
+      font-weight: var(--font-weight-medium);
+      line-height: 1.5;
+    }
+
+    input {
+      font-size: var(--text-base);
+      font-weight: var(--font-weight-normal);
+      line-height: 1.5;
+    }
+  }
+}
+
+html {
+  font-size: var(--font-size);
+}

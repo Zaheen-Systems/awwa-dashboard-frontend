@@ -58,8 +58,8 @@ AWWA Beacon is a modern web application designed to streamline the management of
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/yourusername/awwa-beacon.git
-   cd awwa-beacon
+   git clone https://github.com/Zaheen-Systems/awwa-frontend.git
+   cd awwa-frontend
    ```
 
 2. **Install dependencies**
