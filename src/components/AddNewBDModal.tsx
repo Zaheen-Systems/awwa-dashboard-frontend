@@ -233,9 +233,26 @@ export function AddNewBDModal({ isOpen, onClose, onSubmit }: AddNewBDModalProps)
                 <SelectTrigger className="bg-white border-2" style={{ borderColor: '#BDC3C7' }}>
                   <SelectValue placeholder="Drop down with all GCOs" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent 
+                  className="bg-white border border-gray-200 shadow-lg rounded-md"
+                  style={{ 
+                    backgroundColor: 'white',
+                    borderColor: '#BDC3C7',
+                    boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)'
+                  }}
+                  position="popper"
+                  side="bottom"
+                  align="start"
+                >
                   {mockGCOOptions.map((gco, index) => (
-                    <SelectItem key={index} value={gco}>{gco}</SelectItem>
+                    <SelectItem 
+                      key={index} 
+                      value={gco}
+                      className="hover:bg-gray-100 focus:bg-gray-100"
+                      style={{ color: '#3C3C3C' }}
+                    >
+                      {gco}
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -248,9 +265,24 @@ export function AddNewBDModal({ isOpen, onClose, onSubmit }: AddNewBDModalProps)
                 <SelectTrigger className="bg-white border-2" style={{ borderColor: '#BDC3C7' }}>
                   <SelectValue placeholder="Drop down with all IEP goals, include blank" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent 
+                  className="bg-white border border-gray-200 shadow-lg rounded-md"
+                  style={{ 
+                    backgroundColor: 'white',
+                    borderColor: '#BDC3C7',
+                    boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)'
+                  }}
+                  position="popper"
+                  side="bottom"
+                  align="start"
+                >
                   {mockIEPGoals.map((goal, index) => (
-                    <SelectItem key={index} value={goal}>
+                    <SelectItem 
+                      key={index} 
+                      value={goal}
+                      className="hover:bg-gray-100 focus:bg-gray-100"
+                      style={{ color: '#3C3C3C' }}
+                    >
                       {goal === 'blank' ? '(Blank)' : goal}
                     </SelectItem>
                   ))}

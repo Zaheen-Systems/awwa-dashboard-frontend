@@ -40,6 +40,14 @@ interface BehaviorDescriptor {
   iepGoal?: string;
 }
 
+interface BehaviorComment {
+  id: number;
+  text: string;
+  author: string;
+  authorType: 'team_member' | 'ct';
+  timestamp: string;
+}
+
 interface ClassData {
   id: number;
   name: string;
@@ -261,12 +269,6 @@ export default function App() {
     setCurrentPage('admin-dashboard');
   };
 
-  const handleSwitchToTeamMemberDashboard = () => {
-    // Clear admin-specific data
-    setSelectedClass(null);
-    setSelectedTeamMember(null);
-    setCurrentPage('dashboard');
-  };
 
   const handleSwitchToAdminDashboard = () => {
     // Clear team member-specific data
@@ -287,7 +289,7 @@ export default function App() {
     setCurrentPage('student-detail');
   };
 
-  const handleSaveBehaviorDescriptor = (comments: string) => {
+  const handleSaveBehaviorDescriptor = (comments: BehaviorComment[]) => {
     console.log('Behavior descriptor saved with comments:', comments);
     // In a real implementation, this would save to backend
     handleBackToStudentDetail();
@@ -506,7 +508,6 @@ export default function App() {
   }
 
   let pageContent: React.ReactNode;
-  let pageTitle = 'Beacon';
 
   switch (currentPage) {
     case 'client':
@@ -596,7 +597,6 @@ export default function App() {
             classData={selectedClass}
             onBack={handleBackToAdminDashboard}
             onLogout={handleLogout}
-            onProfileClick={handleProfileClick}
             onDashboardClick={handleBackToAdminDashboard}
             onTeamMembersClick={handleTeamMembersCTClick}
           />
@@ -636,8 +636,10 @@ export default function App() {
           <BehaviorDescriptorDetailPage 
             student={selectedStudent}
             behaviorDescriptor={selectedBehaviorDescriptor}
+            currentUser={{ name: username, type: 'team_member' }}
+            existingComments={[]}
             onBack={handleBackToStudentDetail}
-            onSave={handleSaveBehaviorDescriptor}
+            onSave={(comments: BehaviorComment[]) => handleSaveBehaviorDescriptor(comments)}
             onLogout={handleLogout}
             onProfileClick={handleProfileClick}
           />

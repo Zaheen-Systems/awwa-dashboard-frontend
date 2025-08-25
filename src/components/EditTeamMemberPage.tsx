@@ -193,12 +193,19 @@ export function EditTeamMemberPage({
                     <SelectTrigger className="w-full border-2 rounded-none" style={{ borderColor: '#BDC3C7' }}>
                       <SelectValue placeholder="Team member" />
                     </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="Team member">Team member</SelectItem>
-                      <SelectItem value="CT">CT</SelectItem>
-                      <SelectItem value="Team member/ CT">Team member/ CT</SelectItem>
-                      <SelectItem value="Senior Team member">Senior Team member</SelectItem>
-                      <SelectItem value="Lead CT">Lead CT</SelectItem>
+                    <SelectContent 
+                      className="bg-white border border-gray-200 shadow-lg rounded-md"
+                      style={{ 
+                        backgroundColor: 'white',
+                        borderColor: '#BDC3C7',
+                        boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)'
+                      }}
+                    >
+                      <SelectItem value="Team member" className="hover:bg-gray-100 focus:bg-gray-100" style={{ color: '#3C3C3C' }}>Team member</SelectItem>
+                      <SelectItem value="CT" className="hover:bg-gray-100 focus:bg-gray-100" style={{ color: '#3C3C3C' }}>CT</SelectItem>
+                      <SelectItem value="Team member/ CT" className="hover:bg-gray-100 focus:bg-gray-100" style={{ color: '#3C3C3C' }}>Team member/ CT</SelectItem>
+                      <SelectItem value="Senior Team member" className="hover:bg-gray-100 focus:bg-gray-100" style={{ color: '#3C3C3C' }}>Senior Team member</SelectItem>
+                      <SelectItem value="Lead CT" className="hover:bg-gray-100 focus:bg-gray-100" style={{ color: '#3C3C3C' }}>Lead CT</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>

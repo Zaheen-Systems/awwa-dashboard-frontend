@@ -165,13 +165,24 @@ export function EditStudentModal({ isOpen, onClose, student, onSubmit }: EditStu
                     <SelectTrigger className="bg-white border-2" style={{ borderColor: '#BDC3C7' }}>
                       <SelectValue placeholder="Select..." />
                     </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="0-6">0-6 months</SelectItem>
-                      <SelectItem value="6-12">6-12 months</SelectItem>
-                      <SelectItem value="12-18">12-18 months</SelectItem>
-                      <SelectItem value="18-24">18-24 months</SelectItem>
-                      <SelectItem value="24-30">24-30 months</SelectItem>
-                      <SelectItem value="30-36">30-36 months</SelectItem>
+                    <SelectContent 
+                      className="bg-white border border-gray-200 shadow-lg rounded-md"
+                      style={{ 
+                        backgroundColor: 'white',
+                        borderColor: '#BDC3C7',
+                        boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)'
+                      }}
+                    >
+                      <SelectItem value="0-6" className="hover:bg-gray-100 focus:bg-gray-100" style={{ color: '#3C3C3C' }}>0 - 6 months</SelectItem>
+                      <SelectItem value="7-12" className="hover:bg-gray-100 focus:bg-gray-100" style={{ color: '#3C3C3C' }}>7 - 12 months</SelectItem>
+                      <SelectItem value="13-18" className="hover:bg-gray-100 focus:bg-gray-100" style={{ color: '#3C3C3C' }}>13 - 18 mths</SelectItem>
+                      <SelectItem value="19-24" className="hover:bg-gray-100 focus:bg-gray-100" style={{ color: '#3C3C3C' }}>19 - 24 mths</SelectItem>
+                      <SelectItem value="25-30" className="hover:bg-gray-100 focus:bg-gray-100" style={{ color: '#3C3C3C' }}>25 - 30 mths</SelectItem>
+                      <SelectItem value="31-36" className="hover:bg-gray-100 focus:bg-gray-100" style={{ color: '#3C3C3C' }}>31 - 36 mths</SelectItem>
+                      <SelectItem value="37-48" className="hover:bg-gray-100 focus:bg-gray-100" style={{ color: '#3C3C3C' }}>37 - 48 mths</SelectItem>
+                      <SelectItem value="49-60" className="hover:bg-gray-100 focus:bg-gray-100" style={{ color: '#3C3C3C' }}>49 - 60 mths</SelectItem>
+                      <SelectItem value="61-72" className="hover:bg-gray-100 focus:bg-gray-100" style={{ color: '#3C3C3C' }}>61 - 72 mths</SelectItem>
+                      <SelectItem value="73-84" className="hover:bg-gray-100 focus:bg-gray-100" style={{ color: '#3C3C3C' }}>73 - 84 mths</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -181,13 +192,24 @@ export function EditStudentModal({ isOpen, onClose, student, onSubmit }: EditStu
                     <SelectTrigger className="bg-white border-2" style={{ borderColor: '#BDC3C7' }}>
                       <SelectValue placeholder="Select..." />
                     </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="0-6">0-6 months</SelectItem>
-                      <SelectItem value="6-12">6-12 months</SelectItem>
-                      <SelectItem value="12-18">12-18 months</SelectItem>
-                      <SelectItem value="18-24">18-24 months</SelectItem>
-                      <SelectItem value="24-30">24-30 months</SelectItem>
-                      <SelectItem value="30-36">30-36 months</SelectItem>
+                    <SelectContent 
+                      className="bg-white border border-gray-200 shadow-lg rounded-md"
+                      style={{ 
+                        backgroundColor: 'white',
+                        borderColor: '#BDC3C7',
+                        boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)'
+                      }}
+                    >
+                      <SelectItem value="0-6" className="hover:bg-gray-100 focus:bg-gray-100" style={{ color: '#3C3C3C' }}>0 - 6 months</SelectItem>
+                      <SelectItem value="7-12" className="hover:bg-gray-100 focus:bg-gray-100" style={{ color: '#3C3C3C' }}>7 - 12 months</SelectItem>
+                      <SelectItem value="13-18" className="hover:bg-gray-100 focus:bg-gray-100" style={{ color: '#3C3C3C' }}>13 - 18 mths</SelectItem>
+                      <SelectItem value="19-24" className="hover:bg-gray-100 focus:bg-gray-100" style={{ color: '#3C3C3C' }}>19 - 24 mths</SelectItem>
+                      <SelectItem value="25-30" className="hover:bg-gray-100 focus:bg-gray-100" style={{ color: '#3C3C3C' }}>25 - 30 mths</SelectItem>
+                      <SelectItem value="31-36" className="hover:bg-gray-100 focus:bg-gray-100" style={{ color: '#3C3C3C' }}>31 - 36 mths</SelectItem>
+                      <SelectItem value="37-48" className="hover:bg-gray-100 focus:bg-gray-100" style={{ color: '#3C3C3C' }}>37 - 48 mths</SelectItem>
+                      <SelectItem value="49-60" className="hover:bg-gray-100 focus:bg-gray-100" style={{ color: '#3C3C3C' }}>49 - 60 mths</SelectItem>
+                      <SelectItem value="61-72" className="hover:bg-gray-100 focus:bg-gray-100" style={{ color: '#3C3C3C' }}>61 - 72 mths</SelectItem>
+                      <SelectItem value="73-84" className="hover:bg-gray-100 focus:bg-gray-100" style={{ color: '#3C3C3C' }}>73 - 84 mths</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -197,13 +219,24 @@ export function EditStudentModal({ isOpen, onClose, student, onSubmit }: EditStu
                     <SelectTrigger className="bg-white border-2" style={{ borderColor: '#BDC3C7' }}>
                       <SelectValue placeholder="Select..." />
                     </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="0-6">0-6 months</SelectItem>
-                      <SelectItem value="6-12">6-12 months</SelectItem>
-                      <SelectItem value="12-18">12-18 months</SelectItem>
-                      <SelectItem value="18-24">18-24 months</SelectItem>
-                      <SelectItem value="24-30">24-30 months</SelectItem>
-                      <SelectItem value="30-36">30-36 months</SelectItem>
+                    <SelectContent 
+                      className="bg-white border border-gray-200 shadow-lg rounded-md"
+                      style={{ 
+                        backgroundColor: 'white',
+                        borderColor: '#BDC3C7',
+                        boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)'
+                      }}
+                    >
+                      <SelectItem value="0-6" className="hover:bg-gray-100 focus:bg-gray-100" style={{ color: '#3C3C3C' }}>0 - 6 months</SelectItem>
+                      <SelectItem value="7-12" className="hover:bg-gray-100 focus:bg-gray-100" style={{ color: '#3C3C3C' }}>7 - 12 months</SelectItem>
+                      <SelectItem value="13-18" className="hover:bg-gray-100 focus:bg-gray-100" style={{ color: '#3C3C3C' }}>13 - 18 mths</SelectItem>
+                      <SelectItem value="19-24" className="hover:bg-gray-100 focus:bg-gray-100" style={{ color: '#3C3C3C' }}>19 - 24 mths</SelectItem>
+                      <SelectItem value="25-30" className="hover:bg-gray-100 focus:bg-gray-100" style={{ color: '#3C3C3C' }}>25 - 30 mths</SelectItem>
+                      <SelectItem value="31-36" className="hover:bg-gray-100 focus:bg-gray-100" style={{ color: '#3C3C3C' }}>31 - 36 mths</SelectItem>
+                      <SelectItem value="37-48" className="hover:bg-gray-100 focus:bg-gray-100" style={{ color: '#3C3C3C' }}>37 - 48 mths</SelectItem>
+                      <SelectItem value="49-60" className="hover:bg-gray-100 focus:bg-gray-100" style={{ color: '#3C3C3C' }}>49 - 60 mths</SelectItem>
+                      <SelectItem value="61-72" className="hover:bg-gray-100 focus:bg-gray-100" style={{ color: '#3C3C3C' }}>61 - 72 mths</SelectItem>
+                      <SelectItem value="73-84" className="hover:bg-gray-100 focus:bg-gray-100" style={{ color: '#3C3C3C' }}>73 - 84 mths</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -311,10 +344,17 @@ export function EditStudentModal({ isOpen, onClose, student, onSubmit }: EditStu
                 <SelectTrigger className="bg-white border-2" style={{ borderColor: '#BDC3C7' }}>
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Entry">Entry</SelectItem>
-                  <SelectItem value="Review">Review</SelectItem>
-                  <SelectItem value="Exit">Exit</SelectItem>
+                <SelectContent 
+                  className="bg-white border border-gray-200 shadow-lg rounded-md"
+                  style={{ 
+                    backgroundColor: 'white',
+                    borderColor: '#BDC3C7',
+                    boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)'
+                  }}
+                >
+                  <SelectItem value="Entry" className="hover:bg-gray-100 focus:bg-gray-100" style={{ color: '#3C3C3C' }}>Entry</SelectItem>
+                  <SelectItem value="Review" className="hover:bg-gray-100 focus:bg-gray-100" style={{ color: '#3C3C3C' }}>Review</SelectItem>
+                  <SelectItem value="Exit" className="hover:bg-gray-100 focus:bg-gray-100" style={{ color: '#3C3C3C' }}>Exit</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -376,8 +416,19 @@ export function EditStudentModal({ isOpen, onClose, student, onSubmit }: EditStu
           </div>
         </div>
 
-        {/* Submit Button */}
-        <div className="flex justify-center pt-4">
+        {/* Action Buttons */}
+        <div className="flex justify-center space-x-4 pt-4">
+          <Button
+            onClick={onClose}
+            className="px-12 py-3 border-2 rounded-none font-bold transition-all duration-200 hover:opacity-90"
+            style={{ 
+              backgroundColor: 'white',
+              borderColor: '#BDC3C7',
+              color: '#3C3C3C'
+            }}
+          >
+            Cancel
+          </Button>
           <Button
             onClick={handleSubmit}
             className="px-12 py-3 border-2 rounded-none font-bold transition-all duration-200 hover:opacity-90"

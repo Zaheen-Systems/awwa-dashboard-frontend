@@ -2,9 +2,8 @@ import { useState } from 'react';
 import { Button } from './ui/button';
 import { Textarea } from './ui/textarea';
 import { Label } from './ui/label';
-import { User, ChevronLeft, Settings, LogOut } from 'lucide-react';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from './ui/dropdown-menu';
-import { ImageWithFallback } from './figma/ImageWithFallback';
+import {  ChevronLeft } from 'lucide-react';
+
 // import awwaLogo from 'figma:asset/71b57c03c5488fc89f49e890a42dd4691fd017ee.png';
 
 interface Student {
@@ -31,11 +30,24 @@ interface BehaviorDescriptor {
   iepGoal?: string;
 }
 
+interface Comment {
+  id: number;
+  text: string;
+  author: string;
+  authorType: 'team_member' | 'ct';
+  timestamp: string;
+}
+
 interface BehaviorDescriptorDetailPageProps {
   student: Student;
   behaviorDescriptor: BehaviorDescriptor;
+  currentUser: {
+    name: string;
+    type: 'team_member' | 'ct';
+  };
+  existingComments?: Comment[];
   onBack: () => void;
-  onSave: (comments: string) => void;
+  onSave: (comments: Comment[]) => void;
   onLogout: () => void;
   onProfileClick: () => void;
 }
@@ -43,15 +55,34 @@ interface BehaviorDescriptorDetailPageProps {
 export function BehaviorDescriptorDetailPage({ 
   student, 
   behaviorDescriptor, 
+  currentUser,
+  existingComments = [],
   onBack, 
   onSave, 
-  onLogout,
-  onProfileClick 
+  
 }: BehaviorDescriptorDetailPageProps) {
-  const [comments, setComments] = useState('');
+  const [newComment, setNewComment] = useState('');
+  const [allComments, setAllComments] = useState<Comment[]>(existingComments);
 
   const handleSave = () => {
-    onSave(comments);
+    if (newComment.trim()) {
+      const comment: Comment = {
+        id: Date.now(),
+        text: newComment.trim(),
+        author: currentUser.name,
+        authorType: currentUser.type,
+        timestamp: new Date().toISOString()
+      };
+      
+      const updatedComments = [...allComments, comment];
+      setAllComments(updatedComments);
+      onSave(updatedComments);
+      setNewComment('');
+    }
+  };
+
+  const getAuthorDisplayName = (author: string, authorType: 'team_member' | 'ct') => {
+    return authorType === 'ct' ? `${author} (CT)` : author;
   };
 
   return (
@@ -59,30 +90,49 @@ export function BehaviorDescriptorDetailPage({
       {/* Header Section */}
       <div className="px-4 sm:px-6 py-4 sm:py-6 lg:py-8" style={{ backgroundColor: '#E8F4F8' }}>
         <div className="max-w-7xl mx-auto">
-          {/* Tabs and Back Button Row */}
+          {/* Tabs Row */}
+          <div className="flex space-x-2 sm:space-x-4">
+            <div 
+              className="px-3 sm:px-6 py-2 sm:py-3 text-sm sm:text-base border-2 transition-all duration-200"
+              style={{ 
+                borderColor: '#2C5F7C',
+                color: 'white',
+                backgroundColor: '#2C5F7C'
+              }}
+            >
+              Team member
+            </div>
+            <div 
+              className="px-3 sm:px-6 py-2 sm:py-3 text-sm sm:text-base border-2 opacity-50 cursor-not-allowed"
+              style={{ 
+                borderColor: '#BDC3C7',
+                color: '#6C757D',
+                backgroundColor: 'white'
+              }}
+            >
+              Core Team (CT)
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Breadcrumb Navigation and Back Button */}
+      <div className="px-4 sm:px-6 py-2">
+        <div className="max-w-7xl mx-auto">
           <div className="flex items-center justify-between">
-            {/* Left: Inactive Tabs */}
-            <div className="flex space-x-2 sm:space-x-4">
-              <div 
-                className="px-3 sm:px-6 py-2 sm:py-3 text-sm sm:text-base border-2 opacity-50 cursor-not-allowed"
-                style={{ 
-                  borderColor: '#BDC3C7',
-                  color: '#6C757D',
-                  backgroundColor: 'white'
-                }}
+            {/* Left: Breadcrumb Navigation */}
+            <div className="flex items-center space-x-2">
+              <button 
+                onClick={onBack}
+                style={{ color: '#2C5F7C' }}
+                className="hover:underline"
               >
-                Team member
-              </div>
-              <div 
-                className="px-3 sm:px-6 py-2 sm:py-3 text-sm sm:text-base border-2 opacity-50 cursor-not-allowed"
-                style={{ 
-                  borderColor: '#BDC3C7',
-                  color: '#6C757D',
-                  backgroundColor: 'white'
-                }}
-              >
-                Core Team (CT)
-              </div>
+                Home
+              </button>
+              <span style={{ color: '#2C5F7C' }}> &gt; </span>
+              <span style={{ color: '#2C5F7C' }}>{student.name}</span>
+              <span style={{ color: '#2C5F7C' }}> &gt; </span>
+              <span style={{ color: '#2C5F7C' }}>BD</span>
             </div>
 
             {/* Right: Back Button */}
@@ -102,25 +152,6 @@ export function BehaviorDescriptorDetailPage({
         </div>
       </div>
 
-      {/* Breadcrumb Navigation */}
-      <div className="px-4 sm:px-6 py-2">
-        <div className="max-w-7xl mx-auto">
-          <div className="flex items-center space-x-2">
-            <button 
-              onClick={onBack}
-              style={{ color: '#2C5F7C' }}
-              className="hover:underline"
-            >
-              Home
-            </button>
-            <span style={{ color: '#2C5F7C' }}> &gt; </span>
-            <span style={{ color: '#2C5F7C' }}>{student.name}</span>
-            <span style={{ color: '#2C5F7C' }}> &gt; </span>
-            <span style={{ color: '#2C5F7C' }}>BD</span>
-          </div>
-        </div>
-      </div>
-
       {/* Main Content */}
       <div className="px-4 sm:px-6 pb-8">
         <div className="max-w-4xl mx-auto">
@@ -133,7 +164,7 @@ export function BehaviorDescriptorDetailPage({
 
           {/* Behavior Descriptor Info Section */}
           <div className="bg-white rounded-lg shadow-sm overflow-hidden mb-6 p-6">
-            <h3 className="font-medium mb-4" style={{ color: '#3C3C3C' }}>
+            <h3 className="font-bold mb-4" style={{ color: '#3C3C3C' }}>
               Behavior Descriptor Details
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -178,14 +209,34 @@ export function BehaviorDescriptorDetailPage({
               Comments
             </h3>
             
+            {/* Existing Comments */}
+            {allComments.length > 0 && (
+              <div className="mb-6 space-y-4">
+                {allComments.map((comment) => (
+                  <div key={comment.id} className="p-4 border-2 rounded-lg" style={{ borderColor: '#E8F4F8', backgroundColor: '#F8F9FA' }}>
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="font-medium text-sm" style={{ color: '#2C5F7C' }}>
+                        {getAuthorDisplayName(comment.author, comment.authorType)}
+                      </span>
+                      <span className="text-xs" style={{ color: '#6C757D' }}>
+                        {new Date(comment.timestamp).toLocaleDateString()}
+                      </span>
+                    </div>
+                    <p style={{ color: '#3C3C3C' }}>{comment.text}</p>
+                  </div>
+                ))}
+              </div>
+            )}
+            
+            {/* Add New Comment */}
             <div className="mb-6">
-              <Label htmlFor="comments" style={{ color: '#3C3C3C' }}>
+              <Label htmlFor="newComment" style={{ color: '#3C3C3C' }}>
                 Add your comments
               </Label>
               <Textarea
-                id="comments"
-                value={comments}
-                onChange={(e) => setComments(e.target.value)}
+                id="newComment"
+                value={newComment}
+                onChange={(e) => setNewComment(e.target.value)}
                 placeholder="Enter your observations and comments about this behavior descriptor..."
                 className="mt-2 min-h-32 bg-white border-2 focus:outline-none resize-none"
                 style={{ 
@@ -212,11 +263,12 @@ export function BehaviorDescriptorDetailPage({
               </Button>
               <Button
                 onClick={handleSave}
-                className="px-6 py-2 font-medium transition-all duration-200 hover:opacity-90"
+                disabled={!newComment.trim()}
+                className="px-6 py-2 font-medium transition-all duration-200 hover:opacity-90 disabled:opacity-50"
                 style={{ 
-                  backgroundColor: '#2C5F7C', 
+                  backgroundColor: newComment.trim() ? '#2C5F7C' : '#BDC3C7', 
                   color: 'white',
-                  borderColor: '#2C5F7C'
+                  borderColor: newComment.trim() ? '#2C5F7C' : '#BDC3C7'
                 }}
               >
                 Save Comments

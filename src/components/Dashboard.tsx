@@ -15,6 +15,7 @@ interface Student {
   secondaryDiagnosis: string;
   lastGCODate: string;
   status: string;
+  ctAssigned: string;
 }
 
 interface DashboardProps {
@@ -34,8 +35,9 @@ const students: Student[] = [
     ageBand: "61-72",
     primaryDiagnosis: "Autism Spectrum Disorder",
     secondaryDiagnosis: "Intellectual Disability",
-    lastGCODate: "15.02.24",
-    status: "Entry"
+    lastGCODate: "15/Feb/24",
+    status: "Entry",
+    ctAssigned: "Joycelene"
   },
   {
     id: 2,
@@ -44,8 +46,9 @@ const students: Student[] = [
     ageBand: "37-48",
     primaryDiagnosis: "Down Syndrome",
     secondaryDiagnosis: "Speech Delay",
-    lastGCODate: "22.01.24",
-    status: "Review"
+    lastGCODate: "22/Jan/24",
+    status: "Review",
+    ctAssigned: "Sarah"
   },
   {
     id: 3,
@@ -54,8 +57,9 @@ const students: Student[] = [
     ageBand: "37-48",
     primaryDiagnosis: "Cerebral Palsy",
     secondaryDiagnosis: "Mobility Impairment",
-    lastGCODate: "10.03.24",
-    status: "Entry"
+    lastGCODate: "10/Mar/24",
+    status: "Entry",
+    ctAssigned: "Michael"
   },
   {
     id: 4,
@@ -64,8 +68,9 @@ const students: Student[] = [
     ageBand: "49-60",
     primaryDiagnosis: "Autism Spectrum Disorder",
     secondaryDiagnosis: "Sensory Processing",
-    lastGCODate: "28.02.24",
-    status: "Review"
+    lastGCODate: "28/Feb/24",
+    status: "Review",
+    ctAssigned: "Joycelene"
   },
   {
     id: 5,
@@ -74,8 +79,9 @@ const students: Student[] = [
     ageBand: "37-48",
     primaryDiagnosis: "Intellectual Disability",
     secondaryDiagnosis: "Behavioral Issues",
-    lastGCODate: "05.03.24",
-    status: "Exit"
+    lastGCODate: "05/Mar/24",
+    status: "Exit",
+    ctAssigned: "Sarah"
   }
 ];
 
@@ -217,14 +223,14 @@ export function Dashboard({ onLogout, onStudentClick, onProfileClick, onSwitchTo
                     onClick={() => handleSort('chronologicalAge')}
                     style={{ color: '#3C3C3C' }}
                   >
-                    Chronological Age {sortColumn === 'chronologicalAge' && (sortDirection === 'asc' ? '↑' : '↓')}
+                    Chronological Age (months) {sortColumn === 'chronologicalAge' && (sortDirection === 'asc' ? '↑' : '↓')}
                   </TableHead>
                   <TableHead 
                     className="cursor-pointer hover:bg-gray-100 transition-colors"
                     onClick={() => handleSort('ageBand')}
                     style={{ color: '#3C3C3C' }}
                   >
-                    Age Band {sortColumn === 'ageBand' && (sortDirection === 'asc' ? '↑' : '↓')}
+                    Age Band (Months) {sortColumn === 'ageBand' && (sortDirection === 'asc' ? '↑' : '↓')}
                   </TableHead>
                   <TableHead 
                     className="cursor-pointer hover:bg-gray-100 transition-colors"
@@ -239,6 +245,13 @@ export function Dashboard({ onLogout, onStudentClick, onProfileClick, onSwitchTo
                     style={{ color: '#3C3C3C' }}
                   >
                     Secondary Diagnosis {sortColumn === 'secondaryDiagnosis' && (sortDirection === 'asc' ? '↑' : '↓')}
+                  </TableHead>
+                  <TableHead 
+                    className="cursor-pointer hover:bg-gray-100 transition-colors"
+                    onClick={() => handleSort('ctAssigned')}
+                    style={{ color: '#3C3C3C' }}
+                  >
+                    CT Assigned {sortColumn === 'ctAssigned' && (sortDirection === 'asc' ? '↑' : '↓')}
                   </TableHead>
                   <TableHead 
                     className="cursor-pointer hover:bg-gray-100 transition-colors"
@@ -274,6 +287,7 @@ export function Dashboard({ onLogout, onStudentClick, onProfileClick, onSwitchTo
                     <TableCell style={{ color: '#3C3C3C' }}>{student.ageBand}</TableCell>
                     <TableCell style={{ color: '#3C3C3C' }}>{student.primaryDiagnosis}</TableCell>
                     <TableCell style={{ color: '#3C3C3C' }}>{student.secondaryDiagnosis}</TableCell>
+                    <TableCell style={{ color: '#3C3C3C' }}>{student.ctAssigned}</TableCell>
                     <TableCell style={{ color: '#3C3C3C' }}>{student.lastGCODate}</TableCell>
                     <TableCell>
                       <Badge 

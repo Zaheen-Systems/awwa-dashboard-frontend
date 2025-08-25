@@ -269,12 +269,19 @@ export function ProfileSettingsPage({
                       <SelectTrigger className="mt-2 border-2 rounded-none" style={{ borderColor: '#BDC3C7' }}>
                         <SelectValue />
                       </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="Early Childhood">Early Childhood</SelectItem>
-                        <SelectItem value="Elementary">Elementary</SelectItem>
-                        <SelectItem value="Secondary">Secondary</SelectItem>
-                        <SelectItem value="Vocational Training">Vocational Training</SelectItem>
-                        <SelectItem value="Administration">Administration</SelectItem>
+                      <SelectContent 
+                        className="bg-white border border-gray-200 shadow-lg rounded-md"
+                        style={{ 
+                          backgroundColor: 'white',
+                          borderColor: '#BDC3C7',
+                          boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)'
+                        }}
+                      >
+                        <SelectItem value="Early Childhood" className="hover:bg-gray-100 focus:bg-gray-100" style={{ color: '#3C3C3C' }}>Early Childhood</SelectItem>
+                        <SelectItem value="Elementary" className="hover:bg-gray-100 focus:bg-gray-100" style={{ color: '#3C3C3C' }}>Elementary</SelectItem>
+                        <SelectItem value="Secondary" className="hover:bg-gray-100 focus:bg-gray-100" style={{ color: '#3C3C3C' }}>Secondary</SelectItem>
+                        <SelectItem value="Vocational Training" className="hover:bg-gray-100 focus:bg-gray-100" style={{ color: '#3C3C3C' }}>Vocational Training</SelectItem>
+                        <SelectItem value="Administration" className="hover:bg-gray-100 focus:bg-gray-100" style={{ color: '#3C3C3C' }}>Administration</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>

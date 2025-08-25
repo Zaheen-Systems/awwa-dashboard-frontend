@@ -1,8 +1,6 @@
 import { useState } from 'react';
-import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from './ui/table';
-import { Badge } from './ui/badge';
 import { Search } from 'lucide-react';
 
 interface AdminDashboardProps {
@@ -63,7 +61,7 @@ const mockClasses: ClassData[] = [
   }
 ];
 
-export function AdminDashboard({ onLogout, onProfileClick, onClassClick, onTeamMembersClick, onClientClick }: AdminDashboardProps) {
+export function AdminDashboard({  onClassClick }: AdminDashboardProps) {
   const [searchTerm, setSearchTerm] = useState("");
 
   const filteredClasses = mockClasses.filter(classItem => 

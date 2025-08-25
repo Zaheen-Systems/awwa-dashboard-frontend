@@ -35,13 +35,26 @@ export function SelectBDsModal({
   const [selectedGCOBDs, setSelectedGCOBDs] = useState<BehaviorDescriptor[]>([]);
   const [selectedIEPBDs, setSelectedIEPBDs] = useState<BehaviorDescriptor[]>([]);
 
-  // Reset selections when modal opens
+  // Check for already selected BDs when modal opens
   useEffect(() => {
     if (isOpen) {
+      // Get already selected BDs from both tables
+      const alreadySelectedGCO = behaviourDescriptors.filter(bd => bd.selected);
+      const alreadySelectedIEP = iepBehaviourDescriptors.filter(bd => bd.selected);
+      
+      // If there are already selected BDs, automatically generate report
+      if (alreadySelectedGCO.length > 0 || alreadySelectedIEP.length > 0) {
+        const allSelectedBDs = [...alreadySelectedGCO, ...alreadySelectedIEP];
+        onGenerate(allSelectedBDs);
+        onClose();
+        return;
+      }
+      
+      // If no BDs are selected, reset selections for modal
       setSelectedGCOBDs([]);
       setSelectedIEPBDs([]);
     }
-  }, [isOpen]);
+  }, [isOpen, behaviourDescriptors, iepBehaviourDescriptors, onGenerate, onClose]);
 
   const handleGCOBDSelect = (bd: BehaviorDescriptor, selected: boolean) => {
     if (selected) {

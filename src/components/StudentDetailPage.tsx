@@ -391,6 +391,9 @@ export function StudentDetailPage({ student, onBack, onLogout, onBehaviorDescrip
 
           {/* Scrollable GCO Progress Table */}
           <div className="bg-white rounded-lg shadow-sm overflow-hidden mb-6">
+            <div className="p-4 border-b" style={{ borderColor: '#BDC3C7', backgroundColor: '#F8F9FA' }}>
+              <h3 className="font-medium" style={{ color: '#3C3C3C' }}>BDs Collected For GCOs</h3>
+            </div>
             <div className="max-h-64 overflow-y-auto">
               <Table>
                 <TableHeader className="sticky top-0 bg-white z-10">
@@ -406,15 +409,15 @@ export function StudentDetailPage({ student, onBack, onLogout, onBehaviorDescrip
                     <TableRow key={index} className={index < mockGCOData.gco1.length - 1 ? "border-b" : ""} style={{ borderColor: '#BDC3C7' }}>
                       <TableCell className="w-12 text-center text-sm" style={{ 
                         color: '#3C3C3C', 
-                        backgroundColor: index === 0 ? '#4EAAC9' : 'transparent' 
+                        backgroundColor: 'transparent' 
                       }}>
-                        {index === 0 ? '1' : ''}
+                        {index + 1}
                       </TableCell>
                       <TableCell 
                         className="text-center" 
                         style={{ 
                           color: '#3C3C3C', 
-                          backgroundColor: index === 0 ? '#4EAAC9' : 'transparent' 
+                          backgroundColor: 'transparent' 
                         }}
                       >
                         {mockGCOData.gco1[index]}
@@ -423,7 +426,7 @@ export function StudentDetailPage({ student, onBack, onLogout, onBehaviorDescrip
                         className="text-center" 
                         style={{ 
                           color: '#3C3C3C', 
-                          backgroundColor: index === 0 ? '#4EAAC9' : 'transparent' 
+                          backgroundColor: 'transparent' 
                         }}
                       >
                         {mockGCOData.gco2[index]}
@@ -432,7 +435,7 @@ export function StudentDetailPage({ student, onBack, onLogout, onBehaviorDescrip
                         className="text-center" 
                         style={{ 
                           color: '#3C3C3C', 
-                          backgroundColor: index === 0 ? '#4EAAC9' : 'transparent' 
+                          backgroundColor: 'transparent' 
                         }}
                       >
                         {mockGCOData.gco3[index]}

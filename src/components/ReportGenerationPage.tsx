@@ -63,60 +63,66 @@ export function ReportGenerationPage({
       {/* Tabs Section */}
       <div className="px-4 sm:px-6 py-4 sm:py-6 lg:py-8" style={{ backgroundColor: '#E8F4F8' }}>
         <div className="max-w-7xl mx-auto">
-          {/* Tabs and Back Button Row */}
-          <div className="flex items-center justify-between">
-            {/* Left: Inactive Tabs */}
-            <div className="flex space-x-2 sm:space-x-4">
-              <div 
-                className="px-3 sm:px-6 py-2 sm:py-3 text-sm sm:text-base border-2 opacity-50 cursor-not-allowed"
-                style={{ 
-                  borderColor: '#BDC3C7',
-                  color: '#6C757D',
-                  backgroundColor: 'white'
-                }}
-              >
-                Team member
-              </div>
-              <div 
-                className="px-3 sm:px-6 py-2 sm:py-3 text-sm sm:text-base border-2 opacity-50 cursor-not-allowed"
-                style={{ 
-                  borderColor: '#BDC3C7',
-                  color: '#6C757D',
-                  backgroundColor: 'white'
-                }}
-              >
-                Core Team (CT)
-              </div>
-            </div>
-
-            {/* Right: Back Button */}
-            <button 
-              onClick={onBack}
-              className="flex items-center space-x-2 px-3 py-2 hover:opacity-70 transition-opacity"
-              style={{ color: '#2C5F7C' }}
+          {/* Tabs Row */}
+          <div className="flex space-x-2 sm:space-x-4">
+            <div 
+              className="px-3 sm:px-6 py-2 sm:py-3 text-sm sm:text-base border-2 opacity-50 cursor-not-allowed"
+              style={{ 
+                borderColor: '#BDC3C7',
+                color: '#6C757D',
+                backgroundColor: 'white'
+              }}
             >
-              <ChevronLeft className="w-5 h-5" />
-              <span>Back</span>
-            </button>
+              Team member
+            </div>
+            <div 
+              className="px-3 sm:px-6 py-2 sm:py-3 text-sm sm:text-base border-2 opacity-50 cursor-not-allowed"
+              style={{ 
+                borderColor: '#BDC3C7',
+                color: '#6C757D',
+                backgroundColor: 'white'
+              }}
+            >
+              Core Team (CT)
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Breadcrumb Navigation */}
+      {/* Breadcrumb Navigation and Back Button */}
       <div className="px-4 sm:px-6 py-2">
         <div className="max-w-7xl mx-auto">
-          <div className="flex items-center space-x-2">
-            <button 
+          <div className="flex items-center justify-between">
+            {/* Left: Breadcrumb Navigation */}
+            <div className="flex items-center space-x-2">
+              <button 
+                onClick={onBack}
+                style={{ color: '#2C5F7C' }}
+                className="hover:underline"
+              >
+                Home
+              </button>
+              <span style={{ color: '#2C5F7C' }}> &gt; </span>
+              <span style={{ color: '#2C5F7C' }}>{student.name}</span>
+              <span style={{ color: '#2C5F7C' }}> &gt; </span>
+              <span style={{ color: '#2C5F7C' }}>BD</span>
+              <span style={{ color: '#2C5F7C' }}> &gt; </span>
+              <span style={{ color: '#2C5F7C' }}>Download</span>
+            </div>
+
+            {/* Right: Back Button */}
+            <Button
               onClick={onBack}
-              style={{ color: '#2C5F7C' }}
-              className="hover:underline"
+              className="flex items-center space-x-2 px-6 py-2 font-medium transition-all duration-200 hover:opacity-90"
+              style={{ 
+                backgroundColor: '#4EAAC9', 
+                color: 'white',
+                borderColor: '#4EAAC9'
+              }}
             >
-              Home
-            </button>
-            <span style={{ color: '#2C5F7C' }}> &gt; </span>
-            <span style={{ color: '#2C5F7C' }}>{student.name}</span>
-            <span style={{ color: '#2C5F7C' }}> &gt; </span>
-            <span style={{ color: '#2C5F7C' }}>BD</span>
+              <ChevronLeft className="w-5 h-5" />
+              <span>Back</span>
+            </Button>
           </div>
         </div>
       </div>
