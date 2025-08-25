@@ -88,16 +88,16 @@ export function BehaviorDescriptorDetailPage({
   return (
     <div className="min-h-screen" style={{ backgroundColor: '#F8F9FA' }}>
       {/* Header Section */}
-      <div className="px-4 sm:px-6 py-4 sm:py-6 lg:py-8" style={{ backgroundColor: '#E8F4F8' }}>
+      <div className="px-4 sm:px-6 py-4 sm:py-6 lg:py-8" style={{ backgroundColor: '#fff5f3' }}>
         <div className="max-w-7xl mx-auto">
           {/* Tabs Row */}
           <div className="flex space-x-2 sm:space-x-4">
             <div 
               className="px-3 sm:px-6 py-2 sm:py-3 text-sm sm:text-base border-2 transition-all duration-200"
               style={{ 
-                borderColor: '#2C5F7C',
+                borderColor: '#e65039',
                 color: 'white',
-                backgroundColor: '#2C5F7C'
+                backgroundColor: '#e65039'
               }}
             >
               Team member
@@ -124,15 +124,15 @@ export function BehaviorDescriptorDetailPage({
             <div className="flex items-center space-x-2">
               <button 
                 onClick={onBack}
-                style={{ color: '#2C5F7C' }}
+                style={{ color: '#e65039' }}
                 className="hover:underline"
               >
                 Home
               </button>
-              <span style={{ color: '#2C5F7C' }}> &gt; </span>
-              <span style={{ color: '#2C5F7C' }}>{student.name}</span>
-              <span style={{ color: '#2C5F7C' }}> &gt; </span>
-              <span style={{ color: '#2C5F7C' }}>BD</span>
+              <span style={{ color: '#e65039' }}> &gt; </span>
+              <span style={{ color: '#e65039' }}>{student.name}</span>
+              <span style={{ color: '#e65039' }}> &gt; </span>
+              <span style={{ color: '#e65039' }}>BD</span>
             </div>
 
             {/* Right: Back Button */}
@@ -140,9 +140,9 @@ export function BehaviorDescriptorDetailPage({
               onClick={onBack}
               className="flex items-center space-x-2 px-6 py-2 font-medium transition-all duration-200 hover:opacity-90"
               style={{ 
-                backgroundColor: '#4EAAC9', 
+                backgroundColor: '#e65039', 
                 color: 'white',
-                borderColor: '#4EAAC9'
+                borderColor: '#e65039'
               }}
             >
               <ChevronLeft className="w-5 h-5" />
@@ -215,7 +215,7 @@ export function BehaviorDescriptorDetailPage({
                 {allComments.map((comment) => (
                   <div key={comment.id} className="p-4 border-2 rounded-lg" style={{ borderColor: '#E8F4F8', backgroundColor: '#F8F9FA' }}>
                     <div className="flex items-center justify-between mb-2">
-                      <span className="font-medium text-sm" style={{ color: '#2C5F7C' }}>
+                      <span className="font-medium text-sm" style={{ color: '#e65039' }}>
                         {getAuthorDisplayName(comment.author, comment.authorType)}
                       </span>
                       <span className="text-xs" style={{ color: '#6C757D' }}>
@@ -243,7 +243,7 @@ export function BehaviorDescriptorDetailPage({
                   borderColor: '#BDC3C7',
                   color: '#3C3C3C'
                 }}
-                onFocus={(e) => e.target.style.borderColor = '#2C5F7C'}
+                onFocus={(e) => e.target.style.borderColor = '#e65039'}
                 onBlur={(e) => e.target.style.borderColor = '#BDC3C7'}
               />
             </div>
@@ -266,9 +266,9 @@ export function BehaviorDescriptorDetailPage({
                 disabled={!newComment.trim()}
                 className="px-6 py-2 font-medium transition-all duration-200 hover:opacity-90 disabled:opacity-50"
                 style={{ 
-                  backgroundColor: newComment.trim() ? '#2C5F7C' : '#BDC3C7', 
+                  backgroundColor: newComment.trim() ? '#e65039' : '#BDC3C7', 
                   color: 'white',
-                  borderColor: newComment.trim() ? '#2C5F7C' : '#BDC3C7'
+                                      borderColor: newComment.trim() ? '#e65039' : '#BDC3C7'
                 }}
               >
                 Save Comments

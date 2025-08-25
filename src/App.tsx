@@ -2,6 +2,7 @@ import { useState, lazy, Suspense } from 'react';
 import { Button } from './components/ui/button';
 import { Input } from './components/ui/input';
 import { Label } from './components/ui/label';
+
 import { Layout } from './components/Layout';
 import { Dashboard } from './components/Dashboard';
 // Lazy load heavy components
@@ -156,42 +157,24 @@ export default function App() {
       setCurrentPage('admin-dashboard');
     } else if (navigationContext === 'student-detail' && selectedStudent) {
       setCurrentPage('student-detail');
-    } else if (userType === 'admin') {
-      if (selectedClass) {
-        setCurrentPage('class-detail');
-      } else {
-        setCurrentPage('admin-dashboard');
-      }
-    } else if (selectedStudent && selectedBDsForReport.length > 0) {
-      setCurrentPage('report-generation');
-    } else if (selectedStudent && selectedBehaviorDescriptor) {
-      setCurrentPage('behavior-detail');
-    } else if (selectedStudent) {
-      setCurrentPage('student-detail');
     } else {
-      setCurrentPage('dashboard');
+      // Default fallback based on user type
+      if (userType === 'admin') {
+        setCurrentPage('admin-dashboard');
+      } else {
+        setCurrentPage('dashboard');
+      }
     }
     setNavigationContext(null); // Clear context after navigation
   };
 
   const handleClientClick = () => {
+    // Clear any navigation context when explicitly clicking client
+    setNavigationContext(null);
     setCurrentPage('client');
   };
 
-  const handleBackFromClient = () => {
-    // Clear any selected items to ensure clean navigation
-    setSelectedStudent(null);
-    setSelectedBehaviorDescriptor(null);
-    setSelectedBDsForReport([]);
-    setSelectedTeamMember(null);
-    setSelectedClient(null);
-    
-    if (userType === 'admin') {
-      setCurrentPage('admin-dashboard');
-    } else {
-      setCurrentPage('dashboard');
-    }
-  };
+
 
   const handleTeamMembersCTClick = () => {
     // Set navigation context based on current page
@@ -207,28 +190,7 @@ export default function App() {
     setCurrentPage('team-members-ct');
   };
 
-  const handleBackFromTeamMembersCT = () => {
-    // Return based on navigation context
-    if (navigationContext === 'client') {
-      setCurrentPage('client');
-    } else if (navigationContext === 'student-detail' && selectedStudent) {
-      setCurrentPage('student-detail');
-    } else {
-      // Clear selected items when going back to dashboard
-      setSelectedStudent(null);
-      setSelectedBehaviorDescriptor(null);
-      setSelectedBDsForReport([]);
-      setSelectedTeamMember(null);
-      setSelectedClient(null);
-      
-      if (userType === 'admin') {
-        setCurrentPage('admin-dashboard');
-      } else {
-        setCurrentPage('dashboard');
-      }
-    }
-    setNavigationContext(null); // Clear context after navigation
-  };
+
 
   const handleStudentClick = (student: Student) => {
     setSelectedStudent(student);
@@ -241,6 +203,11 @@ export default function App() {
   };
 
   const handleBackToDashboard = () => {
+    // If we're already on admin-dashboard and user clicks admin dashboard button, stay there
+    if (currentPage === 'admin-dashboard' && userType === 'admin') {
+      return;
+    }
+    
     // Return based on navigation context if it exists
     if (navigationContext === 'client') {
       setCurrentPage('client');
@@ -257,6 +224,25 @@ export default function App() {
     setNavigationContext(null);
     
     // Route to appropriate dashboard based on user type
+    if (userType === 'admin') {
+      setCurrentPage('admin-dashboard');
+    } else {
+      setCurrentPage('dashboard');
+    }
+  };
+
+  // Sidebar dashboard navigation should always go to the appropriate dashboard
+  // regardless of any saved navigation context (e.g., from Client page).
+  const handleGoToDashboardFromSidebar = () => {
+    // Clear transient selections and contexts
+    setSelectedStudent(null);
+    setSelectedBehaviorDescriptor(null);
+    setSelectedBDsForReport([]);
+    setSelectedTeamMember(null);
+    setSelectedClient(null);
+    setSelectedClass(null);
+    setNavigationContext(null);
+
     if (userType === 'admin') {
       setCurrentPage('admin-dashboard');
     } else {
@@ -388,17 +374,20 @@ export default function App() {
     return (
       <div className="min-h-screen" style={{ backgroundColor: '#F8F9FA' }}>
         {/* Header Section */}
-        <div className="px-4 sm:px-6 py-4 sm:py-6 lg:py-8" style={{ backgroundColor: '#E8F4F8' }}>
+        <div className="px-4 sm:px-6 py-4 sm:py-6 lg:py-8" style={{ backgroundColor: '#fff5f3' }}>
           <div className="max-w-7xl mx-auto relative">
             <div className="flex items-center justify-between">
               {/* Left: AWWA Logo */}
               <div className="flex items-center space-x-1 sm:space-x-2 z-10">
-                <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-full flex items-center justify-center" style={{ backgroundColor: '#FF8C42' }}>
-                  <div className="w-3 h-3 sm:w-4 sm:h-4 rounded-full border-2 border-white"></div>
-                </div>
-                <div>
-                  <div className="text-lg sm:text-xl lg:text-2xl font-bold" style={{ color: '#3C3C3C' }}>AWWA</div>
-                  <div className="text-xs" style={{ color: '#6C757D' }}>PEOPLE GIVING TO PEOPLE</div>
+                <div 
+                  className="px-4 py-3 rounded-lg flex items-center justify-center"
+                  style={{ backgroundColor: '#FFF5F3' }}
+                >
+                  <img 
+                    src="/AWWA Logo_Full Colour.png" 
+                    alt="AWWA Logo" 
+                    className="h-8 w-auto sm:h-10"
+                  />
                 </div>
               </div>
 
@@ -407,8 +396,14 @@ export default function App() {
                 <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold whitespace-nowrap" style={{ color: '#3C3C3C' }}>Beacon</h1>
               </div>
 
-              {/* Right: User Icon (invisible on login page but maintains space) */}
-              <div className="w-6 h-6 sm:w-8 sm:h-8 opacity-0"></div>
+              {/* Right: Zaheen Logo */}
+              <div className="flex items-center">
+                <img 
+                  src="/Picture1.png" 
+                  alt="Zaheen Logo" 
+                  className="h-8 w-auto sm:h-10"
+                />
+              </div>
             </div>
           </div>
         </div>
@@ -442,7 +437,7 @@ export default function App() {
                       borderColor: '#BDC3C7',
                       color: '#3C3C3C'
                     }}
-                    onFocus={(e) => e.target.style.borderColor = '#2C5F7C'}
+                    onFocus={(e) => e.target.style.borderColor = '#e65039'}
                     onBlur={(e) => e.target.style.borderColor = '#BDC3C7'}
                   />
                 </div>
@@ -466,7 +461,7 @@ export default function App() {
                       borderColor: '#BDC3C7',
                       color: '#3C3C3C'
                     }}
-                    onFocus={(e) => e.target.style.borderColor = '#2C5F7C'}
+                    onFocus={(e) => e.target.style.borderColor = '#e65039'}
                     onBlur={(e) => e.target.style.borderColor = '#BDC3C7'}
                   />
                 </div>
@@ -476,17 +471,17 @@ export default function App() {
                     type="submit"
                     className="w-full sm:w-auto px-8 sm:px-12 py-2 sm:py-3 border-2 rounded-none font-bold transition-all duration-200 hover:opacity-90"
                     style={{ 
-                      backgroundColor: '#2C5F7C', 
+                      backgroundColor: '#e65039', 
                       color: 'white',
-                      borderColor: '#2C5F7C'
+                      borderColor: '#e65039'
                     }}
                     onMouseEnter={(e) => {
-                      e.currentTarget.style.backgroundColor = '#1F4A66';
-                      e.currentTarget.style.borderColor = '#1F4A66';
+                      e.currentTarget.style.backgroundColor = '#d1452e';
+                      e.currentTarget.style.borderColor = '#d1452e';
                     }}
                     onMouseLeave={(e) => {
-                      e.currentTarget.style.backgroundColor = '#2C5F7C';
-                      e.currentTarget.style.borderColor = '#2C5F7C';
+                      e.currentTarget.style.backgroundColor = '#e65039';
+                      e.currentTarget.style.borderColor = '#e65039';
                     }}
                   >
                     LOGIN
@@ -513,12 +508,6 @@ export default function App() {
     case 'client':
       pageContent = (
         <ClientPage
-          onBack={handleBackFromClient}
-          onLogout={handleLogout}
-          onProfileClick={handleProfileClick}
-          onDashboardClick={handleBackToDashboard}
-          onTeamMembersClick={handleTeamMembersCTClick}
-          onClientClick={handleClientClick}
           onEditClient={handleEditClient}
           onAddClient={handleAddClient}
         />
@@ -531,19 +520,7 @@ export default function App() {
           <EditClientPage
             client={selectedClient}
             onBack={handleBackFromEditClient}
-            onLogout={handleLogout}
-            onProfileClick={handleProfileClick}
             onSave={handleSaveClient}
-            onDashboardClick={() => {
-              setSelectedClient(null);
-              if (userType === 'admin') {
-                setCurrentPage('admin-dashboard');
-              } else {
-                setCurrentPage('dashboard');
-              }
-            }}
-            onTeamMembersClick={handleTeamMembersCTClick}
-            onClientClick={handleClientClick}
           />
         );
       }
@@ -555,22 +532,7 @@ export default function App() {
           <EditTeamMemberPage
             teamMember={selectedTeamMember}
             onBack={handleBackFromEditTeamMember}
-            onLogout={handleLogout}
-            onProfileClick={handleProfileClick}
             onSave={handleSaveTeamMember}
-            onDashboardClick={() => {
-              setSelectedTeamMember(null);
-              if (navigationContext === 'client') {
-                setCurrentPage('client');
-              } else if (userType === 'admin') {
-                setCurrentPage('admin-dashboard');
-              } else {
-                setCurrentPage('dashboard');
-              }
-              setNavigationContext(null);
-            }}
-            onTeamMembersClick={handleBackFromEditTeamMember}
-            onClientClick={handleClientClick}
           />
         );
       }
@@ -579,13 +541,8 @@ export default function App() {
     case 'team-members-ct':
       pageContent = (
         <TeamMembersCTPage
-          onBack={handleBackFromTeamMembersCT}
-          onLogout={handleLogout}
-          onProfileClick={handleProfileClick}
           onEditTeamMember={handleEditTeamMember}
           onAddTeamMember={handleAddTeamMember}
-          onDashboardClick={handleBackToDashboard}
-          onClientClick={handleClientClick}
         />
       );
       break;
@@ -623,8 +580,6 @@ export default function App() {
             student={selectedStudent}
             selectedBDs={selectedBDsForReport}
             onBack={handleBackFromReport}
-            onLogout={handleLogout}
-            onProfileClick={handleProfileClick}
           />
         );
       }
@@ -653,11 +608,8 @@ export default function App() {
           <StudentDetailPage 
             student={selectedStudent} 
             onBack={handleBackToDashboard}
-            onLogout={handleLogout}
             onBehaviorDescriptorClick={handleBehaviorDescriptorClick}
             onGenerateReport={handleGenerateReport}
-            onProfileClick={handleProfileClick}
-            onTeamMembersCTClick={handleTeamMembersCTClick}
           />
         );
       }
@@ -667,11 +619,6 @@ export default function App() {
       pageContent = (
         <ProfileSettingsPage
           onBack={handleBackFromProfile}
-          onLogout={handleLogout}
-          onProfileClick={handleProfileClick}
-          onDashboardClick={handleBackToDashboard}
-          onTeamMembersClick={handleTeamMembersCTClick}
-          onClientClick={handleClientClick}
         />
       );
       break;
@@ -680,9 +627,7 @@ export default function App() {
     default:
       pageContent = (
         <Dashboard 
-          onLogout={handleLogout} 
           onStudentClick={handleStudentClick}
-          onProfileClick={handleProfileClick}
           onSwitchToAdminDashboard={handleSwitchToAdminDashboard}
           userType={userType}
         />
@@ -694,12 +639,11 @@ export default function App() {
     <Layout
       currentPage={currentPage}
       userType={userType}
-      onDashboardClick={handleBackToDashboard}
+      onDashboardClick={handleGoToDashboardFromSidebar}
       onTeamMembersClick={handleTeamMembersCTClick}
       onClientClick={userType === 'admin' ? handleClientClick : () => {}}
       onProfileClick={handleProfileClick}
       onLogout={handleLogout}
-      showHeader={!currentPage.includes('edit-')}
     >
       <Suspense fallback={
         <div className="flex items-center justify-center min-h-screen">

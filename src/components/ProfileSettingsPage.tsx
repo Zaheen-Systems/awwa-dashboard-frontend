@@ -2,32 +2,22 @@ import { useState } from 'react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Label } from './ui/label';
-import { Switch } from './ui/switch';
+
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { Textarea } from './ui/textarea';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
-import { Separator } from './ui/separator';
+
 import { Badge } from './ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
 import { User, Shield, Edit2, Camera, ChevronLeft } from 'lucide-react';
 
 interface ProfileSettingsPageProps {
   onBack: () => void;
-  onLogout: () => void;
-  onProfileClick: () => void;
-  onDashboardClick?: () => void;
-  onTeamMembersClick?: () => void;
-  onClientClick?: () => void;
 }
 
 export function ProfileSettingsPage({ 
-  onBack, 
-  onLogout, 
-  onProfileClick, 
-  onDashboardClick, 
-  onTeamMembersClick, 
-  onClientClick 
+  onBack 
 }: ProfileSettingsPageProps) {
   // Personal Information
   const [firstName, setFirstName] = useState('Ms.');
@@ -99,7 +89,7 @@ export function ProfileSettingsPage({
         {/* Page Header */}
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center space-x-2">
-            <ChevronLeft className="w-4 h-4" style={{ color: '#2C5F7C' }} />
+            <ChevronLeft className="w-4 h-4" style={{ color: '#e65039' }} />
             <h2 className="text-2xl font-bold" style={{ color: '#3C3C3C' }}>
               Account Settings
             </h2>
@@ -109,9 +99,9 @@ export function ProfileSettingsPage({
             onClick={onBack}
             className="flex items-center space-x-2 px-6 py-2 rounded-lg font-medium transition-all duration-200 hover:opacity-90"
             style={{ 
-              backgroundColor: '#4EAAC9', 
+              backgroundColor: '#e65039', 
               color: 'white',
-              borderColor: '#4EAAC9'
+              borderColor: '#e65039'
             }}
           >
             <ChevronLeft className="w-5 h-5" />
@@ -126,14 +116,14 @@ export function ProfileSettingsPage({
               <div className="relative">
                 <Avatar className="w-24 h-24">
                   <AvatarImage src="" alt="Profile picture" />
-                  <AvatarFallback style={{ backgroundColor: '#4EAAC9', color: 'white' }}>
+                  <AvatarFallback style={{ backgroundColor: '#e65039', color: 'white' }}>
                     MA
                   </AvatarFallback>
                 </Avatar>
                 <button 
                   onClick={handlePhotoUpload}
                   className="absolute bottom-0 right-0 p-2 rounded-full shadow-lg transition-all duration-200 hover:opacity-90"
-                  style={{ backgroundColor: '#FF8C42' }}
+                  style={{ backgroundColor: '#e65039' }}
                 >
                   <Camera className="w-4 h-4 text-white" />
                 </button>
@@ -147,7 +137,7 @@ export function ProfileSettingsPage({
                   <Badge 
                     variant="secondary" 
                     className="px-3 py-1 rounded-lg"
-                    style={{ backgroundColor: '#E8F4F8', color: '#2C5F7C' }}
+                    style={{ backgroundColor: '#fff5f3', color: '#e65039' }}
                   >
                     {department}
                   </Badge>
@@ -168,7 +158,7 @@ export function ProfileSettingsPage({
               className="flex items-center space-x-2 rounded-lg"
               style={{ 
                 color: activeTab === 'personal' ? 'white' : '#3C3C3C',
-                backgroundColor: activeTab === 'personal' ? '#2C5F7C' : 'transparent'
+                backgroundColor: activeTab === 'personal' ? '#e65039' : 'transparent'
               }}
             >
               <User className="w-4 h-4" />
@@ -179,7 +169,7 @@ export function ProfileSettingsPage({
               className="flex items-center space-x-2 rounded-lg"
               style={{ 
                 color: activeTab === 'security' ? 'white' : '#3C3C3C',
-                backgroundColor: activeTab === 'security' ? '#2C5F7C' : 'transparent'
+                backgroundColor: activeTab === 'security' ? '#e65039' : 'transparent'
               }}
             >
               <Shield className="w-4 h-4" />
@@ -204,7 +194,7 @@ export function ProfileSettingsPage({
                       onChange={(e) => setFirstName(e.target.value)}
                       className="mt-2 border-2 rounded-none"
                       style={{ borderColor: '#BDC3C7' }}
-                      onFocus={(e) => e.target.style.borderColor = '#2C5F7C'}
+                      onFocus={(e) => e.target.style.borderColor = '#e65039'}
                       onBlur={(e) => e.target.style.borderColor = '#BDC3C7'}
                     />
                   </div>
@@ -216,7 +206,7 @@ export function ProfileSettingsPage({
                       onChange={(e) => setLastName(e.target.value)}
                       className="mt-2 border-2 rounded-none"
                       style={{ borderColor: '#BDC3C7' }}
-                      onFocus={(e) => e.target.style.borderColor = '#2C5F7C'}
+                      onFocus={(e) => e.target.style.borderColor = '#e65039'}
                       onBlur={(e) => e.target.style.borderColor = '#BDC3C7'}
                     />
                   </div>
@@ -232,7 +222,7 @@ export function ProfileSettingsPage({
                       onChange={(e) => setEmail(e.target.value)}
                       className="mt-2 border-2 rounded-none"
                       style={{ borderColor: '#BDC3C7' }}
-                      onFocus={(e) => e.target.style.borderColor = '#2C5F7C'}
+                      onFocus={(e) => e.target.style.borderColor = '#e65039'}
                       onBlur={(e) => e.target.style.borderColor = '#BDC3C7'}
                     />
                   </div>
@@ -324,7 +314,7 @@ export function ProfileSettingsPage({
                     onClick={() => setShowPasswordFields(!showPasswordFields)}
                     variant="outline"
                     className="border-2 rounded-lg"
-                    style={{ borderColor: '#2C5F7C', color: '#2C5F7C' }}
+                    style={{ borderColor: '#e65039', color: '#e65039' }}
                   >
                     <Edit2 className="w-4 h-4 mr-2" />
                     Change
@@ -370,7 +360,7 @@ export function ProfileSettingsPage({
                       <Button
                         onClick={handlePasswordChange}
                         className="px-4 py-2 rounded-lg"
-                        style={{ backgroundColor: '#2C5F7C', color: 'white' }}
+                        style={{ backgroundColor: '#e65039', color: 'white' }}
                       >
                         Update Password
                       </Button>
@@ -403,7 +393,7 @@ export function ProfileSettingsPage({
           <Button
             onClick={handleSave}
             className="px-6 py-2 rounded-lg"
-            style={{ backgroundColor: '#2C5F7C', color: 'white' }}
+            style={{ backgroundColor: '#e65039', color: 'white' }}
           >
             Save All Changes
           </Button>

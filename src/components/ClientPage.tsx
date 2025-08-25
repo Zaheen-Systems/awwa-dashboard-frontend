@@ -1,9 +1,8 @@
 import { useState } from 'react';
 import { Button } from './ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from './ui/table';
-import { User, Upload, Plus, Edit, ArrowLeft, FileSpreadsheet } from 'lucide-react';
+import { Upload, Plus, Edit, FileSpreadsheet, Download, Camera } from 'lucide-react';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, DialogClose } from './ui/dialog';
-import { ImageWithFallback } from './figma/ImageWithFallback';
 // import logoImage from 'figma:asset/71b57c03c5488fc89f49e890a42dd4691fd017ee.png';
 
 interface Client {
@@ -23,12 +22,6 @@ interface Client {
 }
 
 interface ClientPageProps {
-  onBack: () => void;
-  onLogout: () => void;
-  onProfileClick: () => void;
-  onDashboardClick?: () => void;
-  onTeamMembersClick?: () => void;
-  onClientClick?: () => void;
   onEditClient?: (client: Client) => void;
   onAddClient?: () => void;
 }
@@ -44,7 +37,7 @@ const clients: Client[] = [
     primaryDiagnosis: "Speech and Language Difficulty",
     secondaryDiagnosis: "Speech and Language Difficulty",
     dateOfEnrollment: "21.01.2020",
-    photoUrl: "/placeholder-logo.png",
+    photoUrl: "",
     email: "aaron.kumar@example.com",
     dob: "1999-03-15",
     guardianName: "Priya Kumar",
@@ -59,7 +52,7 @@ const clients: Client[] = [
     primaryDiagnosis: "Speech and Language Difficulty",
     secondaryDiagnosis: "Speech and Language Difficulty",
     dateOfEnrollment: "03.07.2021",
-    photoUrl: "/placeholder-logo.png",
+    photoUrl: "",
     email: "meiling.tan@example.com",
     dob: "1995-11-22",
     guardianName: "David Tan",
@@ -68,22 +61,38 @@ const clients: Client[] = [
 ];
 
 export function ClientPage({ 
-  onBack, 
-  onLogout, 
-  onProfileClick, 
-  onDashboardClick, 
-  onTeamMembersClick, 
-  onClientClick, 
   onEditClient, 
   onAddClient 
 }: ClientPageProps) {
-  const [showBulkUploadDialog, setShowBulkUploadDialog] = useState(false);
-  const [uploadStep, setUploadStep] = useState<'template' | 'upload'>('template');
+  const [selectedClientPhoto, setSelectedClientPhoto] = useState<{ 
+    name: string; 
+    hasPhoto: boolean; 
+    photoUrl?: string;
+  } | null>(null);
+  const [isBulkUploadOpen, setIsBulkUploadOpen] = useState(false);
+  const [uploadedFile, setUploadedFile] = useState<File | null>(null);
+
+  const handlePhotoClick = (clientName: string) => {
+    // In a real implementation, this would check if the client has a photo
+    // For now, no clients have photos
+    setSelectedClientPhoto({
+      name: clientName,
+      hasPhoto: false,
+      photoUrl: undefined
+    });
+  };
 
   const handleDownloadTemplate = () => {
-    console.log('Downloading Excel template...');
-    // In a real implementation, this would trigger a file download
-    setUploadStep('upload');
+    // Download a simple CSV template for clients
+    const csvContent = 'Name,Age,Gender,ID Number,Primary Diagnosis,Secondary Diagnosis,Date of Enrollment,Email,DOB,Guardian Name,Guardian Contact\n' +
+                      'John Doe,25,M,CL001,Speech and Language,,2024-01-15,john@example.com,1999-03-15,Jane Doe,+65 9123 4567';
+    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'clients_template.csv';
+    a.click();
+    window.URL.revokeObjectURL(url);
   };
 
   const handleExcelUpload = () => {
@@ -96,16 +105,23 @@ export function ClientPage({
     fileInput.onchange = (e) => {
       const file = (e.target as HTMLInputElement).files?.[0];
       if (file) {
-        console.log('Excel file uploaded:', file.name);
-        // In a real implementation, this would process the Excel file
-        setShowBulkUploadDialog(false);
-        setUploadStep('template'); // Reset for next time
+        console.log('Excel file selected:', file.name);
+        setUploadedFile(file);
       }
     };
     
     document.body.appendChild(fileInput);
     fileInput.click();
     document.body.removeChild(fileInput);
+  };
+
+  const handleBulkUploadSubmit = () => {
+    if (uploadedFile) {
+      console.log('Processing client bulk upload for file:', uploadedFile.name);
+      // In a real implementation, process the Excel and import clients here
+      setUploadedFile(null);
+      setIsBulkUploadOpen(false);
+    }
   };
 
   const handleEditClient = (client: Client, event: React.MouseEvent) => {
@@ -122,24 +138,14 @@ export function ClientPage({
   };
 
   const resetUploadDialog = () => {
-    setUploadStep('template');
-    setShowBulkUploadDialog(false);
+    setUploadedFile(null);
+    setIsBulkUploadOpen(false);
   };
 
   return (
     <div className="flex-1 px-6 py-8" style={{ backgroundColor: '#F8F9FA' }}>
       <div className="max-w-7xl mx-auto">
-        {/* Breadcrumb */}
-        <div className="flex items-center space-x-2 mb-6">
-          <button
-            onClick={onBack}
-            className="flex items-center space-x-1 px-3 py-1 rounded transition-all duration-200 hover:bg-blue-50"
-            style={{ color: '#4EAAC9' }}
-          >
-            <ArrowLeft className="w-4 h-4" />
-            <span>Educator</span>
-          </button>
-        </div>
+        {/* Breadcrumb removed intentionally */}
 
         {/* Page Header */}
         <div className="flex items-center justify-between mb-6">
@@ -181,19 +187,91 @@ export function ClientPage({
                     <TableCell style={{ color: '#3C3C3C' }}>{client.primaryDiagnosis}</TableCell>
                     <TableCell style={{ color: '#3C3C3C' }}>{client.secondaryDiagnosis}</TableCell>
                     <TableCell style={{ color: '#3C3C3C' }}>{client.dateOfEnrollment}</TableCell>
-                    <TableCell>
-                      <div className="w-8 h-8 rounded border overflow-hidden flex items-center justify-center" 
-                        style={{ borderColor: '#BDC3C7', backgroundColor: '#F8F9FA' }}>
-                        {client.photoUrl ? (
-                          <ImageWithFallback 
-                            src={client.photoUrl} 
-                            alt={`${client.name}'s photo`}
-                            className="w-full h-full object-cover"
-                          />
-                        ) : (
-                          <User className="w-4 h-4" style={{ color: '#BDC3C7' }} />
-                        )}
-                      </div>
+                    <TableCell className="text-center">
+                      <Dialog>
+                        <DialogTrigger asChild>
+                          <button 
+                            className="w-10 h-8 border border-red-500 bg-red-50 flex items-center justify-center hover:bg-red-100 transition-colors rounded"
+                            onClick={() => handlePhotoClick(client.name)}
+                            title={`View/Upload photo for ${client.name}`}
+                          >
+                            <Camera className="w-4 h-4" style={{ color: '#DC3545' }} />
+                          </button>
+                        </DialogTrigger>
+                        <DialogContent 
+                          className="max-w-md mx-auto bg-white rounded-lg shadow-xl border-2 p-6"
+                          style={{ borderColor: '#BDC3C7', backgroundColor: 'white' }}
+                        >
+                          {selectedClientPhoto && (
+                            <>
+                              <DialogHeader className="pb-4 text-left">
+                                <DialogTitle 
+                                  className="text-lg font-bold"
+                                  style={{ color: '#3C3C3C' }}
+                                >
+                                  {selectedClientPhoto.name} - Photo
+                                </DialogTitle>
+                                <DialogDescription 
+                                  className="text-sm mt-2"
+                                  style={{ color: '#6C757D' }}
+                                >
+                                  View the photo for {selectedClientPhoto.name}. Click outside to close this dialog.
+                                </DialogDescription>
+                              </DialogHeader>
+                              
+                              <div className="flex justify-center py-6">
+                                <div 
+                                  className="rounded-lg flex items-center justify-center overflow-hidden"
+                                  style={{ backgroundColor: '#E8F4F8' }}
+                                >
+                                  {selectedClientPhoto.hasPhoto && selectedClientPhoto.photoUrl ? (
+                                    <img 
+                                      src={selectedClientPhoto.photoUrl} 
+                                      alt={`Photo of ${selectedClientPhoto.name}`}
+                                      className="max-w-full h-auto rounded-lg"
+                                      style={{ maxHeight: '300px', maxWidth: '300px' }}
+                                    />
+                                  ) : (
+                                    <img 
+                                      src="/placeholder-user.png" 
+                                      alt="No photo available"
+                                      className="max-w-full h-auto"
+                                      style={{ maxHeight: '300px' }}
+                                    />
+                                  )}
+                                </div>
+                              </div>
+
+                              <div className="flex justify-center space-x-3 pt-4">
+                                <Button
+                                  className="px-4 py-2 rounded-lg transition-all duration-200 hover:opacity-90"
+                                  style={{ 
+                                    backgroundColor: '#e65039',
+                                    color: 'white',
+                                    border: 'none'
+                                  }}
+                                >
+                                  <Upload className="w-4 h-4 mr-2" />
+                                  Upload New Photo
+                                </Button>
+                                {selectedClientPhoto.hasPhoto && (
+                                  <Button
+                                    variant="outline"
+                                    className="px-4 py-2 rounded-lg border-2 transition-all duration-200 hover:opacity-90"
+                                    style={{ 
+                                      borderColor: '#DC3545',
+                                      color: '#DC3545',
+                                      backgroundColor: 'white'
+                                    }}
+                                  >
+                                    Remove Photo
+                                  </Button>
+                                )}
+                              </div>
+                            </>
+                          )}
+                        </DialogContent>
+                      </Dialog>
                     </TableCell>
                     <TableCell>
                       <Button
@@ -217,21 +295,21 @@ export function ClientPage({
 
         {/* Action Buttons */}
         <div className="flex justify-end space-x-4">
-          <Dialog open={showBulkUploadDialog} onOpenChange={setShowBulkUploadDialog}>
+          <Dialog open={isBulkUploadOpen} onOpenChange={setIsBulkUploadOpen}>
             <DialogTrigger asChild>
-              <Button
-                className="flex items-center space-x-2 px-6 py-2 transition-all duration-200 hover:opacity-90"
-                style={{ 
-                  backgroundColor: '#4EAAC9',
-                  color: 'white',
-                  border: 'none'
-                }}
-              >
+                          <Button
+              className="flex items-center space-x-2 px-6 py-2 transition-all duration-200 hover:opacity-90"
+              style={{ 
+                backgroundColor: '#e65039',
+                color: 'white',
+                border: 'none'
+              }}
+            >
                 <Upload className="w-4 h-4" />
                 <span>Upload</span>
               </Button>
             </DialogTrigger>
-            <DialogContent className="max-w-md">
+            <DialogContent className="max-w-md" style={{ backgroundColor: 'white' }}>
               <DialogHeader>
                 <DialogTitle className="text-lg font-bold" style={{ color: '#3C3C3C' }}>
                   Bulk Upload Clients
@@ -241,75 +319,93 @@ export function ClientPage({
                 </DialogDescription>
               </DialogHeader>
 
-              <div className="space-y-4">
-                {uploadStep === 'template' ? (
-                  <>
-                    {/* Step 1: Download Template */}
+              <div className="space-y-6 p-4">
+                {/* Step 1: Download Template */}
+                <div className="space-y-3">
+                  <h4 className="font-medium" style={{ color: '#3C3C3C' }}>Step 1: Download Template</h4>
+                  <Button
+                    onClick={handleDownloadTemplate}
+                    className="w-full flex items-center space-x-2 border-2 px-4 py-2 transition-all duration-200 hover:bg-blue-50"
+                    style={{ 
+                      backgroundColor: 'white',
+                      borderColor: '#e65039',
+                      color: '#e65039'
+                    }}
+                  >
+                    <Download className="w-4 h-4" />
+                    <span>Download Excel Template</span>
+                  </Button>
+                </div>
+
+                {/* Step 2: Upload Completed File */}
+                <div className="space-y-3">
+                  <h4 className="font-medium" style={{ color: '#3C3C3C' }}>Step 2: Upload Completed File</h4>
+
+                  {uploadedFile ? (
                     <div className="space-y-3">
-                      <h3 className="font-medium" style={{ color: '#3C3C3C' }}>Step 1: Download Excel Template</h3>
-                      <p className="text-sm" style={{ color: '#6C757D' }}>
-                        Download the template file with the required format for client data.
-                      </p>
-                      <Button
-                        onClick={handleDownloadTemplate}
-                        className="w-full border-2 border-dashed px-4 py-6 transition-all duration-200 hover:bg-blue-50 flex flex-col items-center justify-center space-y-2 min-h-[100px]"
-                        style={{ 
-                          backgroundColor: 'white',
-                          borderColor: '#4EAAC9',
-                          color: '#4EAAC9'
-                        }}
-                      >
-                        <FileSpreadsheet className="w-6 h-6 flex-shrink-0" />
-                        <div className="text-center space-y-1 max-w-full">
-                          <p className="font-medium text-sm leading-tight">Download Template</p>
-                          <p className="text-xs leading-tight break-words" style={{ color: '#6C757D' }}>
-                            Excel file with required columns
-                          </p>
+                      <div className="p-3 border rounded-lg" style={{ borderColor: '#BDC3C7', backgroundColor: '#F8F9FA' }}>
+                        <div className="flex items-center space-x-2">
+                          <FileSpreadsheet className="w-5 h-5" style={{ color: '#e65039' }} />
+                          <span className="text-sm font-medium" style={{ color: '#3C3C3C' }}>
+                            {uploadedFile.name}
+                          </span>
                         </div>
-                      </Button>
-                    </div>
-                  </>
-                ) : (
-                  <>
-                    {/* Step 2: Upload File */}
-                    <div className="space-y-3">
-                      <div className="flex items-center justify-between">
-                        <h3 className="font-medium" style={{ color: '#3C3C3C' }}>Step 2: Upload Filled Template</h3>
+                        <p className="text-xs mt-1" style={{ color: '#6C757D' }}>
+                          {(uploadedFile.size / 1024).toFixed(1)} KB
+                        </p>
+                      </div>
+                      <div className="flex space-x-2">
                         <Button
-                          onClick={() => setUploadStep('template')}
-                          className="p-1"
+                          onClick={handleExcelUpload}
+                          className="flex-1 border-2 px-4 py-2 transition-all duration-200 hover:bg-blue-50"
                           style={{ 
-                            backgroundColor: 'transparent',
-                            color: '#6C757D',
+                            backgroundColor: 'white',
+                            borderColor: '#e65039',
+                            color: '#e65039'
+                          }}
+                        >
+                          Change File
+                        </Button>
+                        <Button
+                          onClick={handleBulkUploadSubmit}
+                          className="flex-1 px-4 py-2 transition-all duration-200 hover:opacity-90"
+                          style={{ 
+                            backgroundColor: '#e65039',
+                            color: 'white',
                             border: 'none'
                           }}
                         >
-                          <ArrowLeft className="w-4 h-4" />
+                          Upload
                         </Button>
                       </div>
-                      <p className="text-sm" style={{ color: '#6C757D' }}>
-                        Upload your completed Excel file with client information.
-                      </p>
-                      <Button
-                        onClick={handleExcelUpload}
-                        className="w-full border-2 border-dashed px-6 py-6 transition-all duration-200 hover:bg-blue-50 flex flex-col items-center justify-center space-y-3 min-h-[120px]"
-                        style={{ 
-                          backgroundColor: 'white',
-                          borderColor: '#4EAAC9',
-                          color: '#4EAAC9'
-                        }}
-                      >
-                        <Upload className="w-6 h-6 flex-shrink-0" />
-                        <div className="text-center space-y-1 max-w-full">
-                          <p className="font-medium text-sm leading-tight">Choose Excel File</p>
-                          <p className="text-xs leading-tight break-words" style={{ color: '#6C757D' }}>
-                            Supports .xlsx, .xls, .csv files
-                          </p>
-                        </div>
-                      </Button>
                     </div>
-                  </>
-                )}
+                  ) : (
+                    <Button
+                      onClick={handleExcelUpload}
+                      className="w-full border-2 border-dashed px-6 py-6 transition-all duration-200 hover:bg-blue-50 flex flex-col items-center justify-center space-y-3 min-h-[120px]"
+                      style={{ 
+                        backgroundColor: 'white',
+                        borderColor: '#e65039',
+                        color: '#e65039'
+                      }}
+                    >
+                      <Upload className="w-6 h-6 flex-shrink-0" />
+                      <div className="text-center space-y-1 max-w-full">
+                        <p className="font-medium text-sm leading-tight">Choose Excel File</p>
+                        <p className="text-xs leading-tight break-words" style={{ color: '#6C757D' }}>
+                          Supports .xlsx, .xls, .csv files
+                        </p>
+                      </div>
+                    </Button>
+                  )}
+                </div>
+
+                {/* Information Section */}
+                <div className="bg-yellow-100 p-3 border-l-4" style={{ borderColor: '#FF8C42' }}>
+                  <p className="text-xs" style={{ color: '#3C3C3C' }}>
+                    <strong>Note:</strong> The Excel file should contain columns for Name, Age, Gender, ID Number, Primary Diagnosis, Secondary Diagnosis, Date of Enrollment, Email, DOB, Guardian Name, and Guardian Contact.
+                  </p>
+                </div>
               </div>
 
               <div className="flex justify-end">
@@ -334,7 +430,7 @@ export function ClientPage({
             onClick={handleAddClient}
             className="flex items-center space-x-2 px-6 py-2 transition-all duration-200 hover:opacity-90"
             style={{ 
-              backgroundColor: '#2C5F7C',
+              backgroundColor: '#e65039',
               color: 'white',
               border: 'none'
             }}

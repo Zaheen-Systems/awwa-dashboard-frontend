@@ -19,9 +19,7 @@ interface Student {
 }
 
 interface DashboardProps {
-  onLogout: () => void;
   onStudentClick: (student: Student) => void;
-  onProfileClick: () => void;
   onSwitchToAdminDashboard?: () => void;
   userType?: 'user' | 'admin';
 }
@@ -85,7 +83,7 @@ const students: Student[] = [
   }
 ];
 
-export function Dashboard({ onLogout, onStudentClick, onProfileClick, onSwitchToAdminDashboard, userType }: DashboardProps) {
+export function Dashboard({ onStudentClick, onSwitchToAdminDashboard, userType }: DashboardProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const [sortColumn, setSortColumn] = useState<keyof Student | null>(null);
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
@@ -166,17 +164,17 @@ export function Dashboard({ onLogout, onStudentClick, onProfileClick, onSwitchTo
               onClick={onSwitchToAdminDashboard}
               className="px-4 py-2 border-2 rounded-none font-medium transition-all duration-200 hover:opacity-90"
               style={{ 
-                backgroundColor: '#4EAAC9', 
+                backgroundColor: '#e65039', 
                 color: 'white',
-                borderColor: '#4EAAC9'
+                borderColor: '#e65039'
               }}
               onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = '#3B8BA8';
-                e.currentTarget.style.borderColor = '#3B8BA8';
+                e.currentTarget.style.backgroundColor = '#d1452e';
+                e.currentTarget.style.borderColor = '#d1452e';
               }}
               onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = '#4EAAC9';
-                e.currentTarget.style.borderColor = '#4EAAC9';
+                e.currentTarget.style.backgroundColor = '#e65039';
+                e.currentTarget.style.borderColor = '#e65039';
               }}
             >
               Switch to Admin Dashboard
@@ -199,7 +197,7 @@ export function Dashboard({ onLogout, onStudentClick, onProfileClick, onSwitchTo
                 borderColor: '#BDC3C7',
                 color: '#3C3C3C'
               }}
-              onFocus={(e) => e.target.style.borderColor = '#2C5F7C'}
+              onFocus={(e) => e.target.style.borderColor = '#e65039'}
               onBlur={(e) => e.target.style.borderColor = '#BDC3C7'}
             />
           </div>
@@ -280,7 +278,7 @@ export function Dashboard({ onLogout, onStudentClick, onProfileClick, onSwitchTo
                     style={{ borderColor: '#BDC3C7' }}
                     onClick={() => onStudentClick(student)}
                   >
-                    <TableCell style={{ color: '#2C5F7C' }} className="hover:underline">
+                    <TableCell style={{ color: '#e65039' }} className="hover:underline">
                       {student.name}
                     </TableCell>
                     <TableCell style={{ color: '#3C3C3C' }}>{student.chronologicalAge}</TableCell>
@@ -309,7 +307,7 @@ export function Dashboard({ onLogout, onStudentClick, onProfileClick, onSwitchTo
                         }}
                         onMouseEnter={(e) => {
                           e.currentTarget.style.backgroundColor = '#F8F9FA';
-                          e.currentTarget.style.borderColor = '#2C5F7C';
+                          e.currentTarget.style.borderColor = '#e65039';
                         }}
                         onMouseLeave={(e) => {
                           e.currentTarget.style.backgroundColor = 'white';

@@ -3,8 +3,7 @@ import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Label } from './ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
-import { Upload } from 'lucide-react';
-import { ImageWithFallback } from './figma/ImageWithFallback';
+import { Upload, User } from 'lucide-react';
 // import userIconImage from 'figma:asset/175b30eba12976a029330759350f9c338ba2c59d.png';
 
 interface TeamMember {
@@ -25,23 +24,13 @@ interface TeamMember {
 interface EditTeamMemberPageProps {
   teamMember: TeamMember;
   onBack: () => void;
-  onLogout: () => void;
-  onProfileClick: () => void;
   onSave: (updatedMember: TeamMember) => void;
-  onDashboardClick?: () => void;
-  onTeamMembersClick?: () => void;
-  onClientClick?: () => void;
 }
 
 export function EditTeamMemberPage({ 
   teamMember, 
   onBack, 
-  onLogout, 
-  onProfileClick, 
-  onSave,
-  onDashboardClick,
-  onTeamMembersClick,
-  onClientClick
+  onSave
 }: EditTeamMemberPageProps) {
   const [formData, setFormData] = useState<TeamMember>({
     ...teamMember,
@@ -49,6 +38,14 @@ export function EditTeamMemberPage({
     dob: teamMember.dob || '',
     dateOfJoining: teamMember.dateOfJoining || new Date().toISOString().split('T')[0]
   });
+
+  // Available classes for assignment (should come from backend in real app)
+  const availableClasses: string[] = [
+    'Class 1',
+    'Class 1.2',
+    'Class 1.3',
+    'Class 2.1'
+  ];
 
   const handleInputChange = (field: keyof TeamMember, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -94,7 +91,7 @@ export function EditTeamMemberPage({
       <div className="max-w-4xl mx-auto">
         {/* Page Header */}
         <div className="flex items-center justify-between mb-6">
-          <div className="bg-white px-4 py-2 border" style={{ borderColor: '#2C5F7C' }}>
+          <div className="bg-white px-4 py-2 border" style={{ borderColor: '#e65039' }}>
             <h2 className="text-lg font-bold" style={{ color: '#3C3C3C' }}>
               {isNewMember ? 'Add New Team member / CT' : 'Edit Team member / CT'}
             </h2>
@@ -104,7 +101,7 @@ export function EditTeamMemberPage({
             onClick={onBack}
             className="px-6 py-2 rounded-lg transition-all duration-200 hover:opacity-90"
             style={{ 
-              backgroundColor: '#2C5F7C',
+              backgroundColor: '#e65039',
               color: 'white',
               border: 'none'
             }}
@@ -203,9 +200,6 @@ export function EditTeamMemberPage({
                     >
                       <SelectItem value="Team member" className="hover:bg-gray-100 focus:bg-gray-100" style={{ color: '#3C3C3C' }}>Team member</SelectItem>
                       <SelectItem value="CT" className="hover:bg-gray-100 focus:bg-gray-100" style={{ color: '#3C3C3C' }}>CT</SelectItem>
-                      <SelectItem value="Team member/ CT" className="hover:bg-gray-100 focus:bg-gray-100" style={{ color: '#3C3C3C' }}>Team member/ CT</SelectItem>
-                      <SelectItem value="Senior Team member" className="hover:bg-gray-100 focus:bg-gray-100" style={{ color: '#3C3C3C' }}>Senior Team member</SelectItem>
-                      <SelectItem value="Lead CT" className="hover:bg-gray-100 focus:bg-gray-100" style={{ color: '#3C3C3C' }}>Lead CT</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -215,14 +209,22 @@ export function EditTeamMemberPage({
                   <Label htmlFor="gender" className="block mb-2" style={{ color: '#3C3C3C' }}>
                     Gender
                   </Label>
-                  <Input
-                    id="gender"
-                    type="text"
-                    value={formData.gender}
-                    onChange={(e) => handleInputChange('gender', e.target.value)}
-                    className="w-full border-2 px-3 py-2 rounded-none"
-                    style={{ borderColor: '#BDC3C7' }}
-                  />
+                  <Select value={formData.gender} onValueChange={(value) => handleInputChange('gender', value)}>
+                    <SelectTrigger className="w-full border-2 rounded-none" style={{ borderColor: '#BDC3C7' }}>
+                      <SelectValue placeholder="Select gender" />
+                    </SelectTrigger>
+                    <SelectContent 
+                      className="bg-white border border-gray-200 shadow-lg rounded-md"
+                      style={{ 
+                        backgroundColor: 'white',
+                        borderColor: '#BDC3C7',
+                        boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)'
+                      }}
+                    >
+                      <SelectItem value="M" className="hover:bg-gray-100 focus:bg-gray-100" style={{ color: '#3C3C3C' }}>Male</SelectItem>
+                      <SelectItem value="F" className="hover:bg-gray-100 focus:bg-gray-100" style={{ color: '#3C3C3C' }}>Female</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
 
                 {/* Classes */}
@@ -230,14 +232,25 @@ export function EditTeamMemberPage({
                   <Label htmlFor="class" className="block mb-2" style={{ color: '#3C3C3C' }}>
                     Classes
                   </Label>
-                  <Input
-                    id="class"
-                    type="text"
-                    value={formData.class}
-                    onChange={(e) => handleInputChange('class', e.target.value)}
-                    className="w-full border-2 px-3 py-2 rounded-none"
-                    style={{ borderColor: '#BDC3C7' }}
-                  />
+                  <Select value={formData.class} onValueChange={(value) => handleInputChange('class', value)}>
+                    <SelectTrigger className="w-full border-2 rounded-none" style={{ borderColor: '#BDC3C7' }}>
+                      <SelectValue placeholder="Select class" />
+                    </SelectTrigger>
+                    <SelectContent 
+                      className="bg-white border border-gray-200 shadow-lg rounded-md"
+                      style={{ 
+                        backgroundColor: 'white',
+                        borderColor: '#BDC3C7',
+                        boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)'
+                      }}
+                    >
+                      {availableClasses.map((cls) => (
+                        <SelectItem key={cls} value={cls} className="hover:bg-gray-100 focus:bg-gray-100" style={{ color: '#3C3C3C' }}>
+                          {cls}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
 
                 {/* Date of joining */}
@@ -266,14 +279,17 @@ export function EditTeamMemberPage({
                     src={formData.photoUrl} 
                     alt={`${formData.name}'s photo`}
                     className="w-full h-full object-cover"
+                    onError={(e) => {
+                      // If the image fails to load, hide it and show the generic icon
+                      (e.target as HTMLImageElement).style.display = 'none';
+                      (e.target as HTMLImageElement).nextElementSibling?.classList.remove('hidden');
+                    }}
                   />
-                ) : (
-                  <ImageWithFallback
-                    src="/placeholder-user.png"
-                    alt="Default user icon"
-                    className="w-8 h-8"
-                  />
-                )}
+                ) : null}
+                <User 
+                  className={`w-8 h-8 ${formData.photoUrl ? 'hidden' : ''}`}
+                  style={{ color: '#BDC3C7' }}
+                />
               </div>
               
               {/* Change Photo Button */}
@@ -282,8 +298,8 @@ export function EditTeamMemberPage({
                 onClick={handlePhotoUpload}
                 className="flex items-center space-x-2 px-4 py-2 border-2 rounded-lg transition-all duration-200 hover:bg-blue-50"
                 style={{ 
-                  borderColor: '#4EAAC9',
-                  color: '#4EAAC9',
+                  borderColor: '#e65039',
+                  color: '#e65039',
                   backgroundColor: 'white'
                 }}
               >
@@ -311,7 +327,7 @@ export function EditTeamMemberPage({
                 type="submit"
                 className="w-full px-4 py-3 rounded-none transition-all duration-200 hover:opacity-90"
                 style={{ 
-                  backgroundColor: '#2C5F7C',
+                  backgroundColor: '#e65039',
                   color: 'white',
                   border: 'none'
                 }}

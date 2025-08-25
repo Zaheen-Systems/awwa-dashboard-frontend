@@ -126,7 +126,7 @@ export function AddNewBDModal({ isOpen, onClose, onSubmit }: AddNewBDModalProps)
                   borderColor: '#BDC3C7',
                   color: '#3C3C3C'
                 }}
-                onFocus={(e) => e.target.style.borderColor = '#2C5F7C'}
+                onFocus={(e) => e.target.style.borderColor = '#e65039'}
                 onBlur={(e) => e.target.style.borderColor = '#BDC3C7'}
               />
             </div>
@@ -143,7 +143,7 @@ export function AddNewBDModal({ isOpen, onClose, onSubmit }: AddNewBDModalProps)
                   borderColor: '#BDC3C7',
                   color: '#3C3C3C'
                 }}
-                onFocus={(e) => e.target.style.borderColor = '#2C5F7C'}
+                onFocus={(e) => e.target.style.borderColor = '#e65039'}
                 onBlur={(e) => e.target.style.borderColor = '#BDC3C7'}
                 placeholder="Describe the action observed..."
               />
@@ -161,7 +161,7 @@ export function AddNewBDModal({ isOpen, onClose, onSubmit }: AddNewBDModalProps)
                   borderColor: '#BDC3C7',
                   color: '#3C3C3C'
                 }}
-                onFocus={(e) => e.target.style.borderColor = '#2C5F7C'}
+                onFocus={(e) => e.target.style.borderColor = '#e65039'}
                 onBlur={(e) => e.target.style.borderColor = '#BDC3C7'}
                 placeholder="What triggered this behavior..."
               />
@@ -179,7 +179,7 @@ export function AddNewBDModal({ isOpen, onClose, onSubmit }: AddNewBDModalProps)
                   borderColor: '#BDC3C7',
                   color: '#3C3C3C'
                 }}
-                onFocus={(e) => e.target.style.borderColor = '#2C5F7C'}
+                onFocus={(e) => e.target.style.borderColor = '#e65039'}
                 onBlur={(e) => e.target.style.borderColor = '#BDC3C7'}
                 placeholder="e.g., Snack time, Free play..."
               />
@@ -201,7 +201,7 @@ export function AddNewBDModal({ isOpen, onClose, onSubmit }: AddNewBDModalProps)
                   borderColor: '#BDC3C7',
                   color: '#3C3C3C'
                 }}
-                onFocus={(e) => e.target.style.borderColor = '#2C5F7C'}
+                onFocus={(e) => e.target.style.borderColor = '#e65039'}
                 onBlur={(e) => e.target.style.borderColor = '#BDC3C7'}
               />
               <p className="text-sm mt-1" style={{ color: '#6C757D' }}>Not mandatory</p>
@@ -219,7 +219,7 @@ export function AddNewBDModal({ isOpen, onClose, onSubmit }: AddNewBDModalProps)
                   borderColor: '#BDC3C7',
                   color: '#3C3C3C'
                 }}
-                onFocus={(e) => e.target.style.borderColor = '#2C5F7C'}
+                onFocus={(e) => e.target.style.borderColor = '#e65039'}
                 onBlur={(e) => e.target.style.borderColor = '#BDC3C7'}
                 readOnly
               />
@@ -309,9 +309,9 @@ export function AddNewBDModal({ isOpen, onClose, onSubmit }: AddNewBDModalProps)
             onClick={handleSubmit}
             className="px-8 py-2 font-medium transition-all duration-200 hover:opacity-90"
             style={{ 
-              backgroundColor: '#2C5F7C', 
+              backgroundColor: '#e65039', 
               color: 'white',
-              borderColor: '#2C5F7C'
+              borderColor: '#e65039'
             }}
           >
             Submit

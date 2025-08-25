@@ -80,21 +80,21 @@ export function AdminDashboard({  onClassClick }: AdminDashboardProps) {
 
         {/* Summary Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <div className="bg-white rounded-lg shadow-sm p-6 border-l-4" style={{ borderLeftColor: '#4EAAC9' }}>
+          <div className="bg-white rounded-lg shadow-sm p-6 border-l-4" style={{ borderLeftColor: '#e65039' }}>
             <h3 className="font-medium mb-2" style={{ color: '#3C3C3C' }}>Total Classes</h3>
-            <div className="text-3xl font-bold" style={{ color: '#2C5F7C' }}>{mockClasses.length}</div>
+            <div className="text-3xl font-bold" style={{ color: '#e65039' }}>{mockClasses.length}</div>
           </div>
           
-          <div className="bg-white rounded-lg shadow-sm p-6 border-l-4" style={{ borderLeftColor: '#FF8C42' }}>
+          <div className="bg-white rounded-lg shadow-sm p-6 border-l-4" style={{ borderLeftColor: '#4EAAC9' }}>
             <h3 className="font-medium mb-2" style={{ color: '#3C3C3C' }}>Total Students</h3>
-            <div className="text-3xl font-bold" style={{ color: '#2C5F7C' }}>
+            <div className="text-3xl font-bold" style={{ color: '#4EAAC9' }}>
               {mockClasses.reduce((sum, cls) => sum + cls.numStudents, 0)}
             </div>
           </div>
           
-          <div className="bg-white rounded-lg shadow-sm p-6 border-l-4" style={{ borderLeftColor: '#6C757D' }}>
+          <div className="bg-white rounded-lg shadow-sm p-6 border-l-4" style={{ borderLeftColor: '#FF8C42' }}>
             <h3 className="font-medium mb-2" style={{ color: '#3C3C3C' }}>Total Staff</h3>
-            <div className="text-3xl font-bold" style={{ color: '#2C5F7C' }}>
+            <div className="text-3xl font-bold" style={{ color: '#FF8C42' }}>
               {mockClasses.reduce((sum, cls) => sum + cls.numTeamMembers + cls.numCTs, 0)}
             </div>
           </div>
@@ -117,7 +117,7 @@ export function AdminDashboard({  onClassClick }: AdminDashboardProps) {
                 borderColor: '#BDC3C7',
                 color: '#3C3C3C'
               }}
-              onFocus={(e) => e.target.style.borderColor = '#2C5F7C'}
+              onFocus={(e) => e.target.style.borderColor = '#e65039'}
               onBlur={(e) => e.target.style.borderColor = '#BDC3C7'}
             />
           </div>
@@ -150,7 +150,7 @@ export function AdminDashboard({  onClassClick }: AdminDashboardProps) {
                       <button
                         onClick={() => onClassClick(classItem)}
                         className="hover:underline transition-all duration-200"
-                        style={{ color: '#2C5F7C' }}
+                        style={{ color: '#e65039' }}
                       >
                         {classItem.name}
                       </button>

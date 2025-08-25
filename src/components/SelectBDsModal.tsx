@@ -144,8 +144,8 @@ export function SelectBDsModal({
                               onCheckedChange={(checked) => handleGCOBDSelect(descriptor, checked as boolean)}
                               className="border-2"
                               style={{ 
-                                borderColor: isSelected ? '#2C5F7C' : '#BDC3C7',
-                                backgroundColor: isSelected ? '#2C5F7C' : 'transparent'
+                                borderColor: isSelected ? '#e65039' : '#BDC3C7',
+                                backgroundColor: isSelected ? '#e65039' : 'transparent'
                               }}
                             />
                           </TableCell>
@@ -201,7 +201,7 @@ export function SelectBDsModal({
                           className={index < iepBehaviourDescriptors.length - 1 ? "border-b" : ""} 
                           style={{ 
                             borderColor: '#BDC3C7',
-                            backgroundColor: isSelected ? '#4EAAC9' : 'transparent'
+                            backgroundColor: isSelected ? '#e65039' : 'transparent'
                           }}
                         >
                           <TableCell className="text-center">
@@ -210,8 +210,8 @@ export function SelectBDsModal({
                               onCheckedChange={(checked) => handleIEPBDSelect(descriptor, checked as boolean)}
                               className="border-2"
                               style={{ 
-                                borderColor: isSelected ? '#2C5F7C' : '#BDC3C7',
-                                backgroundColor: isSelected ? '#2C5F7C' : 'transparent'
+                                borderColor: isSelected ? '#e65039' : '#BDC3C7',
+                                backgroundColor: isSelected ? '#e65039' : 'transparent'
                               }}
                             />
                           </TableCell>
@@ -257,9 +257,9 @@ export function SelectBDsModal({
             disabled={totalSelected === 0}
             className="px-8 py-2 font-medium transition-all duration-200 hover:opacity-90 disabled:opacity-50"
             style={{ 
-              backgroundColor: totalSelected > 0 ? '#2C5F7C' : '#BDC3C7', 
+              backgroundColor: totalSelected > 0 ? '#e65039' : '#BDC3C7', 
               color: 'white',
-              borderColor: totalSelected > 0 ? '#2C5F7C' : '#BDC3C7'
+              borderColor: totalSelected > 0 ? '#e65039' : '#BDC3C7'
             }}
           >
             Generate ({totalSelected} selected)

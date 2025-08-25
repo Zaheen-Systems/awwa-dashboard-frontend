@@ -47,11 +47,8 @@ interface BDFormData {
 interface StudentDetailPageProps {
   student: Student;
   onBack: () => void;
-  onLogout: () => void;
   onBehaviorDescriptorClick: (behaviorDescriptor: BehaviorDescriptor) => void;
   onGenerateReport: (selectedBDs: BehaviorDescriptor[]) => void;
-  onProfileClick: () => void;
-  onTeamMembersCTClick: () => void;
 }
 
 // Mock GCO data structure - expanded for scrolling
@@ -186,7 +183,7 @@ const mockIEPBehaviourDescriptors = [
   }
 ];
 
-export function StudentDetailPage({ student, onBack, onLogout, onBehaviorDescriptorClick, onGenerateReport, onProfileClick, onTeamMembersCTClick }: StudentDetailPageProps) {
+export function StudentDetailPage({ student, onBack, onBehaviorDescriptorClick, onGenerateReport }: StudentDetailPageProps) {
   const [date, setDate] = useState("");
   const [behaviourDescriptors, setBehaviourDescriptors] = useState(mockBehaviourDescriptors);
   const [iepBehaviourDescriptors, setIepBehaviourDescriptors] = useState(mockIEPBehaviourDescriptors);
@@ -251,16 +248,16 @@ export function StudentDetailPage({ student, onBack, onLogout, onBehaviorDescrip
   return (
     <div className="min-h-screen" style={{ backgroundColor: '#F8F9FA' }}>
       {/* Tabs Section */}
-      <div className="px-4 sm:px-6 py-4 sm:py-6 lg:py-8" style={{ backgroundColor: '#E8F4F8' }}>
+      <div className="px-4 sm:px-6 py-4 sm:py-6 lg:py-8" style={{ backgroundColor: '#fff5f3' }}>
         <div className="max-w-7xl mx-auto">
           {/* Navigation buttons in header */}
           <div className="flex justify-start space-x-2 sm:space-x-4">
             <button
               className="px-3 sm:px-6 py-2 sm:py-3 text-sm sm:text-base border-2 transition-all duration-200"
               style={{ 
-                borderColor: '#2C5F7C',
+                borderColor: '#e65039',
                 color: 'white',
-                backgroundColor: '#2C5F7C'
+                backgroundColor: '#e65039'
               }}
             >
               Team member
@@ -284,17 +281,17 @@ export function StudentDetailPage({ student, onBack, onLogout, onBehaviorDescrip
         <div className="max-w-7xl mx-auto">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center space-x-2">
-              <ArrowLeft className="w-4 h-4" style={{ color: '#2C5F7C' }} />
-              <span style={{ color: '#2C5F7C' }}>Home &gt; {student.name}</span>
+              <ArrowLeft className="w-4 h-4" style={{ color: '#e65039' }} />
+              <span style={{ color: '#e65039' }}>Home &gt; {student.name}</span>
             </div>
             
             <Button
               onClick={onBack}
               className="flex items-center space-x-2 px-6 py-2 font-medium transition-all duration-200 hover:opacity-90"
               style={{ 
-                backgroundColor: '#4EAAC9', 
+                backgroundColor: '#e65039', 
                 color: 'white',
-                borderColor: '#4EAAC9'
+                borderColor: '#e65039'
               }}
             >
               <ArrowLeft className="w-5 h-5" />
@@ -473,7 +470,7 @@ export function StudentDetailPage({ student, onBack, onLogout, onBehaviorDescrip
                       className={`${index < behaviourDescriptors.length - 1 ? "border-b" : ""} cursor-pointer hover:bg-gray-50 transition-colors`} 
                       style={{ 
                         borderColor: '#BDC3C7',
-                        backgroundColor: descriptor.selected ? '#4EAAC9' : 'transparent'
+                        backgroundColor: descriptor.selected ? '#e65039' : 'transparent'
                       }}
                       onClick={(e) => handleRowClick(descriptor, e)}
                     >
@@ -483,8 +480,8 @@ export function StudentDetailPage({ student, onBack, onLogout, onBehaviorDescrip
                           onCheckedChange={(checked) => handleBehaviourSelect(descriptor.id, checked as boolean)}
                           className="border-2 data-[state=checked]:bg-primary data-[state=checked]:border-primary"
                           style={{ 
-                            borderColor: descriptor.selected ? '#2C5F7C' : '#BDC3C7',
-                            backgroundColor: descriptor.selected ? '#2C5F7C' : 'transparent'
+                            borderColor: descriptor.selected ? '#e65039' : '#BDC3C7',
+                            backgroundColor: descriptor.selected ? '#e65039' : 'transparent'
                           }}
                         />
                       </TableCell>
@@ -539,7 +536,7 @@ export function StudentDetailPage({ student, onBack, onLogout, onBehaviorDescrip
                       className={`${index < iepBehaviourDescriptors.length - 1 ? "border-b" : ""} cursor-pointer hover:bg-gray-50 transition-colors`} 
                       style={{ 
                         borderColor: '#BDC3C7',
-                        backgroundColor: descriptor.selected ? '#4EAAC9' : 'transparent'
+                        backgroundColor: descriptor.selected ? '#e65039' : 'transparent'
                       }}
                       onClick={(e) => handleRowClick(descriptor, e)}
                     >
@@ -549,8 +546,8 @@ export function StudentDetailPage({ student, onBack, onLogout, onBehaviorDescrip
                           onCheckedChange={(checked) => handleIepBehaviourSelect(descriptor.id, checked as boolean)}
                           className="border-2 data-[state=checked]:bg-primary data-[state=checked]:border-primary"
                           style={{ 
-                            borderColor: descriptor.selected ? '#2C5F7C' : '#BDC3C7',
-                            backgroundColor: descriptor.selected ? '#2C5F7C' : 'transparent'
+                            borderColor: descriptor.selected ? '#e65039' : '#BDC3C7',
+                            backgroundColor: descriptor.selected ? '#e65039' : 'transparent'
                           }}
                         />
                       </TableCell>
@@ -575,9 +572,9 @@ export function StudentDetailPage({ student, onBack, onLogout, onBehaviorDescrip
               onClick={handleAddNewBDs}
               className="px-6 py-2 font-medium transition-all duration-200 hover:opacity-90"
               style={{ 
-                backgroundColor: '#4EAAC9', 
+                backgroundColor: '#e65039', 
                 color: 'white',
-                borderColor: '#4EAAC9'
+                borderColor: '#e65039'
               }}
             >
               Add New BDs
@@ -587,9 +584,9 @@ export function StudentDetailPage({ student, onBack, onLogout, onBehaviorDescrip
               onClick={handleGenerateReportClick}
               className="px-6 py-2 font-medium transition-all duration-200 hover:opacity-90"
               style={{ 
-                backgroundColor: '#2C5F7C', 
+                backgroundColor: '#e65039', 
                 color: 'white',
-                borderColor: '#2C5F7C'
+                borderColor: '#e65039'
               }}
             >
               Generate Report

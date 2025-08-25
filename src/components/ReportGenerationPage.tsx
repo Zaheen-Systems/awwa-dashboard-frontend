@@ -32,16 +32,12 @@ interface ReportGenerationPageProps {
   student: Student;
   selectedBDs: BehaviorDescriptor[];
   onBack: () => void;
-  onLogout: () => void;
-  onProfileClick: () => void;
 }
 
 export function ReportGenerationPage({ 
   student, 
   selectedBDs, 
-  onBack, 
-  onLogout,
-  onProfileClick 
+  onBack 
 }: ReportGenerationPageProps) {
 
   const handleDownloadReport = () => {
@@ -97,17 +93,17 @@ export function ReportGenerationPage({
             <div className="flex items-center space-x-2">
               <button 
                 onClick={onBack}
-                style={{ color: '#2C5F7C' }}
+                style={{ color: '#e65039' }}
                 className="hover:underline"
               >
                 Home
               </button>
-              <span style={{ color: '#2C5F7C' }}> &gt; </span>
-              <span style={{ color: '#2C5F7C' }}>{student.name}</span>
-              <span style={{ color: '#2C5F7C' }}> &gt; </span>
-              <span style={{ color: '#2C5F7C' }}>BD</span>
-              <span style={{ color: '#2C5F7C' }}> &gt; </span>
-              <span style={{ color: '#2C5F7C' }}>Download</span>
+              <span style={{ color: '#e65039' }}> &gt; </span>
+              <span style={{ color: '#e65039' }}>{student.name}</span>
+              <span style={{ color: '#e65039' }}> &gt; </span>
+              <span style={{ color: '#e65039' }}>BD</span>
+              <span style={{ color: '#e65039' }}> &gt; </span>
+              <span style={{ color: '#e65039' }}>Download</span>
             </div>
 
             {/* Right: Back Button */}
@@ -115,9 +111,9 @@ export function ReportGenerationPage({
               onClick={onBack}
               className="flex items-center space-x-2 px-6 py-2 font-medium transition-all duration-200 hover:opacity-90"
               style={{ 
-                backgroundColor: '#4EAAC9', 
+                backgroundColor: '#e65039', 
                 color: 'white',
-                borderColor: '#4EAAC9'
+                borderColor: '#e65039'
               }}
             >
               <ChevronLeft className="w-5 h-5" />
@@ -173,7 +169,7 @@ export function ReportGenerationPage({
                       className={index < selectedBDs.length - 1 ? "border-b" : ""} 
                       style={{ 
                         borderColor: '#BDC3C7',
-                        backgroundColor: '#4EAAC9' // Turquoise background for selected items
+                        backgroundColor: '#e65039' // Orange-red background for selected items
                       }}
                     >
                       <TableCell className="text-center">

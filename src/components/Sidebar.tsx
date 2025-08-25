@@ -1,6 +1,7 @@
 import { Home, Users, UserCheck, Settings, LogOut } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from './ui/dropdown-menu';
 
+
 interface SidebarProps {
   currentPage: string;
   userType: 'user' | 'admin';
@@ -21,16 +22,19 @@ export function Sidebar({
   onLogout 
 }: SidebarProps) {
   return (
-    <div className="w-64 flex-shrink-0 flex flex-col" style={{ backgroundColor: '#4EAAC9' }}>
+    <div className="w-64 flex-shrink-0 flex flex-col" style={{ backgroundColor: '#e65039' }}>
       <div className="p-6 flex-1">
-        {/* AWWA Logo - Same as login page */}
-        <div className="flex items-center space-x-2 mb-8">
-          <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ backgroundColor: '#FF8C42' }}>
-            <div className="w-4 h-4 rounded-full border-2 border-white"></div>
-          </div>
-          <div>
-            <div className="text-xl font-bold text-white">AWWA</div>
-            <div className="text-xs text-white opacity-80">PEOPLE GIVING TO PEOPLE</div>
+        {/* AWWA Logo */}
+        <div className="mb-8">
+          <div 
+            className="px-6 py-4 rounded-lg flex items-center justify-center"
+            style={{ backgroundColor: '#FFF5F3' }}
+          >
+            <img 
+              src="/AWWA Logo_Full Colour.png" 
+              alt="AWWA Logo" 
+              className="h-12 w-auto"
+            />
           </div>
         </div>
 
@@ -89,7 +93,7 @@ export function Sidebar({
           <DropdownMenuTrigger asChild>
             <button className="w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-left transition-all duration-200 text-white hover:bg-white hover:bg-opacity-20">
               <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center">
-                <Settings className="w-4 h-4" style={{ color: '#2C5F7C' }} />
+                <Settings className="w-4 h-4" style={{ color: '#e65039' }} />
               </div>
               <div className="flex-1">
                 <div className="font-medium">User Settings</div>
@@ -113,7 +117,7 @@ export function Sidebar({
             <DropdownMenuItem 
               onClick={onLogout}
               className="flex items-center space-x-2 px-3 py-2 cursor-pointer hover:bg-gray-200 rounded mt-1"
-              style={{ backgroundColor: '#FF8C42', color: 'white' }}
+              style={{ backgroundColor: '#e65039', color: 'white' }}
             >
               <LogOut className="w-4 h-4" />
               <span>Logout</span>

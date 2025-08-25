@@ -150,7 +150,7 @@ export function EditStudentModal({ isOpen, onClose, student, onSubmit }: EditStu
                   borderColor: '#BDC3C7',
                   color: '#3C3C3C'
                 }}
-                onFocus={(e) => e.target.style.borderColor = '#2C5F7C'}
+                onFocus={(e) => e.target.style.borderColor = '#e65039'}
                 onBlur={(e) => e.target.style.borderColor = '#BDC3C7'}
               />
             </div>
@@ -255,7 +255,7 @@ export function EditStudentModal({ isOpen, onClose, student, onSubmit }: EditStu
                   borderColor: '#BDC3C7',
                   color: '#3C3C3C'
                 }}
-                onFocus={(e) => e.target.style.borderColor = '#2C5F7C'}
+                onFocus={(e) => e.target.style.borderColor = '#e65039'}
                 onBlur={(e) => e.target.style.borderColor = '#BDC3C7'}
               />
             </div>
@@ -272,7 +272,7 @@ export function EditStudentModal({ isOpen, onClose, student, onSubmit }: EditStu
                   borderColor: '#BDC3C7',
                   color: '#3C3C3C'
                 }}
-                onFocus={(e) => e.target.style.borderColor = '#2C5F7C'}
+                onFocus={(e) => e.target.style.borderColor = '#e65039'}
                 onBlur={(e) => e.target.style.borderColor = '#BDC3C7'}
               />
             </div>
@@ -290,7 +290,7 @@ export function EditStudentModal({ isOpen, onClose, student, onSubmit }: EditStu
                   borderColor: '#BDC3C7',
                   color: '#3C3C3C'
                 }}
-                onFocus={(e) => e.target.style.borderColor = '#2C5F7C'}
+                onFocus={(e) => e.target.style.borderColor = '#e65039'}
                 onBlur={(e) => e.target.style.borderColor = '#BDC3C7'}
                 placeholder="Select date..."
               />
@@ -312,7 +312,7 @@ export function EditStudentModal({ isOpen, onClose, student, onSubmit }: EditStu
                   borderColor: '#BDC3C7',
                   color: '#3C3C3C'
                 }}
-                onFocus={(e) => e.target.style.borderColor = '#2C5F7C'}
+                onFocus={(e) => e.target.style.borderColor = '#e65039'}
                 onBlur={(e) => e.target.style.borderColor = '#BDC3C7'}
                 min="0"
                 max="1000"
@@ -331,7 +331,7 @@ export function EditStudentModal({ isOpen, onClose, student, onSubmit }: EditStu
                   borderColor: '#BDC3C7',
                   color: '#3C3C3C'
                 }}
-                onFocus={(e) => e.target.style.borderColor = '#2C5F7C'}
+                onFocus={(e) => e.target.style.borderColor = '#e65039'}
                 onBlur={(e) => e.target.style.borderColor = '#BDC3C7'}
                 placeholder="e.g., 20-24"
               />
@@ -370,8 +370,8 @@ export function EditStudentModal({ isOpen, onClose, student, onSubmit }: EditStu
                     className="p-2 border-2 transition-all duration-200 hover:opacity-80"
                     style={{ 
                       backgroundColor: 'white',
-                      borderColor: '#2C5F7C',
-                      color: '#2C5F7C'
+                      borderColor: '#e65039',
+                      color: '#e65039'
                     }}
                   >
                     <Plus className="w-4 h-4" />
@@ -383,8 +383,8 @@ export function EditStudentModal({ isOpen, onClose, student, onSubmit }: EditStu
                     className="p-2 border-2 transition-all duration-200 hover:opacity-80 disabled:cursor-not-allowed"
                     style={{ 
                       backgroundColor: 'white',
-                      borderColor: iepGoals.length <= 1 ? '#BDC3C7' : '#2C5F7C',
-                      color: iepGoals.length <= 1 ? '#BDC3C7' : '#2C5F7C'
+                      borderColor: iepGoals.length <= 1 ? '#BDC3C7' : '#e65039',
+                      color: iepGoals.length <= 1 ? '#BDC3C7' : '#e65039'
                     }}
                   >
                     <Minus className="w-4 h-4" />
@@ -405,7 +405,7 @@ export function EditStudentModal({ isOpen, onClose, student, onSubmit }: EditStu
                         borderColor: '#BDC3C7',
                         color: '#3C3C3C'
                       }}
-                      onFocus={(e) => e.target.style.borderColor = '#2C5F7C'}
+                      onFocus={(e) => e.target.style.borderColor = '#e65039'}
                       onBlur={(e) => e.target.style.borderColor = '#BDC3C7'}
                       placeholder="Enter goal description..."
                     />
@@ -433,17 +433,17 @@ export function EditStudentModal({ isOpen, onClose, student, onSubmit }: EditStu
             onClick={handleSubmit}
             className="px-12 py-3 border-2 rounded-none font-bold transition-all duration-200 hover:opacity-90"
             style={{ 
-              backgroundColor: '#2C5F7C', 
+              backgroundColor: '#e65039', 
               color: 'white',
-              borderColor: '#2C5F7C'
+              borderColor: '#e65039'
             }}
             onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = '#1F4A66';
-              e.currentTarget.style.borderColor = '#1F4A66';
+              e.currentTarget.style.backgroundColor = '#d1452e';
+              e.currentTarget.style.borderColor = '#d1452e';
             }}
             onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = '#2C5F7C';
-              e.currentTarget.style.borderColor = '#2C5F7C';
+              e.currentTarget.style.backgroundColor = '#e65039';
+              e.currentTarget.style.borderColor = '#e65039';
             }}
           >
             Submit

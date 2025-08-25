@@ -3,8 +3,7 @@ import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Label } from './ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
-import { Upload } from 'lucide-react';
-import { ImageWithFallback } from './figma/ImageWithFallback';
+import { Upload, User } from 'lucide-react';
 // import userIconImage from 'figma:asset/175b30eba12976a029330759350f9c338ba2c59d.png';
 
 interface Client {
@@ -26,23 +25,13 @@ interface Client {
 interface EditClientPageProps {
   client: Client;
   onBack: () => void;
-  onLogout: () => void;
-  onProfileClick: () => void;
   onSave: (updatedClient: Client) => void;
-  onDashboardClick?: () => void;
-  onTeamMembersClick?: () => void;
-  onClientClick?: () => void;
 }
 
 export function EditClientPage({ 
   client, 
   onBack, 
-  onLogout, 
-  onProfileClick, 
-  onSave,
-  onDashboardClick,
-  onTeamMembersClick,
-  onClientClick
+  onSave
 }: EditClientPageProps) {
   const [formData, setFormData] = useState<Client>({
     ...client,
@@ -92,7 +81,7 @@ export function EditClientPage({
       <div className="max-w-4xl mx-auto">
         {/* Page Header */}
         <div className="flex items-center justify-between mb-6">
-          <div className="bg-white px-4 py-2 border" style={{ borderColor: '#2C5F7C' }}>
+          <div className="bg-white px-4 py-2 border" style={{ borderColor: '#e65039' }}>
             <h2 className="text-lg font-bold" style={{ color: '#3C3C3C' }}>
               {isNewClient ? 'Add New Client' : 'Edit Client'}
             </h2>
@@ -102,7 +91,7 @@ export function EditClientPage({
             onClick={onBack}
             className="px-6 py-2 rounded-lg transition-all duration-200 hover:opacity-90"
             style={{ 
-              backgroundColor: '#2C5F7C',
+              backgroundColor: '#e65039',
               color: 'white',
               border: 'none'
             }}
@@ -289,18 +278,21 @@ export function EditClientPage({
               {/* Profile Image Display */}
               <div className="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center overflow-hidden border-2" style={{ borderColor: '#BDC3C7' }}>
                 {formData.photoUrl ? (
-                  <ImageWithFallback
-                    src="https://images.unsplash.com/photo-1646670244979-305554fbdd6f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxjYW1lcmElMjBpY29uJTIwcGxhY2Vob2xkZXIlMjBwaG90b3xlbnwxfHx8fDE3NTU1OTE5ODN8MA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral"
+                  <img 
+                    src={formData.photoUrl} 
                     alt={`${formData.name}'s photo`}
                     className="w-full h-full object-cover"
+                    onError={(e) => {
+                      // If the image fails to load, hide it and show the generic icon
+                      (e.target as HTMLImageElement).style.display = 'none';
+                      (e.target as HTMLImageElement).nextElementSibling?.classList.remove('hidden');
+                    }}
                   />
-                ) : (
-                  <ImageWithFallback
-                    src="/placeholder-user.png"
-                    alt="Default user icon"
-                    className="w-8 h-8"
-                  />
-                )}
+                ) : null}
+                <User 
+                  className={`w-8 h-8 ${formData.photoUrl ? 'hidden' : ''}`}
+                  style={{ color: '#BDC3C7' }}
+                />
               </div>
               
               {/* Change Photo Button */}
@@ -309,8 +301,8 @@ export function EditClientPage({
                 onClick={handlePhotoUpload}
                 className="flex items-center space-x-2 px-4 py-2 border-2 rounded-lg transition-all duration-200 hover:bg-blue-50"
                 style={{ 
-                  borderColor: '#4EAAC9',
-                  color: '#4EAAC9',
+                  borderColor: '#e65039',
+                  color: '#e65039',
                   backgroundColor: 'white'
                 }}
               >
@@ -341,7 +333,7 @@ export function EditClientPage({
                 type="submit"
                 className="w-full px-4 py-3 rounded-none transition-all duration-200 hover:opacity-90"
                 style={{ 
-                  backgroundColor: '#2C5F7C',
+                  backgroundColor: '#e65039',
                   color: 'white',
                   border: 'none'
                 }}
@@ -352,7 +344,7 @@ export function EditClientPage({
 
             {/* Info Note */}
             <div className="mt-6 pt-4">
-              <div className="bg-blue-50 px-4 py-3 border-l-4 rounded-r" style={{ borderColor: '#4EAAC9' }}>
+              <div className="bg-blue-50 px-4 py-3 border-l-4 rounded-r" style={{ borderColor: '#e65039' }}>
                 <p className="text-sm" style={{ color: '#3C3C3C' }}>
                   ℹ️ Client information will be used for personalized care plans and progress tracking
                 </p>

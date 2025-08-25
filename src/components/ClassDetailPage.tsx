@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Button } from './ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from './ui/table';
-import { User, ArrowLeft, Camera } from 'lucide-react';
+import { User, ArrowLeft, Camera, Trash2 } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from './ui/dialog';
 
 interface ClassDetailPageProps {
@@ -118,6 +118,7 @@ const mockTeamMembers: TeamMember[] = [
 
 export function ClassDetailPage({ classData, onBack }: ClassDetailPageProps) {
   const [selectedPhoto, setSelectedPhoto] = useState<{ name: string; photo?: string } | null>(null);
+  const [isDeleteOpen, setIsDeleteOpen] = useState(false);
 
   const handlePhotoClick = (person: Client | TeamMember) => {
     setSelectedPhoto({ name: person.name, photo: person.photo });
@@ -131,17 +132,17 @@ export function ClassDetailPage({ classData, onBack }: ClassDetailPageProps) {
           {/* Breadcrumb and Back Button */}
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center space-x-2">
-              <ArrowLeft className="w-4 h-4" style={{ color: '#2C5F7C' }} />
-              <span style={{ color: '#2C5F7C' }}>Home &gt; {classData.name}</span>
+              <ArrowLeft className="w-4 h-4" style={{ color: '#e65039' }} />
+              <span style={{ color: '#e65039' }}>Home &gt; {classData.name}</span>
             </div>
             
             <Button
               onClick={onBack}
               className="px-6 py-2 font-medium transition-all duration-200 hover:opacity-90"
               style={{ 
-                backgroundColor: '#4EAAC9', 
+                backgroundColor: '#e65039', 
                 color: 'white',
-                borderColor: '#4EAAC9'
+                borderColor: '#e65039'
               }}
             >
               Back
@@ -256,6 +257,48 @@ export function ClassDetailPage({ classData, onBack }: ClassDetailPageProps) {
           </div>
         </div>
       </div>
+
+      {/* Bottom actions */}
+      <div className="px-6 pb-8">
+        <div className="max-w-7xl mx-auto flex justify-end">
+          <Button
+            onClick={() => setIsDeleteOpen(true)}
+            className="px-6 py-2 font-medium transition-all duration-200 hover:opacity-90"
+            style={{ backgroundColor: '#DC3545', color: 'white', borderColor: '#DC3545' }}
+          >
+            <Trash2 className="w-4 h-4 mr-2" />
+            Delete Class
+          </Button>
+        </div>
+      </div>
+
+      {/* Delete confirmation dialog */}
+      <Dialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>
+        <DialogContent className="max-w-md bg-white rounded-lg border-2" style={{ backgroundColor: 'white', borderColor: '#BDC3C7' }}>
+          <DialogHeader>
+            <DialogTitle style={{ color: '#3C3C3C' }}>Delete class?</DialogTitle>
+            <DialogDescription style={{ color: '#6C757D' }}>
+              This action cannot be undone. Do you want to permanently delete the class "{classData.name}"?
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex justify-end space-x-3 pt-2">
+            <Button
+              onClick={() => setIsDeleteOpen(false)}
+              className="px-4 py-2 border-2 transition-all duration-200"
+              style={{ backgroundColor: 'white', borderColor: '#BDC3C7', color: '#3C3C3C' }}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={() => { console.log('Deleted class:', classData); setIsDeleteOpen(false); onBack(); }}
+              className="px-4 py-2 transition-all duration-200"
+              style={{ backgroundColor: '#DC3545', color: 'white', border: 'none' }}
+            >
+              Delete
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* Photo View Dialog */}
       <Dialog open={!!selectedPhoto} onOpenChange={() => setSelectedPhoto(null)}>

@@ -22,13 +22,8 @@ interface TeamMember {
 }
 
 interface TeamMembersCTPageProps {
-  onBack: () => void;
-  onLogout: () => void;
-  onProfileClick: () => void;
   onEditTeamMember?: (member: TeamMember) => void;
   onAddTeamMember?: () => void;
-  onDashboardClick?: () => void;
-  onClientClick?: () => void;
 }
 
 // Mock team members data matching the image
@@ -77,7 +72,7 @@ const mockTeamMembers: TeamMember[] = [
   }
 ];
 
-export function TeamMembersCTPage({ onBack, onLogout, onProfileClick, onEditTeamMember, onAddTeamMember, onDashboardClick, onClientClick }: TeamMembersCTPageProps) {
+export function TeamMembersCTPage({ onEditTeamMember, onAddTeamMember }: TeamMembersCTPageProps) {
   const [selectedMemberPhoto, setSelectedMemberPhoto] = useState<{ 
     name: string; 
     hasPhoto: boolean; 
@@ -156,23 +151,8 @@ export function TeamMembersCTPage({ onBack, onLogout, onProfileClick, onEditTeam
   return (
     <div className="flex-1 px-6 py-8" style={{ backgroundColor: '#F8F9FA' }}>
       <div className="max-w-7xl mx-auto">
-        {/* Breadcrumb and Back Button */}
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center space-x-2">
-            <span style={{ color: '#4EAAC9' }}>«« Team member/CT</span>
-          </div>
-          <Button
-            onClick={onBack}
-            className="px-6 py-2 rounded-lg transition-all duration-200 hover:opacity-90"
-            style={{ 
-              backgroundColor: '#2C5F7C',
-              color: 'white',
-              border: 'none'
-            }}
-          >
-            Back
-          </Button>
-        </div>
+        {/* Header spacing */}
+        <div className="mb-6"></div>
 
         {/* Page Title */}
         <h2 className="text-2xl font-bold mb-6" style={{ color: '#3C3C3C' }}>
@@ -284,18 +264,18 @@ export function TeamMembersCTPage({ onBack, onLogout, onProfileClick, onEditTeam
                               </div>
                             </div>
 
-                            <div className="flex justify-center space-x-3 pt-4">
-                              <Button
-                                className="px-4 py-2 rounded-lg transition-all duration-200 hover:opacity-90"
-                                style={{ 
-                                  backgroundColor: '#4EAAC9',
-                                  color: 'white',
-                                  border: 'none'
-                                }}
-                              >
-                                <Upload className="w-4 h-4 mr-2" />
-                                Upload New Photo
-                              </Button>
+                                                          <div className="flex justify-center space-x-3 pt-4">
+                                <Button
+                                  className="px-4 py-2 rounded-lg transition-all duration-200 hover:opacity-90"
+                                  style={{ 
+                                    backgroundColor: '#e65039',
+                                    color: 'white',
+                                    border: 'none'
+                                  }}
+                                >
+                                  <Upload className="w-4 h-4 mr-2" />
+                                  Upload New Photo
+                                </Button>
                               {selectedMemberPhoto.hasPhoto && (
                                 <Button
                                   variant="outline"
@@ -337,7 +317,7 @@ export function TeamMembersCTPage({ onBack, onLogout, onProfileClick, onEditTeam
               <Button
                 className="flex items-center space-x-2 px-6 py-2 transition-all duration-200 hover:opacity-90"
                 style={{ 
-                  backgroundColor: '#4EAAC9',
+                  backgroundColor: '#e65039',
                   color: 'white',
                   border: 'none'
                 }}
@@ -346,7 +326,7 @@ export function TeamMembersCTPage({ onBack, onLogout, onProfileClick, onEditTeam
                 <span>Upload</span>
               </Button>
             </DialogTrigger>
-            <DialogContent className="max-w-md">
+            <DialogContent className="max-w-md" style={{ backgroundColor: 'white' }}>
               <DialogHeader>
                 <DialogTitle className="text-lg font-bold" style={{ color: '#3C3C3C' }}>
                   Bulk Upload Team Members
@@ -367,8 +347,8 @@ export function TeamMembersCTPage({ onBack, onLogout, onProfileClick, onEditTeam
                     className="w-full flex items-center space-x-2 border-2 px-4 py-2 transition-all duration-200 hover:bg-blue-50"
                     style={{ 
                       backgroundColor: 'white',
-                      borderColor: '#4EAAC9',
-                      color: '#4EAAC9'
+                      borderColor: '#e65039',
+                      color: '#e65039'
                     }}
                   >
                     <Download className="w-4 h-4" />
@@ -386,7 +366,7 @@ export function TeamMembersCTPage({ onBack, onLogout, onProfileClick, onEditTeam
                     <div className="space-y-3">
                       <div className="p-3 border rounded-lg" style={{ borderColor: '#BDC3C7', backgroundColor: '#F8F9FA' }}>
                         <div className="flex items-center space-x-2">
-                          <FileSpreadsheet className="w-5 h-5" style={{ color: '#4EAAC9' }} />
+                          <FileSpreadsheet className="w-5 h-5" style={{ color: '#e65039' }} />
                           <span className="text-sm font-medium" style={{ color: '#3C3C3C' }}>
                             {uploadedFile.name}
                           </span>
@@ -402,8 +382,8 @@ export function TeamMembersCTPage({ onBack, onLogout, onProfileClick, onEditTeam
                           className="flex-1 border-2 px-4 py-2 transition-all duration-200 hover:bg-blue-50"
                           style={{ 
                             backgroundColor: 'white',
-                            borderColor: '#4EAAC9',
-                            color: '#4EAAC9'
+                            borderColor: '#e65039',
+                            color: '#e65039'
                           }}
                         >
                           Change File
@@ -412,7 +392,7 @@ export function TeamMembersCTPage({ onBack, onLogout, onProfileClick, onEditTeam
                           onClick={handleBulkUploadSubmit}
                           className="flex-1 px-4 py-2 transition-all duration-200 hover:opacity-90"
                           style={{ 
-                            backgroundColor: '#2C5F7C',
+                            backgroundColor: '#e65039',
                             color: 'white',
                             border: 'none'
                           }}
@@ -427,8 +407,8 @@ export function TeamMembersCTPage({ onBack, onLogout, onProfileClick, onEditTeam
                       className="w-full border-2 border-dashed px-6 py-6 transition-all duration-200 hover:bg-blue-50 flex flex-col items-center justify-center space-y-3 min-h-[120px]"
                       style={{ 
                         backgroundColor: 'white',
-                        borderColor: '#4EAAC9',
-                        color: '#4EAAC9'
+                        borderColor: '#e65039',
+                        color: '#e65039'
                       }}
                     >
                       <Upload className="w-6 h-6 flex-shrink-0" />
@@ -456,13 +436,13 @@ export function TeamMembersCTPage({ onBack, onLogout, onProfileClick, onEditTeam
             onClick={onAddTeamMember}
             className="flex items-center space-x-2 px-6 py-2 transition-all duration-200 hover:opacity-90"
             style={{ 
-              backgroundColor: '#2C5F7C',
+              backgroundColor: '#e65039',
               color: 'white',
               border: 'none'
             }}
           >
             <Plus className="w-4 h-4" />
-            <span>Add Educator</span>
+            <span>Add Team Member / CT</span>
           </Button>
         </div>
       </div>

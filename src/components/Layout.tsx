@@ -10,8 +10,6 @@ interface LayoutProps {
   onClientClick: () => void;
   onProfileClick: () => void;
   onLogout: () => void;
-  showHeader?: boolean;
-  headerContent?: ReactNode;
 }
 
 export function Layout({ 
@@ -22,9 +20,7 @@ export function Layout({
   onTeamMembersClick, 
   onClientClick,
   onProfileClick,
-  onLogout,
-  showHeader = true,
-  headerContent
+  onLogout
 }: LayoutProps) {
   return (
     <div className="min-h-screen flex" style={{ backgroundColor: '#F8F9FA' }}>
@@ -41,20 +37,29 @@ export function Layout({
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col">
-        {/* Header Section */}
-        {showHeader && (
-          <div className="px-4 sm:px-6 py-4 sm:py-6 lg:py-8" style={{ backgroundColor: '#E8F4F8' }}>
-            <div className="max-w-7xl mx-auto">
-              {headerContent || (
-                <div className="flex items-center justify-center">
-                  <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold" style={{ color: '#3C3C3C' }}>
-                    Beacon
-                  </h1>
-                </div>
-              )}
+        {/* Pink Top Bar */}
+        <div className="px-4 sm:px-6 py-4" style={{ backgroundColor: '#FFF5F3' }}>
+          <div className="flex items-center justify-between relative">
+            {/* Left: Empty space for balance */}
+            <div className="w-16"></div>
+            
+            {/* Center: Beacon (absolutely centered) */}
+            <div className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2">
+              <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold whitespace-nowrap" style={{ color: '#3C3C3C' }}>
+                Beacon
+              </h1>
+            </div>
+            
+            {/* Right: Zaheen Logo */}
+            <div className="flex items-center">
+              <img 
+                src="/Picture1.png" 
+                alt="Zaheen Logo" 
+                className="h-8 w-auto sm:h-10"
+              />
             </div>
           </div>
-        )}
+        </div>
 
         {/* Page Content */}
         <div className="flex-1">
