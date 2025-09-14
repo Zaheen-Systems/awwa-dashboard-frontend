@@ -7,14 +7,7 @@ import {  ChevronLeft } from 'lucide-react';
 // import awwaLogo from 'figma:asset/71b57c03c5488fc89f49e890a42dd4691fd017ee.png';
 
 interface Student {
-  id: number;
   name: string;
-  chronologicalAge: number;
-  ageBand: string;
-  primaryDiagnosis: string;
-  secondaryDiagnosis: string;
-  lastGCODate: string;
-  status: string;
 }
 
 interface BehaviorDescriptor {

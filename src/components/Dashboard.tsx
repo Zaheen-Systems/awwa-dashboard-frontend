@@ -5,17 +5,24 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '.
 import { Badge } from './ui/badge';
 import { Search, Edit } from 'lucide-react';
 import { EditStudentModal } from './EditStudentModal';
+import { useQuery } from "@tanstack/react-query";
+import api from "../lib/axios";
 
 interface Student {
-  id: number;
+  id: string; // UUID
   name: string;
-  chronologicalAge: number;
-  ageBand: string;
-  primaryDiagnosis: string;
-  secondaryDiagnosis: string;
-  lastGCODate: string;
-  status: string;
-  ctAssigned: string;
+  chronological_age: number;
+  age_band?: string | null;
+  functional_age?: string | null;
+  primary_diagnosis?: string | null;
+  secondary_diagnosis?: string | null;
+  entry_type: string;
+  ct?: string | null;
+  last_gco_date?: string | null; // ISO date string
+  gco_1_functional_age?: string | null;
+  gco_2_functional_age?: string | null;
+  gco_3_functional_age?: string | null;
+  created_at: string; // ISO datetime string
 }
 
 interface DashboardProps {
@@ -24,64 +31,11 @@ interface DashboardProps {
   userType?: 'user' | 'admin';
 }
 
-// Mock data for students
-const students: Student[] = [
-  {
-    id: 1,
-    name: "Aarav Rajan",
-    chronologicalAge: 60,
-    ageBand: "61-72",
-    primaryDiagnosis: "Autism Spectrum Disorder",
-    secondaryDiagnosis: "Intellectual Disability",
-    lastGCODate: "15/Feb/24",
-    status: "Entry",
-    ctAssigned: "Joycelene"
-  },
-  {
-    id: 2,
-    name: "Priya Sharma",
-    chronologicalAge: 45,
-    ageBand: "37-48",
-    primaryDiagnosis: "Down Syndrome",
-    secondaryDiagnosis: "Speech Delay",
-    lastGCODate: "22/Jan/24",
-    status: "Review",
-    ctAssigned: "Sarah"
-  },
-  {
-    id: 3,
-    name: "Rajesh Kumar",
-    chronologicalAge: 38,
-    ageBand: "37-48",
-    primaryDiagnosis: "Cerebral Palsy",
-    secondaryDiagnosis: "Mobility Impairment",
-    lastGCODate: "10/Mar/24",
-    status: "Entry",
-    ctAssigned: "Michael"
-  },
-  {
-    id: 4,
-    name: "Meera Patel",
-    chronologicalAge: 52,
-    ageBand: "49-60",
-    primaryDiagnosis: "Autism Spectrum Disorder",
-    secondaryDiagnosis: "Sensory Processing",
-    lastGCODate: "28/Feb/24",
-    status: "Review",
-    ctAssigned: "Joycelene"
-  },
-  {
-    id: 5,
-    name: "Kiran Singh",
-    chronologicalAge: 41,
-    ageBand: "37-48",
-    primaryDiagnosis: "Intellectual Disability",
-    secondaryDiagnosis: "Behavioral Issues",
-    lastGCODate: "05/Mar/24",
-    status: "Exit",
-    ctAssigned: "Sarah"
-  }
-];
+
+async function fetchStudents(): Promise<Student[]> {
+  const res = await api.get("/api/students/"); // 👈 your FastAPI endpoint
+  return res.data;
+}
 
 export function Dashboard({ onStudentClick, onSwitchToAdminDashboard, userType }: DashboardProps) {
   const [searchTerm, setSearchTerm] = useState("");
@@ -89,6 +43,15 @@ export function Dashboard({ onStudentClick, onSwitchToAdminDashboard, userType }
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
   const [showEditModal, setShowEditModal] = useState(false);
   const [selectedStudentForEdit, setSelectedStudentForEdit] = useState<Student | null>(null);
+
+  const { 
+      data: students = [], 
+      // isLoading, 
+      // isError
+     } = useQuery<Student[]>({
+    queryKey: ["students"],
+    queryFn: fetchStudents,
+  });
 
   const handleSort = (column: keyof Student) => {
     if (sortColumn === column) {
@@ -102,8 +65,8 @@ export function Dashboard({ onStudentClick, onSwitchToAdminDashboard, userType }
   const filteredAndSortedStudents = students
     .filter(student => 
       student.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      student.primaryDiagnosis.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      student.secondaryDiagnosis.toLowerCase().includes(searchTerm.toLowerCase())
+      student?.primary_diagnosis?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      student?.secondary_diagnosis?.toLowerCase().includes(searchTerm.toLowerCase())
     )
     .sort((a, b) => {
       if (!sortColumn) return 0;
@@ -114,8 +77,8 @@ export function Dashboard({ onStudentClick, onSwitchToAdminDashboard, userType }
       if (typeof aValue === 'string') aValue = aValue.toLowerCase();
       if (typeof bValue === 'string') bValue = bValue.toLowerCase();
       
-      if (aValue < bValue) return sortDirection === 'asc' ? -1 : 1;
-      if (aValue > bValue) return sortDirection === 'asc' ? 1 : -1;
+      // if (aValue < bValue) return sortDirection === 'asc' ? -1 : 1;
+      // if (aValue > bValue) return sortDirection === 'asc' ? 1 : -1;
       return 0;
     });
 
@@ -218,52 +181,52 @@ export function Dashboard({ onStudentClick, onSwitchToAdminDashboard, userType }
                   </TableHead>
                   <TableHead 
                     className="cursor-pointer hover:bg-gray-100 transition-colors"
-                    onClick={() => handleSort('chronologicalAge')}
+                    onClick={() => handleSort('chronological_age')}
                     style={{ color: '#3C3C3C' }}
                   >
-                    Chronological Age (months) {sortColumn === 'chronologicalAge' && (sortDirection === 'asc' ? '↑' : '↓')}
+                    Chronological Age (months) {sortColumn === 'chronological_age' && (sortDirection === 'asc' ? '↑' : '↓')}
                   </TableHead>
                   <TableHead 
                     className="cursor-pointer hover:bg-gray-100 transition-colors"
-                    onClick={() => handleSort('ageBand')}
+                    onClick={() => handleSort('age_band')}
                     style={{ color: '#3C3C3C' }}
                   >
-                    Age Band (Months) {sortColumn === 'ageBand' && (sortDirection === 'asc' ? '↑' : '↓')}
+                    Age Band (Months) {sortColumn === 'age_band' && (sortDirection === 'asc' ? '↑' : '↓')}
                   </TableHead>
                   <TableHead 
                     className="cursor-pointer hover:bg-gray-100 transition-colors"
-                    onClick={() => handleSort('primaryDiagnosis')}
+                    onClick={() => handleSort('primary_diagnosis')}
                     style={{ color: '#3C3C3C' }}
                   >
-                    Primary Diagnosis {sortColumn === 'primaryDiagnosis' && (sortDirection === 'asc' ? '↑' : '↓')}
+                    Primary Diagnosis {sortColumn === 'primary_diagnosis' && (sortDirection === 'asc' ? '↑' : '↓')}
                   </TableHead>
                   <TableHead 
                     className="cursor-pointer hover:bg-gray-100 transition-colors"
-                    onClick={() => handleSort('secondaryDiagnosis')}
+                    onClick={() => handleSort('secondary_diagnosis')}
                     style={{ color: '#3C3C3C' }}
                   >
-                    Secondary Diagnosis {sortColumn === 'secondaryDiagnosis' && (sortDirection === 'asc' ? '↑' : '↓')}
+                    Secondary Diagnosis {sortColumn === 'secondary_diagnosis' && (sortDirection === 'asc' ? '↑' : '↓')}
                   </TableHead>
                   <TableHead 
                     className="cursor-pointer hover:bg-gray-100 transition-colors"
-                    onClick={() => handleSort('ctAssigned')}
+                    onClick={() => handleSort('ct')}
                     style={{ color: '#3C3C3C' }}
                   >
-                    CT Assigned {sortColumn === 'ctAssigned' && (sortDirection === 'asc' ? '↑' : '↓')}
+                    CT Assigned {sortColumn === 'ct' && (sortDirection === 'asc' ? '↑' : '↓')}
                   </TableHead>
                   <TableHead 
                     className="cursor-pointer hover:bg-gray-100 transition-colors"
-                    onClick={() => handleSort('lastGCODate')}
+                    onClick={() => handleSort('last_gco_date')}
                     style={{ color: '#3C3C3C' }}
                   >
-                    Last GCO {sortColumn === 'lastGCODate' && (sortDirection === 'asc' ? '↑' : '↓')}
+                    Last GCO {sortColumn === 'last_gco_date' && (sortDirection === 'asc' ? '↑' : '↓')}
                   </TableHead>
                   <TableHead 
                     className="cursor-pointer hover:bg-gray-100 transition-colors"
-                    onClick={() => handleSort('status')}
+                    onClick={() => handleSort('entry_type')}
                     style={{ color: '#3C3C3C' }}
                   >
-                    Status {sortColumn === 'status' && (sortDirection === 'asc' ? '↑' : '↓')}
+                    Status {sortColumn === 'entry_type' && (sortDirection === 'asc' ? '↑' : '↓')}
                   </TableHead>
                   <TableHead style={{ color: '#3C3C3C' }}>
                     Actions
@@ -281,19 +244,19 @@ export function Dashboard({ onStudentClick, onSwitchToAdminDashboard, userType }
                     <TableCell style={{ color: '#e65039' }} className="hover:underline">
                       {student.name}
                     </TableCell>
-                    <TableCell style={{ color: '#3C3C3C' }}>{student.chronologicalAge}</TableCell>
-                    <TableCell style={{ color: '#3C3C3C' }}>{student.ageBand}</TableCell>
-                    <TableCell style={{ color: '#3C3C3C' }}>{student.primaryDiagnosis}</TableCell>
-                    <TableCell style={{ color: '#3C3C3C' }}>{student.secondaryDiagnosis}</TableCell>
-                    <TableCell style={{ color: '#3C3C3C' }}>{student.ctAssigned}</TableCell>
-                    <TableCell style={{ color: '#3C3C3C' }}>{student.lastGCODate}</TableCell>
+                    <TableCell style={{ color: '#3C3C3C' }}>{student?.chronological_age}</TableCell>
+                    <TableCell style={{ color: '#3C3C3C' }}>{student.age_band}</TableCell>
+                    <TableCell style={{ color: '#3C3C3C' }}>{student.primary_diagnosis}</TableCell>
+                    <TableCell style={{ color: '#3C3C3C' }}>{student.secondary_diagnosis}</TableCell>
+                    <TableCell style={{ color: '#3C3C3C' }}>{student.ct}</TableCell>
+                    <TableCell style={{ color: '#3C3C3C' }}>{student.last_gco_date}</TableCell>
                     <TableCell>
                       <Badge 
                         variant="outline" 
                         className="border-0"
-                        style={getStatusBadgeStyle(student.status)}
+                        style={getStatusBadgeStyle(student.entry_type)}
                       >
-                        {student.status}
+                        {student.entry_type}
                       </Badge>
                     </TableCell>
                     <TableCell>

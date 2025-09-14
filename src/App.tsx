@@ -18,14 +18,16 @@ const ClientPage = lazy(() => import('./components/ClientPage').then(module => (
 const EditClientPage = lazy(() => import('./components/EditClientPage').then(module => ({ default: module.EditClientPage })));
 
 interface Student {
-  id: number;
+  id: string; // UUID
   name: string;
-  chronologicalAge: number;
-  ageBand: string;
-  primaryDiagnosis: string;
-  secondaryDiagnosis: string;
-  lastGCODate: string;
-  status: string;
+  chronological_age: number;
+  age_band?: string | null;
+  functional_age?: string | null;
+  primary_diagnosis?: string | null;
+  secondary_diagnosis?: string | null;
+  entry_type: string;
+  ct?: string | null;
+  last_gco_date?: string | null; // ISO date string
 }
 
 interface BehaviorDescriptor {
