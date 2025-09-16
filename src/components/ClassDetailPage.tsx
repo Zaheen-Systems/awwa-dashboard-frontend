@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Button } from './ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from './ui/table';
-import { User, ArrowLeft, Camera, Trash2 } from 'lucide-react';
+import { ArrowLeft, Trash2 } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from './ui/dialog';
 
 interface ClassDetailPageProps {
@@ -32,7 +32,6 @@ interface Client {
   secondaryDiagnosis: string;
   dateOfEnrolment: string;
   ct: string;
-  photo?: string;
 }
 
 interface TeamMember {
@@ -43,7 +42,6 @@ interface TeamMember {
   memberId: string;
   specialization: string;
   dateOfJoining: string;
-  photo?: string;
 }
 
 // Mock data for clients - matching the image
@@ -117,12 +115,7 @@ const mockTeamMembers: TeamMember[] = [
 ];
 
 export function ClassDetailPage({ classData, onBack }: ClassDetailPageProps) {
-  const [selectedPhoto, setSelectedPhoto] = useState<{ name: string; photo?: string } | null>(null);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
-
-  const handlePhotoClick = (person: Client | TeamMember) => {
-    setSelectedPhoto({ name: person.name, photo: person.photo });
-  };
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: '#F8F9FA' }}>
@@ -172,7 +165,6 @@ export function ClassDetailPage({ classData, onBack }: ClassDetailPageProps) {
                       <TableHead className="text-sm font-medium" style={{ color: '#3C3C3C' }}>Secondary Diagnosis</TableHead>
                       <TableHead className="text-sm font-medium" style={{ color: '#3C3C3C' }}>Date of enrolment</TableHead>
                       <TableHead className="text-sm font-medium" style={{ color: '#3C3C3C' }}>CT</TableHead>
-                      <TableHead className="text-sm font-medium" style={{ color: '#3C3C3C' }}>Photo</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -191,14 +183,6 @@ export function ClassDetailPage({ classData, onBack }: ClassDetailPageProps) {
                         <TableCell className="text-sm" style={{ color: '#3C3C3C' }}>{client.secondaryDiagnosis}</TableCell>
                         <TableCell className="text-sm" style={{ color: '#3C3C3C' }}>{client.dateOfEnrolment}</TableCell>
                         <TableCell className="text-sm" style={{ color: '#3C3C3C' }}>{client.ct}</TableCell>
-                        <TableCell>
-                          <button
-                            onClick={() => handlePhotoClick(client)}
-                            className="w-10 h-8 border border-red-500 bg-red-50 flex items-center justify-center hover:bg-red-100 transition-colors rounded"
-                          >
-                            <Camera className="w-4 h-4" style={{ color: '#DC3545' }} />
-                          </button>
-                        </TableCell>
                       </TableRow>
                     ))}
                   </TableBody>
@@ -223,7 +207,6 @@ export function ClassDetailPage({ classData, onBack }: ClassDetailPageProps) {
                       <TableHead className="text-sm font-medium" style={{ color: '#3C3C3C' }}>ID</TableHead>
                       <TableHead className="text-sm font-medium" style={{ color: '#3C3C3C' }}>Specialisation</TableHead>
                       <TableHead className="text-sm font-medium" style={{ color: '#3C3C3C' }}>Date of joining</TableHead>
-                      <TableHead className="text-sm font-medium" style={{ color: '#3C3C3C' }}>Photo</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -240,14 +223,6 @@ export function ClassDetailPage({ classData, onBack }: ClassDetailPageProps) {
                         <TableCell className="text-sm" style={{ color: '#3C3C3C' }}>{member.memberId}</TableCell>
                         <TableCell className="text-sm" style={{ color: '#3C3C3C' }}>{member.specialization}</TableCell>
                         <TableCell className="text-sm" style={{ color: '#3C3C3C' }}>{member.dateOfJoining}</TableCell>
-                        <TableCell>
-                          <button
-                            onClick={() => handlePhotoClick(member)}
-                            className="w-10 h-8 border border-red-500 bg-red-50 flex items-center justify-center hover:bg-red-100 transition-colors rounded"
-                          >
-                            <Camera className="w-4 h-4" style={{ color: '#DC3545' }} />
-                          </button>
-                        </TableCell>
                       </TableRow>
                     ))}
                   </TableBody>
@@ -300,35 +275,6 @@ export function ClassDetailPage({ classData, onBack }: ClassDetailPageProps) {
         </DialogContent>
       </Dialog>
 
-      {/* Photo View Dialog */}
-      <Dialog open={!!selectedPhoto} onOpenChange={() => setSelectedPhoto(null)}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle style={{ color: '#3C3C3C' }}>
-              {selectedPhoto?.name} - Photo
-            </DialogTitle>
-            <DialogDescription style={{ color: '#6C757D' }}>
-              View the photo for {selectedPhoto?.name}. Click outside to close this dialog.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="flex justify-center p-4">
-            {selectedPhoto?.photo ? (
-              <img 
-                src={selectedPhoto.photo} 
-                alt={`${selectedPhoto.name}'s photo`}
-                className="max-w-full h-auto rounded-lg"
-              />
-            ) : (
-              <div className="w-48 h-48 bg-gray-200 rounded-lg flex items-center justify-center">
-                <div className="text-center">
-                  <User className="w-16 h-16 mx-auto mb-2" style={{ color: '#6C757D' }} />
-                  <p style={{ color: '#6C757D' }}>No photo available</p>
-                </div>
-              </div>
-            )}
-          </div>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }
