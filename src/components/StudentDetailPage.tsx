@@ -56,7 +56,7 @@ interface BehaviorDescriptor {
   context: string;
   gco_id: string;
   created_at: string;
-  iepGoal?: IEPGoalBasic;
+  iep_goal?: IEPGoalBasic;
 }
 
 interface BehavioralDescriptorUI extends BehaviorDescriptor {
@@ -83,38 +83,11 @@ interface StudentDetailPageProps {
   onGenerateReport: (selectedBDs: BehaviorDescriptor[]) => void;
 }
 
-// Mock GCO data structure - expanded for scrolling
-const mockGCOData = {
-  gco1: [
-    "1.1.1 - 2",
-    "1.1.2 - 3", 
-    "1.1.3 - 4",
-    "1.2.1 - 3",
-    "1.2.2 - 1",
-    "1.3.1 - 1",
-    "1.3.2 - 2",
-    "1.4.1 - 0"
-  ],
-  gco2: [
-    "2.1.1 - 4",
-    "2.1.2 - 0",
-    "2.2.1 - 5",
-    "2.3.1 - 1",
-    "",
-    "",
-    "",
-    ""
-  ],
-  gco3: [
-    "3.1.1 - 4",
-    "3.1.2 - 3",
-    "3.1.3 - 2", 
-    "3.2.1 - 5",
-    "3.2.1 - 5",
-    "3.3.1 - 5",
-    "",
-    ""
-  ]
+
+interface GroupedDescriptors {
+  "gco1": string[];
+  "gco2": string[];
+  "gco3": string[];
 };
 
 // const fetchStudentDetail = async (id: number): Promise<Student> => {
@@ -144,6 +117,11 @@ function useBehavioralDescriptors(studentId: number) {
   });
 }
 
+const fetchGroupedDescriptors = async (studentId: number) => {
+  const { data } = await api.get(`/api/behavioral-descriptors/grouped_gcos/${studentId}`);
+  return data;
+};
+
 export function StudentDetailPage({ student, onBack, onBehaviorDescriptorClick, onGenerateReport }: StudentDetailPageProps) {
   const [date, setDate] = useState("");
   // const [behaviourDescriptors, setBehaviourDescriptors] = useState<BehavioralDescriptorUI[]>([]);
@@ -161,8 +139,14 @@ export function StudentDetailPage({ student, onBack, onBehaviorDescriptorClick, 
   // });
 
   const { data: behaviourDescriptorsAll } = useBehavioralDescriptors(parseInt(student.id));
-  const iepBehaviourDescriptors = behaviourDescriptorsAll?.filter((goal) => !goal)
-  const behaviourDescriptors = behaviourDescriptorsAll?.filter((goal) => goal)
+  const iepBehaviourDescriptors = behaviourDescriptorsAll?.filter((bd) => Boolean(bd.iep_goal))
+  const behaviourDescriptors = behaviourDescriptorsAll?.filter((bd) => !Boolean(bd.iep_goal))
+
+    const { data: mockGCOData  } = useQuery<GroupedDescriptors>({
+    queryKey: ["groupedDescriptors", student.id],
+    queryFn: () => fetchGroupedDescriptors(parseInt(student.id)),
+    enabled: !!student.id, // don’t run until we have a studentId
+  });
 
   // Modal states
   const [showAddBDModal, setShowAddBDModal] = useState(false);
@@ -378,7 +362,7 @@ export function StudentDetailPage({ student, onBack, onBehaviorDescriptorClick, 
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {mockGCOData.gco1.map((_, index) => (
+                  {mockGCOData?.gco1.map((_, index) => (
                     <TableRow key={index} className={index < mockGCOData.gco1.length - 1 ? "border-b" : ""} style={{ borderColor: '#BDC3C7' }}>
                       <TableCell className="w-12 text-center text-sm" style={{ 
                         color: '#3C3C3C', 
@@ -533,8 +517,8 @@ export function StudentDetailPage({ student, onBack, onBehaviorDescriptorClick, 
                       <TableCell style={{ color: descriptor.selected ? 'white' : '#3C3C3C' }}>{descriptor.action}</TableCell>
                       <TableCell style={{ color: descriptor.selected ? 'white' : '#3C3C3C' }}>{descriptor.trigger}</TableCell>
                       <TableCell style={{ color: descriptor.selected ? 'white' : '#3C3C3C' }}>{descriptor.context}</TableCell>
-                      <TableCell style={{ color: descriptor.selected ? 'white' : '#3C3C3C' }}>{descriptor.iepGoal?.description}</TableCell>
-                      <TableCell style={{ color: descriptor.selected ? 'white' : '#3C3C3C' }}>GCO {descriptor.iepGoal?.gco}</TableCell>
+                      <TableCell style={{ color: descriptor.selected ? 'white' : '#3C3C3C' }}>{descriptor.iep_goal?.description}</TableCell>
+                      <TableCell style={{ color: descriptor.selected ? 'white' : '#3C3C3C' }}>GCO {descriptor.iep_goal?.gco}</TableCell>
                     </TableRow>
                   ))}
                 </TableBody>

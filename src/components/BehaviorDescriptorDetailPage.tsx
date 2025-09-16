@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Button } from './ui/button';
 import { Textarea } from './ui/textarea';
 import { Label } from './ui/label';
@@ -56,6 +56,37 @@ export function BehaviorDescriptorDetailPage({
 }: BehaviorDescriptorDetailPageProps) {
   const [newComment, setNewComment] = useState('');
   const [allComments, setAllComments] = useState<Comment[]>(existingComments);
+
+  const videoRef = useRef<HTMLVideoElement | null>(null);
+
+  // Start and end times in seconds
+  const startTime = 80;  // 1 min 20 sec
+  const endTime = 100;   // 2 min 20 sec
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    const handleTimeUpdate = () => {
+      if (video.currentTime >= endTime) {
+        video.pause(); // stop at end time
+      }
+    };
+
+    video.addEventListener("timeupdate", handleTimeUpdate);
+
+    // Seek to start time once metadata is loaded
+    const handleLoadedMetadata = () => {
+      video.currentTime = startTime;
+      video.play();
+    };
+    video.addEventListener("loadedmetadata", handleLoadedMetadata);
+
+    return () => {
+      video.removeEventListener("timeupdate", handleTimeUpdate);
+      video.removeEventListener("loadedmetadata", handleLoadedMetadata);
+    };
+}, [startTime, endTime]);
 
   const handleSave = () => {
     if (newComment.trim()) {
@@ -151,7 +182,14 @@ export function BehaviorDescriptorDetailPage({
           {/* Video Player Section */}
           <div className="bg-white rounded-lg shadow-sm overflow-hidden mb-6">
             <div className="aspect-video bg-black flex items-center justify-center">
-              <div className="text-white text-lg">Video Player</div>
+              <video
+                ref={videoRef}
+                controls
+                className="w-full h-full"
+              >
+                <source src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" type="video/mp4" />
+                Your browser does not support the video tag.
+              </video>
             </div>
           </div>
 

@@ -17,6 +17,15 @@ const EditTeamMemberPage = lazy(() => import('./components/EditTeamMemberPage').
 const ClientPage = lazy(() => import('./components/ClientPage').then(module => ({ default: module.ClientPage })));
 const EditClientPage = lazy(() => import('./components/EditClientPage').then(module => ({ default: module.EditClientPage })));
 
+interface IndividualIEPGoal {
+  id: number;
+  student_id: string; // UUID as string
+  description?: string | null;
+  goal_met?: string | null;     // will become boolean later
+  processed?: string | null;    // will become boolean later
+  gco?: string | null;    // will become boolean later
+}
+
 interface Student {
   id: string; // UUID
   name: string;
@@ -28,6 +37,8 @@ interface Student {
   entry_type: string;
   ct?: string | null;
   last_gco_date?: string | null; // ISO date string
+  created_at: string; // ISO datetime string
+  iep_goals: IndividualIEPGoal[];
 }
 
 interface BehaviorDescriptor {
@@ -108,10 +119,19 @@ export default function App() {
   const [selectedTeamMember, setSelectedTeamMember] = useState<TeamMember | null>(null);
   const [selectedClient, setSelectedClient] = useState<Client | null>(null);
   const [navigationContext, setNavigationContext] = useState<NavigationContext>(null);
+  const [error, setError] = useState("");
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
     console.log('Login attempted with:', { username, password });
+    
+    setError(""); // clear old error
+
+    // validation
+    if (!username.trim() || !password.trim()) {
+      setError("Enter valid username and password.");
+      return;
+    }
     
     // Check if admin login
     if (username.toLowerCase().includes('admin')) {
@@ -419,6 +439,9 @@ export default function App() {
               </h2>
               
               <form onSubmit={handleLogin} className="space-y-6">
+                  {error && (
+                    <p className="text-red-600 text-sm font-medium">{error}</p>
+                  )}
                 <div>
                   <Label 
                     htmlFor="username" 
