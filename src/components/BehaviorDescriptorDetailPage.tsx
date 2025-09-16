@@ -20,7 +20,8 @@ interface BehaviorDescriptor {
   trigger: string;
   context: string;
   gco: string;
-  iepGoal?: string;
+  iep_goal?: string;
+  video_url?: string;
 }
 
 interface Comment {
@@ -187,7 +188,7 @@ export function BehaviorDescriptorDetailPage({
                 controls
                 className="w-full h-full"
               >
-                <source src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" type="video/mp4" />
+                <source src={behaviorDescriptor.video_url} type="video/mp4" />
                 Your browser does not support the video tag.
               </video>
             </div>

@@ -57,6 +57,7 @@ interface BehaviorDescriptor {
   gco_id: string;
   created_at: string;
   iep_goal?: IEPGoalBasic;
+  video_url?: string;
 }
 
 interface BehavioralDescriptorUI extends BehaviorDescriptor {
