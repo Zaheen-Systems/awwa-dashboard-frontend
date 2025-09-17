@@ -8,7 +8,7 @@ import { Filter, ArrowLeft } from 'lucide-react';
 import { AddNewBDModal } from './AddNewBDModal';
 import { SelectBDsModal } from './SelectBDsModal';
 import api from "../lib/axios";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { format } from "date-fns";
 // import awwaLogo from 'figma:asset/71b57c03c5488fc89f49e890a42dd4691fd017ee.png';
 
@@ -202,8 +202,32 @@ export function StudentDetailPage({ student, onBack, onBehaviorDescriptorClick, 
     setShowSelectBDsModal(true);
   };
 
+  function useGenerateReport() {
+    return useMutation({
+      mutationFn: async (studentId: string) => {
+        const response = await api.get(`/api/students/${studentId}/gcowmr`);
+        return response.data; // expects { download_url: string }
+      },
+      onSuccess: (data) => {
+        const { download_url } = data;
+        if (!download_url) return;
+
+        // trigger download automatically
+        const link = document.createElement("a");
+        link.href = download_url;
+        link.setAttribute("download", "report.xlsx"); // optional
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+      },
+    });
+  }
+
+  const { mutate: generateReport, isPending } = useGenerateReport();
+
   const handleReportGenerate = (selectedBDs: BehaviorDescriptor[]) => {
-    onGenerateReport(selectedBDs);
+    // onGenerateReport(selectedBDs);
+    generateReport(student.id)
   };
 
   return (
