@@ -38,7 +38,7 @@ interface Student {
 interface DashboardProps {
   onStudentClick: (student: Student) => void;
   onSwitchToAdminDashboard?: () => void;
-  userType?: 'user' | 'admin';
+  userType?: 'teacher' | 'admin';
 }
 
 

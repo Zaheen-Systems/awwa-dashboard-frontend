@@ -5,6 +5,10 @@ import { Label } from './components/ui/label';
 
 import { Layout } from './components/Layout';
 import { Dashboard } from './components/Dashboard';
+import api from "./lib/axios";
+import { useMutation } from "@tanstack/react-query";
+
+
 // Lazy load heavy components
 const StudentDetailPage = lazy(() => import('./components/StudentDetailPage').then(module => ({ default: module.StudentDetailPage })));
 const BehaviorDescriptorDetailPage = lazy(() => import('./components/BehaviorDescriptorDetailPage').then(module => ({ default: module.BehaviorDescriptorDetailPage })));
@@ -114,8 +118,20 @@ interface Client {
   guardianContact?: string;
 }
 
+export interface LoginResponse {
+  access_token: string;
+  token_type: string;
+  user_type: "admin" | "teacher";
+  name: string;
+}
+
+const loginApi = async (username: string, password: string): Promise<LoginResponse> => {
+  const { data } = await api.post<LoginResponse>("/api/auth/login", { username, password });
+  return data;
+};
+
 type CurrentPage = 'login' | 'dashboard' | 'admin-dashboard' | 'class-detail' | 'student-detail' | 'behavior-detail' | 'report-generation' | 'profile-settings' | 'team-members-ct' | 'edit-team-member' | 'client' | 'edit-client';
-type UserType = 'user' | 'admin' | null;
+type UserType = 'teacher' | 'admin' | null;
 type NavigationContext = 'dashboard' | 'admin-dashboard' | 'client' | 'student-detail' | null;
 
 export default function App() {
@@ -132,6 +148,27 @@ export default function App() {
   const [navigationContext, setNavigationContext] = useState<NavigationContext>(null);
   const [error, setError] = useState("");
 
+    const loginMutation = useMutation({
+      mutationFn: () => loginApi(username, password),
+      onSuccess: (data) => {
+        // Save token (localStorage/sessionStorage or context)
+        localStorage.setItem("token", data.access_token);
+        localStorage.setItem("name", data.name);
+
+        // Use user_type instead of checking username
+        setUserType(data.user_type);
+
+        if (data.user_type === "admin") {
+          setCurrentPage("admin-dashboard");
+        } else {
+          setCurrentPage("dashboard");
+        }
+      },
+      onError: () => {
+        setError("Invalid username or password");
+      },
+    });
+
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
     console.log('Login attempted with:', { username, password });
@@ -139,19 +176,14 @@ export default function App() {
     setError(""); // clear old error
 
     // validation
+    setError("");
+
     if (!username.trim() || !password.trim()) {
       setError("Enter valid username and password.");
       return;
     }
-    
-    // Check if admin login
-    if (username.toLowerCase().includes('admin')) {
-      setUserType('admin');
-      setCurrentPage('admin-dashboard');
-    } else {
-      setUserType('user');
-      setCurrentPage('dashboard');
-    }
+
+    loginMutation.mutate();
   };
 
   const handleLogout = () => {

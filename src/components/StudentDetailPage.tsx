@@ -8,7 +8,7 @@ import { Filter, ArrowLeft } from 'lucide-react';
 import { AddNewBDModal } from './AddNewBDModal';
 import { SelectBDsModal } from './SelectBDsModal';
 import api from "../lib/axios";
-import { useQuery, useMutation } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
 // import awwaLogo from 'figma:asset/71b57c03c5488fc89f49e890a42dd4691fd017ee.png';
 
@@ -74,7 +74,7 @@ interface BDFormData {
   time: string;
   staff: string;
   gcoClassification: string;
-  iepGoal: string;
+  iep_goal_id: string;
 }
 
 interface StudentDetailPageProps {
@@ -125,6 +125,7 @@ const fetchGroupedDescriptors = async (studentId: number) => {
 
 export function StudentDetailPage({ student, onBack, onBehaviorDescriptorClick }: StudentDetailPageProps) {
   const [date, setDate] = useState("");
+  const queryClient = useQueryClient();
   // const [behaviourDescriptors, setBehaviourDescriptors] = useState<BehavioralDescriptorUI[]>([]);
   // const [iepBehaviourDescriptors, setIepBehaviourDescriptors] = useState<BehaviorDescriptor[]>(mockIEPBehaviourDescriptors);
 
@@ -184,8 +185,43 @@ export function StudentDetailPage({ student, onBack, onBehaviorDescriptorClick }
     setShowAddBDModal(true);
   };
 
+  const createBehaviorDescriptor = async (data: BDFormData) => {
+  const payload = {
+    source: data.source,
+    action: data.action,
+    trigger: data.trigger,
+    tag_time: data.time,               // maps to Time column
+    gco_id: data.gcoClassification,    // maps to FK
+    iep_goal_id: Number(data.iep_goal_id), // ensure it's number
+    student_id: student.id,
+  };
+
+    const res = await api.post("/api/behavioral-descriptors/", payload);
+    return res.data;
+  };
+
+  const useCreateBD = () => {
+    return useMutation({ mutationFn: createBehaviorDescriptor });
+  };
+
+  const { mutate: submitBD } = useCreateBD();
+
   const handleBDSubmit = (bdData: BDFormData) => {
     console.log("Team Member BD submitted:", bdData);
+
+    submitBD(bdData, {
+      onSuccess: (res) => {
+        console.log("BD saved:", res);
+
+        queryClient.invalidateQueries({
+          queryKey: ["behavioralDescriptors", parseInt(student.id)],
+        });
+      },
+      onError: (err) => {
+        console.error("Error saving BD:", err);
+      }
+    });
+
     // const newBD = {
     //   id: Math.max(...behaviourDescriptors.map(bd => bd.id)) + 1,
     //   selected: false,

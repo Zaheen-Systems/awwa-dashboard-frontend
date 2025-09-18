@@ -29,7 +29,7 @@ interface BDFormData {
   time: string;
   staff: string;
   gcoClassification: string;
-  iepGoal: string;
+  iep_goal_id: string;
 }
 
 export function AddNewBDModal({ isOpen, onClose, onSubmit, iepGoals }: AddNewBDModalProps) {
@@ -41,8 +41,9 @@ export function AddNewBDModal({ isOpen, onClose, onSubmit, iepGoals }: AddNewBDM
     time: '',
     staff: 'Ms. Arya Stark', // Prefilled with current user name
     gcoClassification: '',
-    iepGoal: ''
+    iep_goal_id: ''
   });
+  const [error, setError] = useState<string | null>(null);
 
   // Reset form when modal opens
   useEffect(() => {
@@ -55,7 +56,7 @@ export function AddNewBDModal({ isOpen, onClose, onSubmit, iepGoals }: AddNewBDM
         time: '',
         staff: 'Ms. Arya Stark',
         gcoClassification: '',
-        iepGoal: ''
+        iep_goal_id: ''
       });
     }
   }, [isOpen]);
@@ -79,10 +80,17 @@ export function AddNewBDModal({ isOpen, onClose, onSubmit, iepGoals }: AddNewBDM
 
   const handleSubmit = () => {
     // Convert "blank" back to empty string for IEP goal if needed
+    if (!formData.gcoClassification.trim()) {
+      setError("GCO classification is required.");
+      return;
+    }
+
+    setError(null); // clear error if everything is fine
     const submissionData = {
       ...formData,
-      iepGoal: formData.iepGoal === 'blank' ? '' : formData.iepGoal
+      iepGoal: formData.iep_goal_id === 'blank' ? '' : formData.iep_goal_id
     };
+    console.log(submissionData)
     onSubmit(submissionData);
     onClose();
   };
@@ -250,12 +258,15 @@ export function AddNewBDModal({ isOpen, onClose, onSubmit, iepGoals }: AddNewBDM
                   ))}
                 </SelectContent>
               </Select>
+              {error && (
+                <p className="text-sm mt-1 text-red-500">{error}</p>
+              )}
             </div>
 
             {/* IEP Goals */}
             <div>
               <Label htmlFor="iepGoal" style={{ color: '#3C3C3C' }}>IEP Goals</Label>
-              <Select value={formData.iepGoal} onValueChange={(value) => handleInputChange('iepGoal', value)}>
+              <Select value={formData.iep_goal_id} onValueChange={(value) => handleInputChange('iep_goal_id', value)}>
                 <SelectTrigger className="bg-white border-2" style={{ borderColor: '#BDC3C7' }}>
                   <SelectValue placeholder="Drop down with all IEP goals, include blank" />
                 </SelectTrigger>
