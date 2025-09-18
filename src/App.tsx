@@ -314,10 +314,10 @@ export default function App() {
     handleBackToStudentDetail();
   };
 
-  const handleGenerateReport = (selectedBDs: BehaviorDescriptor[]) => {
-    setSelectedBDsForReport(selectedBDs);
-    setCurrentPage('report-generation');
-  };
+  // const handleGenerateReport = (selectedBDs: BehaviorDescriptor[]) => {
+  //   setSelectedBDsForReport(selectedBDs);
+  //   setCurrentPage('report-generation');
+  // };
 
   const handleBackFromReport = () => {
     setSelectedBDsForReport([]);
@@ -645,7 +645,7 @@ export default function App() {
             student={selectedStudent} 
             onBack={handleBackToDashboard}
             onBehaviorDescriptorClick={handleBehaviorDescriptorClick}
-            onGenerateReport={handleGenerateReport}
+            // onGenerateReport={handleGenerateReport}
           />
         );
       }

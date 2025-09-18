@@ -6,7 +6,7 @@ import { Label } from './ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { Textarea } from './ui/textarea';
 import api from "../lib/axios";
-import { useQuery, useMutation } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 
 interface IEPGoalBasic {
   id: number;
@@ -31,14 +31,6 @@ interface BDFormData {
   gcoClassification: string;
   iepGoal: string;
 }
-
-const mockIEPGoals = [
-  "blank",
-  "Goal 1: Will participate in Play Time in EC",
-  "Goal 2: Will communicate basic needs verbally",
-  "Goal 3: Will follow simple two-step instructions",
-  "Goal 4: Will demonstrate appropriate social interaction"
-];
 
 export function AddNewBDModal({ isOpen, onClose, onSubmit, iepGoals }: AddNewBDModalProps) {
   const [formData, setFormData] = useState<BDFormData>({

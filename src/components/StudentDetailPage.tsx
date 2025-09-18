@@ -81,7 +81,7 @@ interface StudentDetailPageProps {
   student: Student;
   onBack: () => void;
   onBehaviorDescriptorClick: (behaviorDescriptor: BehaviorDescriptor) => void;
-  onGenerateReport: (selectedBDs: BehaviorDescriptor[]) => void;
+  // onGenerateReport: (selectedBDs: BehaviorDescriptor[]) => void;
 }
 
 
@@ -123,7 +123,7 @@ const fetchGroupedDescriptors = async (studentId: number) => {
   return data;
 };
 
-export function StudentDetailPage({ student, onBack, onBehaviorDescriptorClick, onGenerateReport }: StudentDetailPageProps) {
+export function StudentDetailPage({ student, onBack, onBehaviorDescriptorClick }: StudentDetailPageProps) {
   const [date, setDate] = useState("");
   // const [behaviourDescriptors, setBehaviourDescriptors] = useState<BehavioralDescriptorUI[]>([]);
   // const [iepBehaviourDescriptors, setIepBehaviourDescriptors] = useState<BehaviorDescriptor[]>(mockIEPBehaviourDescriptors);
@@ -154,6 +154,7 @@ export function StudentDetailPage({ student, onBack, onBehaviorDescriptorClick, 
   const [showSelectBDsModal, setShowSelectBDsModal] = useState(false);
 
   const handleBehaviourSelect = (id: number, selected: boolean) => {
+    console.log(id, selected)
     // setBehaviourDescriptors(prev => 
     //   prev.map(item => 
     //     item.id === id ? { ...item, selected } : item
@@ -162,6 +163,7 @@ export function StudentDetailPage({ student, onBack, onBehaviorDescriptorClick, 
   };
 
   const handleIepBehaviourSelect = (id: number, selected: boolean) => {
+    console.log(id, selected)
     // setIepBehaviourDescriptors(prev => 
     //   prev.map(item => 
     //     item.id === id ? { ...item, selected } : item
@@ -183,7 +185,7 @@ export function StudentDetailPage({ student, onBack, onBehaviorDescriptorClick, 
   };
 
   const handleBDSubmit = (bdData: BDFormData) => {
-    // console.log("Team Member BD submitted:", bdData);
+    console.log("Team Member BD submitted:", bdData);
     // const newBD = {
     //   id: Math.max(...behaviourDescriptors.map(bd => bd.id)) + 1,
     //   selected: false,
@@ -227,6 +229,7 @@ export function StudentDetailPage({ student, onBack, onBehaviorDescriptorClick, 
   const { mutate: generateReport, isPending: isReportPending } = useGenerateReport();
 
   const handleReportGenerate = (selectedBDs: BehaviorDescriptor[]) => {
+    console.log(selectedBDs)
     // onGenerateReport(selectedBDs);
     generateReport(student.id)
   };
