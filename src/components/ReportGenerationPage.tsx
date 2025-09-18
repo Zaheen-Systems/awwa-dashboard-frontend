@@ -17,6 +17,12 @@ interface Student {
   last_gco_date?: string | null; // ISO date string
 }
 
+interface IEPGoalBasic {
+  id: number;
+  description?: string | null;
+  gco?: string | null;    // will become boolean later
+}
+
 interface BehaviorDescriptor {
   id: number;
   selected: boolean;
@@ -26,8 +32,10 @@ interface BehaviorDescriptor {
   action: string;
   trigger: string;
   context: string;
-  gco: string;
-  iepGoal?: string;
+  gco_id: string;
+  created_at: string;
+  iep_goal?: IEPGoalBasic;
+  video_url?: string;
 }
 
 interface ReportGenerationPageProps {
@@ -188,7 +196,7 @@ export function ReportGenerationPage({
                       <TableCell style={{ color: 'white' }}>{descriptor.action}</TableCell>
                       <TableCell style={{ color: 'white' }}>{descriptor.trigger}</TableCell>
                       <TableCell style={{ color: 'white' }}>{descriptor.context}</TableCell>
-                      <TableCell style={{ color: 'white' }}>{descriptor.gco}</TableCell>
+                      <TableCell style={{ color: 'white' }}>{descriptor.gco_id}</TableCell>
                     </TableRow>
                   ))}
                 </TableBody>

@@ -199,7 +199,8 @@ export function StudentDetailPage({ student, onBack, onBehaviorDescriptorClick, 
   };
 
   const handleGenerateReportClick = () => {
-    setShowSelectBDsModal(true);
+    // setShowSelectBDsModal(true);
+    generateReport(student.id)
   };
 
   function useGenerateReport() {
@@ -223,7 +224,7 @@ export function StudentDetailPage({ student, onBack, onBehaviorDescriptorClick, 
     });
   }
 
-  const { mutate: generateReport, isPending } = useGenerateReport();
+  const { mutate: generateReport, isPending: isReportPending } = useGenerateReport();
 
   const handleReportGenerate = (selectedBDs: BehaviorDescriptor[]) => {
     // onGenerateReport(selectedBDs);
@@ -319,7 +320,7 @@ export function StudentDetailPage({ student, onBack, onBehaviorDescriptorClick, 
                 </TableRow>
                 <TableRow className="border-b" style={{ borderColor: '#BDC3C7' }}>
                   <TableCell className="font-medium" style={{ color: '#3C3C3C', backgroundColor: '#F8F9FA' }}>CT</TableCell>
-                  <TableCell style={{ color: '#3C3C3C' }}>Jaylene</TableCell>
+                  <TableCell style={{ color: '#3C3C3C' }}></TableCell>
                   <TableCell className="font-medium" style={{ color: '#3C3C3C', backgroundColor: '#F8F9FA' }}>GCO 2</TableCell>
                   <TableCell style={{ color: '#3C3C3C' }}>{student.gco_2_functional_age}</TableCell>
                 </TableRow>
@@ -568,13 +569,14 @@ export function StudentDetailPage({ student, onBack, onBehaviorDescriptorClick, 
             <Button
               onClick={handleGenerateReportClick}
               className="px-6 py-2 font-medium transition-all duration-200 hover:opacity-90"
+              disabled={isReportPending}
               style={{ 
                 backgroundColor: '#e65039', 
                 color: 'white',
                 borderColor: '#e65039'
               }}
             >
-              Generate Report
+              {isReportPending ? "Generating..." : "Generate Report"}
             </Button>
           </div>
         </div>
@@ -585,6 +587,7 @@ export function StudentDetailPage({ student, onBack, onBehaviorDescriptorClick, 
         isOpen={showAddBDModal}
         onClose={() => setShowAddBDModal(false)}
         onSubmit={handleBDSubmit}
+        iepGoals={student.iep_goals}
       />
 
       <SelectBDsModal

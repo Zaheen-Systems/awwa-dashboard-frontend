@@ -5,11 +5,20 @@ import { Input } from './ui/input';
 import { Label } from './ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { Textarea } from './ui/textarea';
+import api from "../lib/axios";
+import { useQuery, useMutation } from "@tanstack/react-query";
+
+interface IEPGoalBasic {
+  id: number;
+  description?: string | null;
+  gco?: string | null;    // will become boolean later
+}
 
 interface AddNewBDModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSubmit: (bdData: BDFormData) => void;
+  iepGoals: IEPGoalBasic[];
 }
 
 interface BDFormData {
@@ -23,23 +32,6 @@ interface BDFormData {
   iepGoal: string;
 }
 
-const mockGCOOptions = [
-  "GCO 1.1.1",
-  "GCO 1.1.2",
-  "GCO 1.1.3",
-  "GCO 1.2.1",
-  "GCO 1.2.2",
-  "GCO 1.3.1",
-  "GCO 1.3.2",
-  "GCO 2.1.1",
-  "GCO 2.1.2",
-  "GCO 2.2.1",
-  "GCO 2.3.1",
-  "GCO 3.1.1",
-  "GCO 3.1.2",
-  "GCO 3.2.1"
-];
-
 const mockIEPGoals = [
   "blank",
   "Goal 1: Will participate in Play Time in EC",
@@ -48,7 +40,7 @@ const mockIEPGoals = [
   "Goal 4: Will demonstrate appropriate social interaction"
 ];
 
-export function AddNewBDModal({ isOpen, onClose, onSubmit }: AddNewBDModalProps) {
+export function AddNewBDModal({ isOpen, onClose, onSubmit, iepGoals }: AddNewBDModalProps) {
   const [formData, setFormData] = useState<BDFormData>({
     date: '',
     action: '',
@@ -75,6 +67,16 @@ export function AddNewBDModal({ isOpen, onClose, onSubmit }: AddNewBDModalProps)
       });
     }
   }, [isOpen]);
+
+  const fetchIds = async (): Promise<string[]> => {
+    const res = await api.get<string[]>("/api/document-gcos/ids"); // adjust URL to your API route
+    return res.data;
+  };
+
+  const { data: gcoIds } = useQuery({
+    queryKey: ["gcoIds"],
+    queryFn: fetchIds,
+  });
 
   const handleInputChange = (field: keyof BDFormData, value: string) => {
     setFormData(prev => ({
@@ -234,7 +236,7 @@ export function AddNewBDModal({ isOpen, onClose, onSubmit }: AddNewBDModalProps)
                   <SelectValue placeholder="Drop down with all GCOs" />
                 </SelectTrigger>
                 <SelectContent 
-                  className="bg-white border border-gray-200 shadow-lg rounded-md"
+                  className="bg-white border border-gray-200 shadow-lg rounded-md max-h-60 overflow-y-auto"
                   style={{ 
                     backgroundColor: 'white',
                     borderColor: '#BDC3C7',
@@ -244,7 +246,7 @@ export function AddNewBDModal({ isOpen, onClose, onSubmit }: AddNewBDModalProps)
                   side="bottom"
                   align="start"
                 >
-                  {mockGCOOptions.map((gco, index) => (
+                  {gcoIds?.map((gco, index) => (
                     <SelectItem 
                       key={index} 
                       value={gco}
@@ -276,14 +278,14 @@ export function AddNewBDModal({ isOpen, onClose, onSubmit }: AddNewBDModalProps)
                   side="bottom"
                   align="start"
                 >
-                  {mockIEPGoals.map((goal, index) => (
+                  {iepGoals?.map((goal, index) => (
                     <SelectItem 
                       key={index} 
-                      value={goal}
+                      value={goal.id.toString()}
                       className="hover:bg-gray-100 focus:bg-gray-100"
                       style={{ color: '#3C3C3C' }}
                     >
-                      {goal === 'blank' ? '(Blank)' : goal}
+                      {goal.description}
                     </SelectItem>
                   ))}
                 </SelectContent>

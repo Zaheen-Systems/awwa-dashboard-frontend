@@ -10,6 +10,12 @@ interface Student {
   name: string;
 }
 
+interface IEPGoalBasic {
+  id: number;
+  description?: string | null;
+  gco?: string | null;    // will become boolean later
+}
+
 interface BehaviorDescriptor {
   id: number;
   selected: boolean;
@@ -19,8 +25,9 @@ interface BehaviorDescriptor {
   action: string;
   trigger: string;
   context: string;
-  gco: string;
-  iep_goal?: string;
+  gco_id: string;
+  created_at: string;
+  iep_goal?: IEPGoalBasic;
   video_url?: string;
 }
 
@@ -215,7 +222,7 @@ export function BehaviorDescriptorDetailPage({
                 </div>
                 <div className="mb-3">
                   <strong style={{ color: '#3C3C3C' }}>GCO:</strong>
-                  <span className="ml-2" style={{ color: '#3C3C3C' }}>{behaviorDescriptor.gco}</span>
+                  <span className="ml-2" style={{ color: '#3C3C3C' }}>{behaviorDescriptor.gco_id}</span>
                 </div>
               </div>
               <div>

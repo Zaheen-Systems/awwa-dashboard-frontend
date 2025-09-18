@@ -37,8 +37,17 @@ interface Student {
   entry_type: string;
   ct?: string | null;
   last_gco_date?: string | null; // ISO date string
+  gco_1_functional_age?: string | null;
+  gco_2_functional_age?: string | null;
+  gco_3_functional_age?: string | null;
   created_at: string; // ISO datetime string
   iep_goals: IndividualIEPGoal[];
+}
+
+interface IEPGoalBasic {
+  id: number;
+  description?: string | null;
+  gco?: string | null;    // will become boolean later
 }
 
 interface BehaviorDescriptor {
@@ -50,8 +59,10 @@ interface BehaviorDescriptor {
   action: string;
   trigger: string;
   context: string;
-  gco: string;
-  iepGoal?: string;
+  gco_id: string;
+  created_at: string;
+  iep_goal?: IEPGoalBasic;
+  video_url?: string;
 }
 
 interface BehaviorComment {

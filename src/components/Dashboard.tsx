@@ -8,6 +8,15 @@ import { EditStudentModal } from './EditStudentModal';
 import { useQuery } from "@tanstack/react-query";
 import api from "../lib/axios";
 
+interface IndividualIEPGoal {
+  id: number;
+  student_id: string; // UUID as string
+  description?: string | null;
+  goal_met?: string | null;     // will become boolean later
+  processed?: string | null;    // will become boolean later
+  gco?: string | null;    // will become boolean later
+}
+
 interface Student {
   id: string; // UUID
   name: string;
@@ -23,6 +32,7 @@ interface Student {
   gco_2_functional_age?: string | null;
   gco_3_functional_age?: string | null;
   created_at: string; // ISO datetime string
+  iep_goals: IndividualIEPGoal[];
 }
 
 interface DashboardProps {
