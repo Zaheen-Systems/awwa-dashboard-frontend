@@ -3,76 +3,19 @@ import { Button } from './ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from './ui/table';
 import { Upload, Plus, Edit, Camera, FileSpreadsheet, Download } from 'lucide-react';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from './ui/dialog';
+import { useUsers } from '../hooks/useUsers';
+import { TeamMember } from '../types/users';
 
 // import noPhotoImage from 'figma:asset/59199c214065bea516a2cb6b06390172087b4e22.png';
-
-interface TeamMember {
-  id: number;
-  name: string;
-  age: number;
-  gender: string;
-  idNumber: string;
-  specialization: string;
-  dateOfJoining: string;
-  class: string;
-  role: string;
-  photoUrl?: string;
-  email?: string;
-  dob?: string;
-}
 
 interface TeamMembersCTPageProps {
   onEditTeamMember?: (member: TeamMember) => void;
   onAddTeamMember?: () => void;
 }
 
-// Mock team members data matching the image
-const mockTeamMembers: TeamMember[] = [
-  {
-    id: 1,
-    name: "Asuzhan",
-    age: 30,
-    gender: "F",
-    idNumber: "50000",
-    specialization: "Speech",
-    dateOfJoining: "2020-01-01",
-    class: "Class 1.1, Class 2.1",
-    role: "Team member",
-    photoUrl: "",
-    email: "asuzhan@awwa.org",
-    dob: "1994-05-15"
-  },
-  {
-    id: 2,
-    name: "Dawn",
-    age: 28,
-    gender: "F",
-    idNumber: "50000",
-    specialization: "Social worker",
-    dateOfJoining: "2021-07-03",
-    class: "",
-    role: "CT",
-    photoUrl: "",
-    email: "dawn@awwa.org",
-    dob: "1996-03-20"
-  },
-  {
-    id: 3,
-    name: "Joanne",
-    age: 28,
-    gender: "F",
-    idNumber: "50000",
-    specialization: "Social worker",
-    dateOfJoining: "2021-07-03",
-    class: "Class 1.2",
-    role: "Team member/ CT",
-    photoUrl: "",
-    email: "joanne@awwa.org",
-    dob: "1996-08-10"
-  }
-];
-
 export function TeamMembersCTPage({ onEditTeamMember, onAddTeamMember }: TeamMembersCTPageProps) {
+  const { data: users } = useUsers();
+
   const [selectedMemberPhoto, setSelectedMemberPhoto] = useState<{ 
     name: string; 
     hasPhoto: boolean; 
@@ -178,7 +121,7 @@ export function TeamMembersCTPage({ onEditTeamMember, onAddTeamMember }: TeamMem
               </TableRow>
             </TableHeader>
             <TableBody>
-              {mockTeamMembers.map((member, index) => (
+              {users?.map((member, index) => (
                 <TableRow 
                   key={member.id} 
                   style={{ 
@@ -189,7 +132,7 @@ export function TeamMembersCTPage({ onEditTeamMember, onAddTeamMember }: TeamMem
                   <TableCell className="text-center" style={{ color: '#3C3C3C' }}>
                     {index + 1}
                   </TableCell>
-                  <TableCell style={{ color: '#3C3C3C' }}>{member.name}</TableCell>
+                  <TableCell style={{ color: '#3C3C3C' }}>{member.first_name} {member.last_name}</TableCell>
                   <TableCell className="text-center" style={{ color: '#3C3C3C' }}>
                     {member.age}
                   </TableCell>
@@ -197,25 +140,21 @@ export function TeamMembersCTPage({ onEditTeamMember, onAddTeamMember }: TeamMem
                     {member.gender}
                   </TableCell>
                   <TableCell className="text-center" style={{ color: '#3C3C3C' }}>
-                    {member.idNumber}
+                    {member.id_number}
                   </TableCell>
                   <TableCell style={{ color: '#3C3C3C' }}>{member.specialization}</TableCell>
                   <TableCell style={{ color: '#3C3C3C' }}>
-                    {new Date(member.dateOfJoining).toLocaleDateString('en-GB', {
-                      day: '2-digit',
-                      month: '2-digit',
-                      year: 'numeric'
-                    }).replace(/\//g, '.')}
+                    {member.date_of_joining}
                   </TableCell>
-                  <TableCell style={{ color: '#3C3C3C' }}>{member.class}</TableCell>
+                  <TableCell style={{ color: '#3C3C3C' }}>{member.classes}</TableCell>
                   <TableCell style={{ color: '#3C3C3C' }}>{member.role}</TableCell>
                   <TableCell className="text-center">
                     <Dialog>
                       <DialogTrigger asChild>
                         <button 
                           className="w-10 h-8 border border-red-500 bg-red-50 flex items-center justify-center hover:bg-red-100 transition-colors rounded"
-                          onClick={() => handlePhotoClick(member.name)}
-                          title={`View/Upload photo for ${member.name}`}
+                          onClick={() => handlePhotoClick(member.first_name)}
+                          title={`View/Upload photo for ${member.first_name}`}
                         >
                           <Camera className="w-4 h-4" style={{ color: '#DC3545' }} />
                         </button>
@@ -299,7 +238,7 @@ export function TeamMembersCTPage({ onEditTeamMember, onAddTeamMember }: TeamMem
                     <button 
                       onClick={() => onEditTeamMember && onEditTeamMember(member)}
                       className="p-1 hover:bg-gray-100 rounded transition-colors"
-                      title={`Edit ${member.name}`}
+                      title={`Edit ${member.first_name}`}
                     >
                       <Edit className="w-4 h-4" style={{ color: '#3C3C3C' }} />
                     </button>

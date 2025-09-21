@@ -3,62 +3,14 @@ import { Button } from './ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from './ui/table';
 import { Upload, Plus, Edit, FileSpreadsheet, Download, Camera } from 'lucide-react';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, DialogClose } from './ui/dialog';
+import { StudentBaseRead } from '../types/class';
+import { useStudents } from '../hooks/useStudents';
 // import logoImage from 'figma:asset/71b57c03c5488fc89f49e890a42dd4691fd017ee.png';
 
-interface Client {
-  id: number;
-  name: string;
-  age: number;
-  gender: string;
-  idNumber: string;
-  primaryDiagnosis: string;
-  secondaryDiagnosis: string;
-  dateOfEnrollment: string;
-  photoUrl?: string;
-  email?: string;
-  dob?: string;
-  guardianName?: string;
-  guardianContact?: string;
-}
-
 interface ClientPageProps {
-  onEditClient?: (client: Client) => void;
+  onEditClient?: (client: StudentBaseRead) => void;
   onAddClient?: () => void;
 }
-
-// Mock data for clients
-const clients: Client[] = [
-  {
-    id: 1,
-    name: "Aaron Kumar",
-    age: 24,
-    gender: "M",
-    idNumber: "S0001",
-    primaryDiagnosis: "Speech and Language Difficulty",
-    secondaryDiagnosis: "Speech and Language Difficulty",
-    dateOfEnrollment: "21.01.2020",
-    photoUrl: "",
-    email: "aaron.kumar@example.com",
-    dob: "1999-03-15",
-    guardianName: "Priya Kumar",
-    guardianContact: "+65 9123 4567"
-  },
-  {
-    id: 2,
-    name: "Mei Ling Tan",
-    age: 28,
-    gender: "F",
-    idNumber: "S0002",
-    primaryDiagnosis: "Speech and Language Difficulty",
-    secondaryDiagnosis: "Speech and Language Difficulty",
-    dateOfEnrollment: "03.07.2021",
-    photoUrl: "",
-    email: "meiling.tan@example.com",
-    dob: "1995-11-22",
-    guardianName: "David Tan",
-    guardianContact: "+65 8765 4321"
-  }
-];
 
 export function ClientPage({ 
   onEditClient, 
@@ -71,6 +23,8 @@ export function ClientPage({
   } | null>(null);
   const [isBulkUploadOpen, setIsBulkUploadOpen] = useState(false);
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
+
+  const { data: clients } = useStudents();
 
   const handlePhotoClick = (clientName: string) => {
     // In a real implementation, this would check if the client has a photo
@@ -124,7 +78,7 @@ export function ClientPage({
     }
   };
 
-  const handleEditClient = (client: Client, event: React.MouseEvent) => {
+  const handleEditClient = (client: StudentBaseRead, event: React.MouseEvent) => {
     event.stopPropagation();
     if (onEditClient) {
       onEditClient(client);
@@ -173,7 +127,7 @@ export function ClientPage({
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {clients.map((client, index) => (
+                {clients?.map((client, index) => (
                   <TableRow 
                     key={client.id} 
                     className={`${index < clients.length - 1 ? "border-b" : ""} hover:bg-gray-50 transition-colors`} 
@@ -181,12 +135,12 @@ export function ClientPage({
                   >
                     <TableCell style={{ color: '#3C3C3C' }}>{index + 1}</TableCell>
                     <TableCell style={{ color: '#3C3C3C' }}>{client.name}</TableCell>
-                    <TableCell style={{ color: '#3C3C3C' }}>{client.age}</TableCell>
+                    <TableCell style={{ color: '#3C3C3C' }}>{client.chronological_age}</TableCell>
                     <TableCell style={{ color: '#3C3C3C' }}>{client.gender}</TableCell>
-                    <TableCell style={{ color: '#3C3C3C' }}>{client.idNumber}</TableCell>
-                    <TableCell style={{ color: '#3C3C3C' }}>{client.primaryDiagnosis}</TableCell>
-                    <TableCell style={{ color: '#3C3C3C' }}>{client.secondaryDiagnosis}</TableCell>
-                    <TableCell style={{ color: '#3C3C3C' }}>{client.dateOfEnrollment}</TableCell>
+                    <TableCell style={{ color: '#3C3C3C' }}>{client.id_number}</TableCell>
+                    <TableCell style={{ color: '#3C3C3C' }}>{client.primary_diagnosis}</TableCell>
+                    <TableCell style={{ color: '#3C3C3C' }}>{client.secondary_diagnosis}</TableCell>
+                    <TableCell style={{ color: '#3C3C3C' }}>{client.date_of_enrollment}</TableCell>
                     <TableCell className="text-center">
                       <Dialog>
                         <DialogTrigger asChild>

@@ -2,6 +2,8 @@ import { useState } from 'react';
 import { Input } from './ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from './ui/table';
 import { Search } from 'lucide-react';
+import { ClassData } from '../types/class';
+import { useClasses } from '../hooks/useClasses';
 
 interface AdminDashboardProps {
   onLogout: () => void;
@@ -11,60 +13,12 @@ interface AdminDashboardProps {
   onClientClick?: () => void;
 }
 
-interface ClassData {
-  id: number;
-  name: string;
-  days: string;
-  classTime: string;
-  numStudents: number;
-  numTeamMembers: number;
-  numCTs: number;
-}
-
-// Mock data for classes
-const mockClasses: ClassData[] = [
-  {
-    id: 1,
-    name: "Class 1",
-    days: "M,W,F",
-    classTime: "9 a.m-11.30 a.m",
-    numStudents: 14,
-    numTeamMembers: 4,
-    numCTs: 2
-  },
-  {
-    id: 2,
-    name: "Class 1.2",
-    days: "M,W,F",
-    classTime: "2p.m - 5 p.m",
-    numStudents: 8,
-    numTeamMembers: 2,
-    numCTs: 2
-  },
-  {
-    id: 3,
-    name: "Class 1.3",
-    days: "T, Th",
-    classTime: "9 a.m-12 a.m",
-    numStudents: 10,
-    numTeamMembers: 3,
-    numCTs: 2
-  },
-  {
-    id: 4,
-    name: "Class 2.1",
-    days: "T, Th",
-    classTime: "2p.m - 5 p.m",
-    numStudents: 9,
-    numTeamMembers: 3,
-    numCTs: 2
-  }
-];
-
 export function AdminDashboard({  onClassClick }: AdminDashboardProps) {
+  const { data: classes } = useClasses();
+
   const [searchTerm, setSearchTerm] = useState("");
 
-  const filteredClasses = mockClasses.filter(classItem => 
+  const filteredClasses = classes?.filter(classItem => 
     classItem.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     classItem.days.toLowerCase().includes(searchTerm.toLowerCase())
   );
@@ -82,20 +36,20 @@ export function AdminDashboard({  onClassClick }: AdminDashboardProps) {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           <div className="bg-white rounded-lg shadow-sm p-6 border-l-4" style={{ borderLeftColor: '#e65039' }}>
             <h3 className="font-medium mb-2" style={{ color: '#3C3C3C' }}>Total Classes</h3>
-            <div className="text-3xl font-bold" style={{ color: '#e65039' }}>{mockClasses.length}</div>
+            <div className="text-3xl font-bold" style={{ color: '#e65039' }}>{classes?.length}</div>
           </div>
           
           <div className="bg-white rounded-lg shadow-sm p-6 border-l-4" style={{ borderLeftColor: '#4EAAC9' }}>
             <h3 className="font-medium mb-2" style={{ color: '#3C3C3C' }}>Total Students</h3>
             <div className="text-3xl font-bold" style={{ color: '#4EAAC9' }}>
-              {mockClasses.reduce((sum, cls) => sum + cls.numStudents, 0)}
+              {classes?.reduce((sum, cls) => sum + cls.number_of_students, 0)}
             </div>
           </div>
           
           <div className="bg-white rounded-lg shadow-sm p-6 border-l-4" style={{ borderLeftColor: '#FF8C42' }}>
             <h3 className="font-medium mb-2" style={{ color: '#3C3C3C' }}>Total Staff</h3>
             <div className="text-3xl font-bold" style={{ color: '#FF8C42' }}>
-              {mockClasses.reduce((sum, cls) => sum + cls.numTeamMembers + cls.numCTs, 0)}
+              {classes?.reduce((sum, cls) => sum + cls.number_of_team_members + cls.number_of_cts, 0)}
             </div>
           </div>
         </div>
@@ -139,7 +93,7 @@ export function AdminDashboard({  onClassClick }: AdminDashboardProps) {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredClasses.map((classItem, index) => (
+                {filteredClasses?.map((classItem, index) => (
                   <TableRow 
                     key={classItem.id} 
                     className={`${index < filteredClasses.length - 1 ? "border-b" : ""} hover:bg-gray-50 transition-colors`} 
@@ -156,10 +110,10 @@ export function AdminDashboard({  onClassClick }: AdminDashboardProps) {
                       </button>
                     </TableCell>
                     <TableCell style={{ color: '#3C3C3C' }}>{classItem.days}</TableCell>
-                    <TableCell style={{ color: '#3C3C3C' }}>{classItem.classTime}</TableCell>
-                    <TableCell style={{ color: '#3C3C3C' }} className="text-center">{classItem.numStudents}</TableCell>
-                    <TableCell style={{ color: '#3C3C3C' }} className="text-center">{classItem.numTeamMembers}</TableCell>
-                    <TableCell style={{ color: '#3C3C3C' }} className="text-center">{classItem.numCTs}</TableCell>
+                    <TableCell style={{ color: '#3C3C3C' }}>{classItem.class_timing}</TableCell>
+                    <TableCell style={{ color: '#3C3C3C' }} className="text-center">{classItem.number_of_students}</TableCell>
+                    <TableCell style={{ color: '#3C3C3C' }} className="text-center">{classItem.number_of_team_members}</TableCell>
+                    <TableCell style={{ color: '#3C3C3C' }} className="text-center">{classItem.number_of_cts}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>

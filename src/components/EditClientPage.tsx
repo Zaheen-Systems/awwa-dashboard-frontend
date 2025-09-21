@@ -4,28 +4,14 @@ import { Input } from './ui/input';
 import { Label } from './ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { Upload, User } from 'lucide-react';
+import { StudentBaseRead } from '../types/class';
+import { useCreateStudent, useUpdateStudent} from '../hooks/useStudents';
 // import userIconImage from 'figma:asset/175b30eba12976a029330759350f9c338ba2c59d.png';
 
-interface Client {
-  id: number;
-  name: string;
-  age: number;
-  gender: string;
-  idNumber: string;
-  primaryDiagnosis: string;
-  secondaryDiagnosis: string;
-  dateOfEnrollment: string;
-  photoUrl?: string;
-  email?: string;
-  dob?: string;
-  guardianName?: string;
-  guardianContact?: string;
-}
-
 interface EditClientPageProps {
-  client: Client;
+  client: StudentBaseRead;
   onBack: () => void;
-  onSave: (updatedClient: Client) => void;
+  onSave: (updatedClient: StudentBaseRead) => void;
 }
 
 export function EditClientPage({ 
@@ -33,21 +19,33 @@ export function EditClientPage({
   onBack, 
   onSave
 }: EditClientPageProps) {
-  const [formData, setFormData] = useState<Client>({
+  const [formData, setFormData] = useState<StudentBaseRead>({
     ...client,
     email: client.email || '',
     dob: client.dob || '',
-    guardianName: client.guardianName || '',
-    guardianContact: client.guardianContact || '',
-    dateOfEnrollment: client.dateOfEnrollment || new Date().toISOString().split('T')[0]
+    guardian_name: client.guardian_name || '',
+    guardian_contact: client.guardian_contact || '',
+    date_of_enrollment: client.date_of_enrollment || new Date().toISOString().split('T')[0]
   });
 
-  const handleInputChange = (field: keyof Client, value: string | number) => {
+    const createStudent = useCreateStudent();
+    const updateStudent = useUpdateStudent();
+
+  const handleInputChange = (field: keyof StudentBaseRead, value: any) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    console.log(formData);
+    if (formData.id  && formData.id != 0) {
+      updateStudent.mutate(
+        { id: formData.id, data: formData },
+        { onSuccess: () => onSave(formData) }
+      );
+    } else {
+      createStudent.mutate(formData, { onSuccess: () => onSave(formData) });
+    }
     onSave(formData);
   };
 
@@ -64,7 +62,7 @@ export function EditClientPage({
         // In a real implementation, you would upload the file to a server
         // For now, we'll create a temporary URL
         const photoUrl = URL.createObjectURL(file);
-        handleInputChange('photoUrl', photoUrl);
+        handleInputChange('photo', photoUrl);
         console.log('Photo uploaded:', file.name);
       }
     };
@@ -140,14 +138,14 @@ export function EditClientPage({
 
                 {/* Primary Diagnosis */}
                 <div>
-                  <Label htmlFor="primaryDiagnosis" className="block mb-2" style={{ color: '#3C3C3C' }}>
+                  <Label htmlFor="primary_diagnosis" className="block mb-2" style={{ color: '#3C3C3C' }}>
                     Primary Diagnosis
                   </Label>
                   <Input
-                    id="primaryDiagnosis"
+                    id="primary_diagnosis"
                     type="text"
-                    value={formData.primaryDiagnosis}
-                    onChange={(e) => handleInputChange('primaryDiagnosis', e.target.value)}
+                    value={formData.primary_diagnosis}
+                    onChange={(e) => handleInputChange('primary_diagnosis', e.target.value)}
                     className="w-full border-2 px-3 py-2 rounded-none"
                     style={{ borderColor: '#BDC3C7' }}
                   />
@@ -155,14 +153,14 @@ export function EditClientPage({
 
                 {/* Guardian Name */}
                 <div>
-                  <Label htmlFor="guardianName" className="block mb-2" style={{ color: '#3C3C3C' }}>
+                  <Label htmlFor="guardian_name" className="block mb-2" style={{ color: '#3C3C3C' }}>
                     Guardian Name
                   </Label>
                   <Input
-                    id="guardianName"
+                    id="guardian_name"
                     type="text"
-                    value={formData.guardianName}
-                    onChange={(e) => handleInputChange('guardianName', e.target.value)}
+                    value={formData.guardian_name}
+                    onChange={(e) => handleInputChange('guardian_name', e.target.value)}
                     className="w-full border-2 px-3 py-2 rounded-none"
                     style={{ borderColor: '#BDC3C7' }}
                   />
@@ -188,14 +186,14 @@ export function EditClientPage({
               <div className="space-y-6">
                 {/* Age */}
                 <div>
-                  <Label htmlFor="age" className="block mb-2" style={{ color: '#3C3C3C' }}>
+                  <Label htmlFor="chronological_age" className="block mb-2" style={{ color: '#3C3C3C' }}>
                     Age
                   </Label>
                   <Input
-                    id="age"
+                    id="chronological_age"
                     type="number"
-                    value={formData.age}
-                    onChange={(e) => handleInputChange('age', parseInt(e.target.value) || 0)}
+                    value={formData.chronological_age}
+                    onChange={(e) => handleInputChange('chronological_age', parseInt(e.target.value) || 0)}
                     className="w-full border-2 px-3 py-2 rounded-none"
                     style={{ borderColor: '#BDC3C7' }}
                     min="0"
@@ -219,8 +217,8 @@ export function EditClientPage({
                         boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)'
                       }}
                     >
-                      <SelectItem value="M" className="hover:bg-gray-100 focus:bg-gray-100" style={{ color: '#3C3C3C' }}>Male</SelectItem>
-                      <SelectItem value="F" className="hover:bg-gray-100 focus:bg-gray-100" style={{ color: '#3C3C3C' }}>Female</SelectItem>
+                      <SelectItem value="Male" className="hover:bg-gray-100 focus:bg-gray-100" style={{ color: '#3C3C3C' }}>Male</SelectItem>
+                      <SelectItem value="Female" className="hover:bg-gray-100 focus:bg-gray-100" style={{ color: '#3C3C3C' }}>Female</SelectItem>
                       <SelectItem value="Other" className="hover:bg-gray-100 focus:bg-gray-100" style={{ color: '#3C3C3C' }}>Other</SelectItem>
                     </SelectContent>
                   </Select>
@@ -228,14 +226,14 @@ export function EditClientPage({
 
                 {/* Secondary Diagnosis */}
                 <div>
-                  <Label htmlFor="secondaryDiagnosis" className="block mb-2" style={{ color: '#3C3C3C' }}>
+                  <Label htmlFor="secondary_diagnosis" className="block mb-2" style={{ color: '#3C3C3C' }}>
                     Secondary Diagnosis
                   </Label>
                   <Input
-                    id="secondaryDiagnosis"
+                    id="secondary_diagnosis"
                     type="text"
-                    value={formData.secondaryDiagnosis}
-                    onChange={(e) => handleInputChange('secondaryDiagnosis', e.target.value)}
+                    value={formData.secondary_diagnosis}
+                    onChange={(e) => handleInputChange('secondary_diagnosis', e.target.value)}
                     className="w-full border-2 px-3 py-2 rounded-none"
                     style={{ borderColor: '#BDC3C7' }}
                   />
@@ -243,14 +241,14 @@ export function EditClientPage({
 
                 {/* Guardian Contact */}
                 <div>
-                  <Label htmlFor="guardianContact" className="block mb-2" style={{ color: '#3C3C3C' }}>
+                  <Label htmlFor="guardian_contact" className="block mb-2" style={{ color: '#3C3C3C' }}>
                     Guardian Contact
                   </Label>
                   <Input
-                    id="guardianContact"
+                    id="guardian_contact"
                     type="tel"
-                    value={formData.guardianContact}
-                    onChange={(e) => handleInputChange('guardianContact', e.target.value)}
+                    value={formData.guardian_contact}
+                    onChange={(e) => handleInputChange('guardian_contact', e.target.value)}
                     className="w-full border-2 px-3 py-2 rounded-none"
                     style={{ borderColor: '#BDC3C7' }}
                   />
@@ -258,14 +256,14 @@ export function EditClientPage({
 
                 {/* Date of Enrollment */}
                 <div>
-                  <Label htmlFor="dateOfEnrollment" className="block mb-2" style={{ color: '#3C3C3C' }}>
+                  <Label htmlFor="date_of_enrollment" className="block mb-2" style={{ color: '#3C3C3C' }}>
                     Date of Enrollment
                   </Label>
                   <Input
-                    id="dateOfEnrollment"
+                    id="date_of_enrollment"
                     type="date"
-                    value={formData.dateOfEnrollment}
-                    onChange={(e) => handleInputChange('dateOfEnrollment', e.target.value)}
+                    value={formData.date_of_enrollment}
+                    onChange={(e) => handleInputChange('date_of_enrollment', e.target.value)}
                     className="w-full border-2 px-3 py-2 rounded-none"
                     style={{ borderColor: '#BDC3C7' }}
                   />
@@ -277,9 +275,9 @@ export function EditClientPage({
             <div className="flex flex-col items-center space-y-4 py-6">
               {/* Profile Image Display */}
               <div className="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center overflow-hidden border-2" style={{ borderColor: '#BDC3C7' }}>
-                {formData.photoUrl ? (
+                {formData.photo ? (
                   <img 
-                    src={formData.photoUrl} 
+                    src={formData.photo} 
                     alt={`${formData.name}'s photo`}
                     className="w-full h-full object-cover"
                     onError={(e) => {
@@ -290,7 +288,7 @@ export function EditClientPage({
                   />
                 ) : null}
                 <User 
-                  className={`w-8 h-8 ${formData.photoUrl ? 'hidden' : ''}`}
+                  className={`w-8 h-8 ${formData.photo ? 'hidden' : ''}`}
                   style={{ color: '#BDC3C7' }}
                 />
               </div>
@@ -313,14 +311,14 @@ export function EditClientPage({
 
             {/* ID Number */}
             <div className="max-w-md mx-auto">
-              <Label htmlFor="idNumber" className="block mb-2" style={{ color: '#3C3C3C' }}>
+              <Label htmlFor="id_number" className="block mb-2" style={{ color: '#3C3C3C' }}>
                 ID Number
               </Label>
               <Input
-                id="idNumber"
+                id="id_number"
                 type="text"
-                value={formData.idNumber}
-                onChange={(e) => handleInputChange('idNumber', e.target.value)}
+                value={formData.id_number}
+                onChange={(e) => handleInputChange('id_number', e.target.value)}
                 className="w-full border-2 px-3 py-2 rounded-none"
                 style={{ borderColor: '#BDC3C7' }}
                 placeholder="Auto-generated or manual entry"

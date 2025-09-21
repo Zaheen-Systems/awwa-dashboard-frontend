@@ -1,8 +1,10 @@
-import { useState, useRef, useEffect } from 'react';
+import { useRef, useEffect } from 'react';
 import { Button } from './ui/button';
-import { Textarea } from './ui/textarea';
-import { Label } from './ui/label';
+// import { Textarea } from './ui/textarea';
+// import { Label } from './ui/label';
 import {  ChevronLeft } from 'lucide-react';
+import CommentsSection from './CommentSection';
+// import { Description } from '@radix-ui/react-dialog';
 
 // import awwaLogo from 'figma:asset/71b57c03c5488fc89f49e890a42dd4691fd017ee.png';
 
@@ -56,14 +58,14 @@ interface BehaviorDescriptorDetailPageProps {
 export function BehaviorDescriptorDetailPage({ 
   student, 
   behaviorDescriptor, 
-  currentUser,
-  existingComments = [],
+  // currentUser,
+  // existingComments = [],
   onBack, 
-  onSave, 
+  // onSave,
   
 }: BehaviorDescriptorDetailPageProps) {
-  const [newComment, setNewComment] = useState('');
-  const [allComments, setAllComments] = useState<Comment[]>(existingComments);
+  // const [newComment, setNewComment] = useState('');
+  // const [allComments, setAllComments] = useState<Comment[]>(existingComments);
 
   const videoRef = useRef<HTMLVideoElement | null>(null);
 
@@ -96,26 +98,26 @@ export function BehaviorDescriptorDetailPage({
     };
 }, [startTime, endTime]);
 
-  const handleSave = () => {
-    if (newComment.trim()) {
-      const comment: Comment = {
-        id: Date.now(),
-        text: newComment.trim(),
-        author: currentUser.name,
-        authorType: currentUser.type,
-        timestamp: new Date().toISOString()
-      };
+  // const handleSave = () => {
+  //   if (newComment.trim()) {
+  //     const comment: Comment = {
+  //       id: Date.now(),
+  //       text: newComment.trim(),
+  //       author: currentUser.name,
+  //       authorType: currentUser.type,
+  //       timestamp: new Date().toISOString()
+  //     };
       
-      const updatedComments = [...allComments, comment];
-      setAllComments(updatedComments);
-      onSave(updatedComments);
-      setNewComment('');
-    }
-  };
+  //     const updatedComments = [...allComments, comment];
+  //     setAllComments(updatedComments);
+  //     onSave(updatedComments);
+  //     setNewComment('');
+  //   }
+  // };
 
-  const getAuthorDisplayName = (author: string, authorType: 'team_member' | 'ct') => {
-    return authorType === 'ct' ? `${author} (CT)` : author;
-  };
+  // const getAuthorDisplayName = (author: string, authorType: 'team_member' | 'ct') => {
+  //   return authorType === 'ct' ? `${author} (CT)` : author;
+  // };
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: '#F8F9FA' }}>
@@ -244,12 +246,12 @@ export function BehaviorDescriptorDetailPage({
 
           {/* Comments Section */}
           <div className="bg-white rounded-lg shadow-sm overflow-hidden p-6">
-            <h3 className="font-medium mb-4" style={{ color: '#3C3C3C' }}>
+            {/* <h3 className="font-medium mb-4" style={{ color: '#3C3C3C' }}>
               Comments
-            </h3>
+            </h3> */}
             
             {/* Existing Comments */}
-            {allComments.length > 0 && (
+            {/* {allComments.length > 0 && (
               <div className="mb-6 space-y-4">
                 {allComments.map((comment) => (
                   <div key={comment.id} className="p-4 border-2 rounded-lg" style={{ borderColor: '#E8F4F8', backgroundColor: '#F8F9FA' }}>
@@ -265,10 +267,12 @@ export function BehaviorDescriptorDetailPage({
                   </div>
                 ))}
               </div>
-            )}
+            )} */}
+
+            <CommentsSection descriptorId={behaviorDescriptor.id}/>
             
             {/* Add New Comment */}
-            <div className="mb-6">
+            {/* <div className="mb-6">
               <Label htmlFor="newComment" style={{ color: '#3C3C3C' }}>
                 Add your comments
               </Label>
@@ -285,10 +289,10 @@ export function BehaviorDescriptorDetailPage({
                 onFocus={(e) => e.target.style.borderColor = '#e65039'}
                 onBlur={(e) => e.target.style.borderColor = '#BDC3C7'}
               />
-            </div>
+            </div> */}
 
             {/* Action Buttons */}
-            <div className="flex justify-end space-x-4">
+            {/* <div className="flex justify-end space-x-4">
               <Button
                 onClick={onBack}
                 className="px-6 py-2 font-medium border-2 transition-all duration-200 hover:opacity-90"
@@ -312,7 +316,7 @@ export function BehaviorDescriptorDetailPage({
               >
                 Save Comments
               </Button>
-            </div>
+            </div> */}
           </div>
         </div>
       </div>
