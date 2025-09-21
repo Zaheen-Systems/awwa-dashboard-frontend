@@ -22,13 +22,12 @@ export function Sidebar({
   onLogout 
 }: SidebarProps) {
   return (
-    <div className="w-64 flex-shrink-0 flex flex-col" style={{ backgroundColor: '#e65039' }}>
+    <div className="w-64 flex-shrink-0 flex flex-col" style={{ backgroundColor: '#FFF5F3' }}>
       <div className="p-6 flex-1">
         {/* AWWA Logo */}
         <div className="mb-8">
           <div 
             className="px-6 py-4 rounded-lg flex items-center justify-center"
-            style={{ backgroundColor: '#FFF5F3' }}
           >
             <img 
               src="/AWWA Logo_Full Colour.png" 
@@ -45,8 +44,8 @@ export function Sidebar({
             onClick={onDashboardClick}
             className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-left transition-all duration-200 ${
               currentPage === 'dashboard' || currentPage === 'admin-dashboard'
-                ? 'bg-white text-gray-800'
-                : 'text-white hover:bg-white hover:bg-opacity-20'
+                ? 'bg-red-600 text-white'
+                : 'text-gray-800 hover:bg-red-600 hover:text-white'
             }`}
           >
             <Home className="w-5 h-5" />
@@ -61,8 +60,8 @@ export function Sidebar({
               onClick={onTeamMembersClick}
               className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-left transition-all duration-200 ${
                 currentPage === 'team-members-ct' || currentPage === 'edit-team-member'
-                  ? 'bg-white text-gray-800'
-                  : 'text-white hover:bg-white hover:bg-opacity-20'
+                  ? 'bg-red-600 text-white'
+                  : 'text-gray-800 hover:bg-red-600 hover:text-white'
               }`}
             >
               <Users className="w-5 h-5" />
@@ -76,8 +75,8 @@ export function Sidebar({
               onClick={onClientClick}
               className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-left transition-all duration-200 ${
                 currentPage === 'client' || currentPage === 'edit-client'
-                  ? 'bg-white text-gray-800'
-                  : 'text-white hover:bg-white hover:bg-opacity-20'
+                  ? 'bg-red-600 text-white'
+                  : 'text-gray-800 hover:bg-red-600 hover:text-white'
               }`}
             >
               <UserCheck className="w-5 h-5" />
@@ -88,12 +87,12 @@ export function Sidebar({
       </div>
 
       {/* User Profile Section at Bottom */}
-      <div className="p-4 border-t border-white border-opacity-20">
+      <div className="p-4 border-t border-gray-300 border-opacity-50">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <button className="w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-left transition-all duration-200 text-white hover:bg-white hover:bg-opacity-20">
-              <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center">
-                <Settings className="w-4 h-4" style={{ color: '#e65039' }} />
+            <button className="w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-left transition-all duration-200 text-gray-800 hover:bg-red-600 hover:text-white">
+              <div className="w-8 h-8 rounded-full bg-red-600 flex items-center justify-center">
+                <Settings className="w-4 h-4" style={{ color: 'white' }} />
               </div>
               <div className="flex-1">
                 <div className="font-medium">User Settings</div>
