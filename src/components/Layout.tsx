@@ -36,9 +36,9 @@ export function Layout({
       />
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col">
+      <div className="flex-1 flex flex-col border-l border-gray-300">
         {/* Pink Top Bar */}
-        <div className="px-4 sm:px-6 py-4" style={{ backgroundColor: '#FFF5F3' }}>
+        <div className="px-4 sm:px-6 py-4 border-b border-gray-300" style={{ backgroundColor: '#FFF5F3' }}>
           <div className="flex items-center justify-between relative">
             {/* Left: Empty space for balance */}
             <div className="w-16"></div>

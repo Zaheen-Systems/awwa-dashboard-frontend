@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { Button } from './ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from './ui/table';
-import { User, ArrowLeft, Camera, Trash2 } from 'lucide-react';
+import { ArrowLeft, Trash2, Camera } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from './ui/dialog';
+
 import { ClassData } from '../types/class';
 import { useClassDetail } from '../hooks/useClasses';
 import { StudentBaseRead, UserRead } from '../types/class';
@@ -15,21 +16,6 @@ interface ClassDetailPageProps {
   onTeamMembersClick?: () => void;
 }
 
-interface TeamMember {
-  id: number;
-  first_name: string;
-  last_name: string;
-  age: number;
-  gender: 'M' | 'F';
-  specialization: string;
-  date_of_joining: string;
-  photo?: string;
-}
-
-// Mock data for team members
-const mockTeamMembers: TeamMember[] = [
-];
-
 export function ClassDetailPage({ classData, onBack }: ClassDetailPageProps) {
   const { data: clients } = useClassDetail(classData.id);
 
@@ -37,28 +23,33 @@ export function ClassDetailPage({ classData, onBack }: ClassDetailPageProps) {
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
 
   const handlePhotoClick = (person: StudentBaseRead | UserRead) => {
-    setSelectedPhoto({ name: person.id.toLocaleString(), photo: person.photo });
+    // Use a sensible display name: prefer first/last name if present, else fall back to id
+    const name =
+      ('first_name' in person && 'last_name' in person && person.first_name && person.last_name)
+        ? `${person.first_name} ${person.last_name}`
+        : String(person.id);
+    setSelectedPhoto({ name, photo: (person as any).photo });
   };
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: '#F8F9FA' }}>
       {/* Content Area */}
       <div className="px-6 py-4">
-        <div className="max-w-7xl mx-auto">
+        <div className="mx-auto max-w-7xl">
           {/* Breadcrumb and Back Button */}
-          <div className="flex items-center justify-between mb-4">
+          <div className="mb-4 flex items-center justify-between">
             <div className="flex items-center space-x-2">
-              <ArrowLeft className="w-4 h-4" style={{ color: '#e65039' }} />
+              <ArrowLeft className="h-4 w-4" style={{ color: '#e65039' }} />
               <span style={{ color: '#e65039' }}>Home &gt; {classData.name}</span>
             </div>
-            
+
             <Button
               onClick={onBack}
               className="px-6 py-2 font-medium transition-all duration-200 hover:opacity-90"
-              style={{ 
-                backgroundColor: '#e65039', 
+              style={{
+                backgroundColor: '#e65039',
                 color: 'white',
-                borderColor: '#e65039'
+                borderColor: '#e65039',
               }}
             >
               Back
@@ -67,19 +58,28 @@ export function ClassDetailPage({ classData, onBack }: ClassDetailPageProps) {
 
           {/* Page Title */}
           <div className="mb-6">
-            <h2 className="text-2xl font-bold" style={{ color: '#3C3C3C' }}>{classData.name}</h2>
+            <h2 className="text-2xl font-bold" style={{ color: '#3C3C3C' }}>
+              {classData.name}
+            </h2>
           </div>
 
           {/* Clients Section */}
           <div className="mb-8">
-            <h3 className="text-lg font-medium mb-4" style={{ color: '#3C3C3C' }}>Clients</h3>
-            
-            <div className="bg-white rounded border overflow-hidden" style={{ borderColor: '#BDC3C7' }}>
+            <div className="mb-4 flex items-baseline justify-between">
+              <h3 className="text-lg font-medium" style={{ color: '#3C3C3C' }}>
+                Clients
+              </h3>
+              <span className="text-sm text-gray-500">
+                {clients?.students?.length ?? 0} total
+              </span>
+            </div>
+
+            <div className="overflow-hidden rounded border bg-white" style={{ borderColor: '#BDC3C7' }}>
               <div className="overflow-x-auto">
                 <Table>
                   <TableHeader>
                     <TableRow className="border-b" style={{ borderColor: '#BDC3C7', backgroundColor: '#F8F9FA' }}>
-                      <TableHead className="text-sm font-medium" style={{ color: '#3C3C3C' }}>N</TableHead>
+                      <TableHead className="text-sm font-medium" style={{ color: '#3C3C3C' }}>#</TableHead>
                       <TableHead className="text-sm font-medium" style={{ color: '#3C3C3C' }}>Name ↑</TableHead>
                       <TableHead className="text-sm font-medium" style={{ color: '#3C3C3C' }}>Age</TableHead>
                       <TableHead className="text-sm font-medium" style={{ color: '#3C3C3C' }}>Gender</TableHead>
@@ -92,31 +92,57 @@ export function ClassDetailPage({ classData, onBack }: ClassDetailPageProps) {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {clients?.students.map((client, index) => (
-                      <TableRow 
-                        key={client.id} 
-                        className={`${index < clients.students.length - 1 ? "border-b" : ""} hover:bg-gray-50 transition-colors`} 
+                    {clients?.students?.map((client, index) => (
+                      <TableRow
+                        key={client.id}
+                        className={`${index < (clients.students.length - 1) ? 'border-b' : ''} transition-colors hover:bg-gray-50`}
                         style={{ borderColor: '#BDC3C7' }}
                       >
-                        <TableCell className="text-sm" style={{ color: '#3C3C3C' }}>{client.id}</TableCell>
-                        <TableCell className="text-sm font-medium" style={{ color: '#3C3C3C' }}>{client.name}</TableCell>
-                        <TableCell className="text-sm" style={{ color: '#3C3C3C' }}>{client.chronological_age}</TableCell>
-                        <TableCell className="text-sm" style={{ color: '#3C3C3C' }}>{client.gender}</TableCell>
-                        <TableCell className="text-sm" style={{ color: '#3C3C3C' }}>{client.id_number}</TableCell>
-                        <TableCell className="text-sm" style={{ color: '#3C3C3C' }}>{client.primary_diagnosis}</TableCell>
-                        <TableCell className="text-sm" style={{ color: '#3C3C3C' }}>{client.secondary_diagnosis}</TableCell>
-                        <TableCell className="text-sm" style={{ color: '#3C3C3C' }}>{client.date_of_enrollment}</TableCell>
-                        <TableCell className="text-sm" style={{ color: '#3C3C3C' }}>{client.ct}</TableCell>
+                        <TableCell className="text-sm" style={{ color: '#3C3C3C' }}>
+                          {index + 1}
+                        </TableCell>
+                        <TableCell className="text-sm font-medium" style={{ color: '#3C3C3C' }}>
+                          {client.name}
+                        </TableCell>
+                        <TableCell className="text-sm" style={{ color: '#3C3C3C' }}>
+                          {client.chronological_age}
+                        </TableCell>
+                        <TableCell className="text-sm" style={{ color: '#3C3C3C' }}>
+                          {client.gender}
+                        </TableCell>
+                        <TableCell className="text-sm" style={{ color: '#3C3C3C' }}>
+                          {client.id_number}
+                        </TableCell>
+                        <TableCell className="text-sm" style={{ color: '#3C3C3C' }}>
+                          {client.primary_diagnosis}
+                        </TableCell>
+                        <TableCell className="text-sm" style={{ color: '#3C3C3C' }}>
+                          {client.secondary_diagnosis}
+                        </TableCell>
+                        <TableCell className="text-sm" style={{ color: '#3C3C3C' }}>
+                          {client.date_of_enrollment}
+                        </TableCell>
+                        <TableCell className="text-sm" style={{ color: '#3C3C3C' }}>
+                          {client.ct}
+                        </TableCell>
                         <TableCell>
                           <button
                             onClick={() => handlePhotoClick(client)}
-                            className="w-10 h-8 border border-red-500 bg-red-50 flex items-center justify-center hover:bg-red-100 transition-colors rounded"
+                            className="flex h-8 w-10 items-center justify-center rounded border border-red-500 bg-red-50 transition-colors hover:bg-red-100"
                           >
-                            <Camera className="w-4 h-4" style={{ color: '#DC3545' }} />
+                            <Camera className="h-4 w-4" style={{ color: '#DC3545' }} />
                           </button>
                         </TableCell>
                       </TableRow>
                     ))}
+
+                    {!clients?.students?.length && (
+                      <TableRow>
+                        <TableCell colSpan={10} className="py-6 text-center text-sm text-gray-500">
+                          No clients found.
+                        </TableCell>
+                      </TableRow>
+                    )}
                   </TableBody>
                 </Table>
               </div>
@@ -125,14 +151,21 @@ export function ClassDetailPage({ classData, onBack }: ClassDetailPageProps) {
 
           {/* Team Members Section */}
           <div>
-            <h3 className="text-lg font-medium mb-4" style={{ color: '#3C3C3C' }}>Team members</h3>
-            
-            <div className="bg-white rounded border overflow-hidden" style={{ borderColor: '#BDC3C7' }}>
+            <div className="mb-4 flex items-baseline justify-between">
+              <h3 className="text-lg font-medium" style={{ color: '#3C3C3C' }}>
+                Team members
+              </h3>
+              <span className="text-sm text-gray-500">
+                {clients?.users?.length ?? 0} total
+              </span>
+            </div>
+
+            <div className="overflow-hidden rounded border bg-white" style={{ borderColor: '#BDC3C7' }}>
               <div className="overflow-x-auto">
                 <Table>
                   <TableHeader>
                     <TableRow className="border-b" style={{ borderColor: '#BDC3C7', backgroundColor: '#F8F9FA' }}>
-                      <TableHead className="text-sm font-medium" style={{ color: '#3C3C3C' }}>N</TableHead>
+                      <TableHead className="text-sm font-medium" style={{ color: '#3C3C3C' }}>#</TableHead>
                       <TableHead className="text-sm font-medium" style={{ color: '#3C3C3C' }}>Name</TableHead>
                       <TableHead className="text-sm font-medium" style={{ color: '#3C3C3C' }}>Gender</TableHead>
                       <TableHead className="text-sm font-medium" style={{ color: '#3C3C3C' }}>ID</TableHead>
@@ -143,29 +176,51 @@ export function ClassDetailPage({ classData, onBack }: ClassDetailPageProps) {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {clients?.users.map((member, index) => (
-                      <TableRow 
-                        key={member.id} 
-                        className={`${index < mockTeamMembers.length - 1 ? "border-b" : ""} hover:bg-gray-50 transition-colors`} 
+                    {clients?.users?.map((member, index) => (
+                      <TableRow
+                        key={member.id}
+                        className={`${index < (clients.users.length - 1) ? 'border-b' : ''} transition-colors hover:bg-gray-50`}
                         style={{ borderColor: '#BDC3C7' }}
                       >
-                        <TableCell className="text-sm" style={{ color: '#3C3C3C' }}>{index}</TableCell>
-                        <TableCell className="text-sm font-medium" style={{ color: '#3C3C3C' }}>{member.first_name} {member.last_name}</TableCell>
-                        <TableCell className="text-sm" style={{ color: '#3C3C3C' }}>{member.gender}</TableCell>
-                        <TableCell className="text-sm" style={{ color: '#3C3C3C' }}>{member.id_number}</TableCell>
-                        <TableCell className="text-sm" style={{ color: '#3C3C3C' }}>{member.role}</TableCell>
-                        <TableCell className="text-sm" style={{ color: '#3C3C3C' }}>{member.specialization}</TableCell>
-                        <TableCell className="text-sm" style={{ color: '#3C3C3C' }}>{member.date_of_joining}</TableCell>
+                        <TableCell className="text-sm" style={{ color: '#3C3C3C' }}>
+                          {index + 1}
+                        </TableCell>
+                        <TableCell className="text-sm font-medium" style={{ color: '#3C3C3C' }}>
+                          {member.first_name} {member.last_name}
+                        </TableCell>
+                        <TableCell className="text-sm" style={{ color: '#3C3C3C' }}>
+                          {member.gender}
+                        </TableCell>
+                        <TableCell className="text-sm" style={{ color: '#3C3C3C' }}>
+                          {member.id_number}
+                        </TableCell>
+                        <TableCell className="text-sm" style={{ color: '#3C3C3C' }}>
+                          {member.role}
+                        </TableCell>
+                        <TableCell className="text-sm" style={{ color: '#3C3C3C' }}>
+                          {member.specialization}
+                        </TableCell>
+                        <TableCell className="text-sm" style={{ color: '#3C3C3C' }}>
+                          {member.date_of_joining}
+                        </TableCell>
                         <TableCell>
                           <button
                             onClick={() => handlePhotoClick(member)}
-                            className="w-10 h-8 border border-red-500 bg-red-50 flex items-center justify-center hover:bg-red-100 transition-colors rounded"
+                            className="flex h-8 w-10 items-center justify-center rounded border border-red-500 bg-red-50 transition-colors hover:bg-red-100"
                           >
-                            <Camera className="w-4 h-4" style={{ color: '#DC3545' }} />
+                            <Camera className="h-4 w-4" style={{ color: '#DC3545' }} />
                           </button>
                         </TableCell>
                       </TableRow>
                     ))}
+
+                    {!clients?.users?.length && (
+                      <TableRow>
+                        <TableCell colSpan={8} className="py-6 text-center text-sm text-gray-500">
+                          No team members found.
+                        </TableCell>
+                      </TableRow>
+                    )}
                   </TableBody>
                 </Table>
               </div>
@@ -176,13 +231,13 @@ export function ClassDetailPage({ classData, onBack }: ClassDetailPageProps) {
 
       {/* Bottom actions */}
       <div className="px-6 pb-8">
-        <div className="max-w-7xl mx-auto flex justify-end">
+        <div className="mx-auto max-w-7xl flex justify-end">
           <Button
             onClick={() => setIsDeleteOpen(true)}
             className="px-6 py-2 font-medium transition-all duration-200 hover:opacity-90"
             style={{ backgroundColor: '#DC3545', color: 'white', borderColor: '#DC3545' }}
           >
-            <Trash2 className="w-4 h-4 mr-2" />
+            <Trash2 className="mr-2 h-4 w-4" />
             Delete Class
           </Button>
         </div>
@@ -190,7 +245,7 @@ export function ClassDetailPage({ classData, onBack }: ClassDetailPageProps) {
 
       {/* Delete confirmation dialog */}
       <Dialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>
-        <DialogContent className="max-w-md bg-white rounded-lg border-2" style={{ backgroundColor: 'white', borderColor: '#BDC3C7' }}>
+        <DialogContent className="max-w-md rounded-lg border-2 bg-white" style={{ borderColor: '#BDC3C7' }}>
           <DialogHeader>
             <DialogTitle style={{ color: '#3C3C3C' }}>Delete class?</DialogTitle>
             <DialogDescription style={{ color: '#6C757D' }}>
@@ -206,7 +261,11 @@ export function ClassDetailPage({ classData, onBack }: ClassDetailPageProps) {
               Cancel
             </Button>
             <Button
-              onClick={() => { console.log('Deleted class:', classData); setIsDeleteOpen(false); onBack(); }}
+              onClick={() => {
+                console.log('Deleted class:', classData);
+                setIsDeleteOpen(false);
+                onBack();
+              }}
               className="px-4 py-2 transition-all duration-200"
               style={{ backgroundColor: '#DC3545', color: 'white', border: 'none' }}
             >
@@ -216,31 +275,25 @@ export function ClassDetailPage({ classData, onBack }: ClassDetailPageProps) {
         </DialogContent>
       </Dialog>
 
-      {/* Photo View Dialog */}
-      <Dialog open={!!selectedPhoto} onOpenChange={() => setSelectedPhoto(null)}>
-        <DialogContent className="max-w-md">
+      {/* Photo preview dialog */}
+      <Dialog open={!!selectedPhoto} onOpenChange={(open) => !open && setSelectedPhoto(null)}>
+        <DialogContent className="max-w-lg rounded-lg border-2 bg-white" style={{ borderColor: '#BDC3C7' }}>
           <DialogHeader>
-            <DialogTitle style={{ color: '#3C3C3C' }}>
-              {selectedPhoto?.name} - Photo
-            </DialogTitle>
+            <DialogTitle style={{ color: '#3C3C3C' }}>{selectedPhoto?.name}</DialogTitle>
             <DialogDescription style={{ color: '#6C757D' }}>
-              View the photo for {selectedPhoto?.name}. Click outside to close this dialog.
+              Photo preview
             </DialogDescription>
           </DialogHeader>
-          <div className="flex justify-center p-4">
+          <div className="flex items-center justify-center">
             {selectedPhoto?.photo ? (
-              <img 
-                src={selectedPhoto.photo} 
-                alt={`${selectedPhoto.name}'s photo`}
-                className="max-w-full h-auto rounded-lg"
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={selectedPhoto.photo}
+                alt={selectedPhoto.name}
+                className="max-h-[60vh] max-w-full rounded"
               />
             ) : (
-              <div className="w-48 h-48 bg-gray-200 rounded-lg flex items-center justify-center">
-                <div className="text-center">
-                  <User className="w-16 h-16 mx-auto mb-2" style={{ color: '#6C757D' }} />
-                  <p style={{ color: '#6C757D' }}>No photo available</p>
-                </div>
-              </div>
+              <p className="py-8 text-sm text-gray-500">No photo available.</p>
             )}
           </div>
         </DialogContent>
