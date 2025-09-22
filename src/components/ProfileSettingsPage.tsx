@@ -1,9 +1,9 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Label } from './ui/label';
 
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
+// import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { Textarea } from './ui/textarea';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
@@ -11,7 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
 import { Badge } from './ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
 import { User, Shield, Edit2, Camera, ChevronLeft } from 'lucide-react';
-
+import { useUser, useUpdateUser } from '../hooks/useUsers';
 interface ProfileSettingsPageProps {
   onBack: () => void;
 }
@@ -19,14 +19,28 @@ interface ProfileSettingsPageProps {
 export function ProfileSettingsPage({ 
   onBack 
 }: ProfileSettingsPageProps) {
-  // Personal Information
-  const [firstName, setFirstName] = useState('Ms.');
-  const [lastName, setLastName] = useState('Arya');
-  const [email, setEmail] = useState('arya@awwa.org');
-  const [phone, setPhone] = useState('+65 9123 4567');
-  const [jobTitle, setJobTitle] = useState('Special Education Teacher');
-  const [department, setDepartment] = useState('Early Childhood');
-  const [bio, setBio] = useState('Dedicated educator with 5+ years of experience in special education and behavior intervention.');
+  const { data: user } = useUser(localStorage.getItem("user_id"));
+
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
+  const [jobTitle, setJobTitle] = useState("");
+  const [department, setDepartment] = useState("");
+  const [bio, setBio] = useState("");
+
+  // ✅ Prefill states once user data is available
+  useEffect(() => {
+    if (user) {
+      setFirstName(user.first_name ?? "");
+      setLastName(user.last_name ?? "");
+      setEmail(user.email ?? "");
+      setPhone(user.phone_number ?? "");
+      setJobTitle(user.job_title ?? "");
+      setDepartment(user.department ?? "");
+      setBio(user.bio ?? "");
+    }
+  }, [user]);
 
   // Security Settings
   const [currentPassword, setCurrentPassword] = useState('');
@@ -37,12 +51,28 @@ export function ProfileSettingsPage({
   const [activeTab, setActiveTab] = useState('personal');
   const [showPasswordFields, setShowPasswordFields] = useState(false);
 
+  const updateUser = useUpdateUser();
+
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
     console.log('Profile updated:', { 
       personal: { firstName, lastName, email, phone, jobTitle, department, bio },
       security: { passwordChanged: newPassword ? true : false }
     });
+    const data = {
+      first_name: firstName,
+      last_name: lastName,
+      email,
+      phone_number: phone,
+      job_title: jobTitle,
+      department,
+      bio,
+    }
+    if (user?.id)
+      updateUser.mutate(
+        { id: user?.id, data: data },
+        { onSuccess: () => console.log("done") }
+      );
     // In a real implementation, this would save to backend
     onBack();
   };
@@ -255,6 +285,18 @@ export function ProfileSettingsPage({
                   </div>
                   <div>
                     <Label htmlFor="department" style={{ color: '#3C3C3C' }}>Department</Label>
+                    <Input
+                      id="department"
+                      value={department}
+                      onChange={(e) => setDepartment(e.target.value)}
+                      className="mt-2 border-2 rounded-none"
+                      style={{ borderColor: '#BDC3C7' }}
+                      onFocus={(e) => e.target.style.borderColor = '#2C5F7C'}
+                      onBlur={(e) => e.target.style.borderColor = '#BDC3C7'}
+                    />
+                  </div>
+                  {/* <div>
+                    <Label htmlFor="department" style={{ color: '#3C3C3C' }}>Department</Label>
                     <Select value={department} onValueChange={setDepartment}>
                       <SelectTrigger className="mt-2 border-2 rounded-none" style={{ borderColor: '#BDC3C7' }}>
                         <SelectValue />
@@ -274,7 +316,7 @@ export function ProfileSettingsPage({
                         <SelectItem value="Administration" className="hover:bg-gray-100 focus:bg-gray-100" style={{ color: '#3C3C3C' }}>Administration</SelectItem>
                       </SelectContent>
                     </Select>
-                  </div>
+                  </div> */}
                 </div>
 
                 <div>

@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import api from "../lib/axios";
-import { TeamMember } from "../types/users";
+import { TeamMember, UserWithClasses } from "../types/users";
 
 // Fetch function
 const fetchUsers = async (): Promise<TeamMember[]> => {
@@ -45,3 +45,17 @@ export function useUpdateUser() {
     },
   });
 }
+
+
+const getUserById = async (userId: string | null): Promise<UserWithClasses> => {
+  const { data } = await api.get(`/api/users/${userId}`);
+  return data;
+};
+
+export const useUser = (userId: string | null) => {
+  return useQuery<UserWithClasses>({
+    queryKey: ["user", userId],
+    queryFn: () => getUserById(userId),
+    enabled: !!userId, // only run if userId is defined
+  });
+};

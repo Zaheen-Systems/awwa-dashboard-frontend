@@ -5,6 +5,10 @@ export interface UserWithClasses {
   age?: number;
   gender?: string;
   email: string;
+  phone_number: string;
+  job_title: string;
+  department: string;
+  bio: string;
   role: string;
   classes: string; // comma separated classes
   specialization?: string;

@@ -84,6 +84,7 @@ export interface LoginResponse {
   token_type: string;
   user_type: "admin" | "teacher";
   name: string;
+  user_id: string;
 }
 
 const loginApi = async (username: string, password: string): Promise<LoginResponse> => {
@@ -115,6 +116,7 @@ export default function App() {
         // Save token (localStorage/sessionStorage or context)
         localStorage.setItem("token", data.access_token);
         localStorage.setItem("name", data.name);
+        localStorage.setItem("user_id", data.user_id);
 
         // Use user_type instead of checking username
         setUserType(data.user_type);
