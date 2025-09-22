@@ -326,6 +326,7 @@ export default function App() {
   const handleAddTeamMember = () => {
     // Create a new team member with default values
     const newTeamMember: TeamMember = {
+      id: 0,
       first_name: '',
       last_name: '',
       age: 0,
@@ -334,6 +335,7 @@ export default function App() {
       classes: '',
       role: 'Team member',
       email: '',
+      photo: ''
     };
     setSelectedTeamMember(newTeamMember);
     setCurrentPage('edit-team-member');

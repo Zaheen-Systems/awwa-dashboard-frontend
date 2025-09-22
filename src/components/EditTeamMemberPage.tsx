@@ -1,11 +1,14 @@
 import { useState } from 'react';
+import { useQueryClient } from "@tanstack/react-query";
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Label } from './ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from './ui/dialog';
 import { Upload, User } from 'lucide-react';
 import { TeamMember } from '../types/users';
 import { useCreateUser, useUpdateUser } from '../hooks/useUsers';
+import { useUploadUserPhoto } from '../hooks/useUploadFile';
 // import userIconImage from 'figma:asset/175b30eba12976a029330759350f9c338ba2c59d.png';
 
 interface EditTeamMemberPageProps {
@@ -24,9 +27,13 @@ export function EditTeamMemberPage({
     email: teamMember.email || '',
     dob: teamMember.dob || '',
   });
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const queryClient = useQueryClient();
 
   const createUser = useCreateUser();
   const updateUser = useUpdateUser();
+
+  const uploadMutation = useUploadUserPhoto();
 
   // Available classes for assignment (should come from backend in real app)
   const availableClasses: string[] = [
@@ -40,7 +47,7 @@ export function EditTeamMemberPage({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     console.log(formData);
-    if (formData.id) {
+    if (formData.id && formData.id != 0) {
       updateUser.mutate(
         { id: formData.id, data: formData },
         { onSuccess: () => onSave(formData) }
@@ -56,7 +63,7 @@ export function EditTeamMemberPage({
     console.log('Password reset requested for:', formData.first_name);
   };
 
-  const handlePhotoUpload = () => {
+  const handlePhotoUpload = (userId: number) => {
     // Create a file input element
     const fileInput = document.createElement('input');
     fileInput.type = 'file';
@@ -66,11 +73,22 @@ export function EditTeamMemberPage({
     fileInput.onchange = (e) => {
       const file = (e.target as HTMLInputElement).files?.[0];
       if (file) {
-        // In a real implementation, you would upload the file to a server
-        // For now, we'll create a temporary URL
-        const photoUrl = URL.createObjectURL(file);
-        // handleInputChange('photo', photoUrl);
-        console.log('Photo uploaded:', file.name, photoUrl);
+        uploadMutation.mutate(
+          { userId, file },
+          {
+            onSuccess: (data) => {
+              console.log("Uploaded:", data);
+              setIsDialogOpen(true);
+              queryClient.invalidateQueries({ queryKey: ["allstudents"] });
+            },
+            onError: (error) => {
+              console.error("Upload failed", error);
+            },
+          }
+        );
+        const photo = URL.createObjectURL(file);
+        handleInputChange('photo', photo);
+        console.log('Photo uploaded:', file.name);
       }
     };
     
@@ -302,9 +320,9 @@ export function EditTeamMemberPage({
             <div className="flex flex-col items-center space-y-4 py-6">
               {/* Profile Image Display */}
               <div className="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center overflow-hidden border-2" style={{ borderColor: '#BDC3C7' }}>
-                {formData.photoUrl ? (
+                {formData.photo ? (
                   <img 
-                    src={formData.photoUrl} 
+                    src={formData.photo} 
                     alt={`${formData.first_name}'s photo`}
                     className="w-full h-full object-cover"
                     onError={(e) => {
@@ -315,7 +333,7 @@ export function EditTeamMemberPage({
                   />
                 ) : null}
                 <User 
-                  className={`w-8 h-8 ${formData.photoUrl ? 'hidden' : ''}`}
+                  className={`w-8 h-8 ${formData.photo ? 'hidden' : ''}`}
                   style={{ color: '#BDC3C7' }}
                 />
               </div>
@@ -323,7 +341,7 @@ export function EditTeamMemberPage({
               {/* Change Photo Button */}
               <button
                 type="button"
-                onClick={handlePhotoUpload}
+                onClick={() => handlePhotoUpload(formData.id)}
                 className="flex items-center space-x-2 px-4 py-2 border-2 rounded-lg transition-all duration-200 hover:bg-blue-50"
                 style={{ 
                   borderColor: '#e65039',
@@ -363,6 +381,26 @@ export function EditTeamMemberPage({
                 {isNewMember ? 'Create' : 'Update'}
               </Button>
             </div>
+
+            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+              <DialogContent className="max-w-md bg-white rounded-lg border-2" style={{ backgroundColor: 'white', borderColor: '#BDC3C7' }}>
+                <DialogHeader>
+                  <DialogTitle style={{ color: '#3C3C3C' }}>Photo Update</DialogTitle>
+                  <DialogDescription style={{ color: '#6C757D' }}>
+                    Photo has been successfully updated.
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="flex justify-end space-x-3 pt-2">
+                  <Button
+                    onClick={() => setIsDialogOpen(false)}
+                    className="px-4 py-2 border-2 transition-all duration-200"
+                    style={{ backgroundColor: 'white', borderColor: '#BDC3C7', color: '#3C3C3C' }}
+                  >
+                    Ok
+                  </Button>
+                </div>
+              </DialogContent>
+            </Dialog>
 
             {/* Admin Note */}
             <div className="mt-6 pt-4">

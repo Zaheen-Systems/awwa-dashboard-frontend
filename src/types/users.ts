@@ -13,7 +13,7 @@ export interface UserWithClasses {
 }
 
 export interface TeamMember {
-  id?: number;
+  id: number;
   first_name: string;
   last_name: string;
   age: number;
@@ -25,5 +25,5 @@ export interface TeamMember {
   email?: string;
   dob?: string;
   date_of_joining?: string;
-  photoUrl?: string;
+  photo?: string;
 }

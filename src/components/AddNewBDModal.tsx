@@ -33,13 +33,14 @@ interface BDFormData {
 }
 
 export function AddNewBDModal({ isOpen, onClose, onSubmit, iepGoals }: AddNewBDModalProps) {
+  const name = localStorage.getItem("name")
   const [formData, setFormData] = useState<BDFormData>({
     date: '',
     action: '',
     trigger: '',
     source: '',
     time: '',
-    staff: 'Ms. Arya Stark', // Prefilled with current user name
+    staff: name? name: "", // Prefilled with current user name
     gcoClassification: '',
     iep_goal_id: ''
   });
@@ -48,13 +49,14 @@ export function AddNewBDModal({ isOpen, onClose, onSubmit, iepGoals }: AddNewBDM
   // Reset form when modal opens
   useEffect(() => {
     if (isOpen) {
+      const name = localStorage.getItem("name")
       setFormData({
         date: '',
         action: '',
         trigger: '',
         source: '',
         time: '',
-        staff: 'Ms. Arya Stark',
+        staff: name? name: "",
         gcoClassification: '',
         iep_goal_id: ''
       });

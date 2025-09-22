@@ -1,11 +1,12 @@
 import { useState } from 'react';
+import { useQueryClient } from "@tanstack/react-query";
 import { Button } from './ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from './ui/table';
 import { Upload, Plus, Edit, Camera, FileSpreadsheet, Download } from 'lucide-react';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from './ui/dialog';
 import { useUsers } from '../hooks/useUsers';
 import { TeamMember } from '../types/users';
-import { useUploadUsersCSV } from '../hooks/useUploadFile';
+import { useUploadUsersCSV, useUploadUserPhoto } from '../hooks/useUploadFile';
 
 // import noPhotoImage from 'figma:asset/59199c214065bea516a2cb6b06390172087b4e22.png';
 
@@ -16,16 +17,20 @@ interface TeamMembersCTPageProps {
 
 export function TeamMembersCTPage({ onEditTeamMember, onAddTeamMember }: TeamMembersCTPageProps) {
   const { data: users } = useUsers();
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   const [selectedMemberPhoto, setSelectedMemberPhoto] = useState<{ 
     name: string; 
     hasPhoto: boolean; 
     photoUrl?: string;
   } | null>(null);
+  const queryClient = useQueryClient();
   const [isBulkUploadOpen, setIsBulkUploadOpen] = useState(false);
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
 
   const uploadMutation = useUploadUsersCSV();
+
+  const uploadMutationPhoto = useUploadUserPhoto();
   
   const handlePhotoClick = (memberName: string) => {
     // In a real implementation, this would check if the member has a photo
@@ -45,6 +50,40 @@ export function TeamMembersCTPage({ onEditTeamMember, onAddTeamMember }: TeamMem
       hasPhoto,
       photoUrl: hasPhoto ? memberPhotoUrls[memberName] : undefined
     });
+  };
+
+  const handlePhotoUpload = (userId: number) => {
+    // Create a file input element
+    const fileInput = document.createElement('input');
+    fileInput.type = 'file';
+    fileInput.accept = 'image/*';
+    fileInput.style.display = 'none';
+    
+    fileInput.onchange = (e) => {
+      const file = (e.target as HTMLInputElement).files?.[0];
+      if (file) {
+        uploadMutationPhoto.mutate(
+          { userId, file },
+          {
+            onSuccess: (data) => {
+              console.log("Uploaded:", data);
+              setIsDialogOpen(true);
+              queryClient.invalidateQueries({ queryKey: ["users"] });
+            },
+            onError: (error) => {
+              console.error("Upload failed", error);
+            },
+          }
+        );
+        // const photo = URL.createObjectURL(file);
+        // handleInputChange('photo', photo);
+        // console.log('Photo uploaded:', file.name);
+      }
+    };
+    
+    document.body.appendChild(fileInput);
+    fileInput.click();
+    document.body.removeChild(fileInput);
   };
 
   const handleExcelUpload = () => {
@@ -191,10 +230,11 @@ export function TeamMembersCTPage({ onEditTeamMember, onAddTeamMember }: TeamMem
                                 className="rounded-lg flex items-center justify-center overflow-hidden"
                                 style={{ backgroundColor: '#E8F4F8' }}
                               >
-                                {selectedMemberPhoto.hasPhoto && selectedMemberPhoto.photoUrl ? (
+                                {member.photo ? (
                                   <img 
-                                    src={selectedMemberPhoto.photoUrl} 
-                                    alt={`Photo of ${selectedMemberPhoto.name}`}
+                                    src={member.photo}
+                                    key={member.photo}
+                                    alt={`Photo of ${member.first_name}`}
                                     className="max-w-full h-auto rounded-lg"
                                     style={{ maxHeight: '300px', maxWidth: '300px' }}
                                   />
@@ -209,9 +249,10 @@ export function TeamMembersCTPage({ onEditTeamMember, onAddTeamMember }: TeamMem
                               </div>
                             </div>
 
-                                                          <div className="flex justify-center space-x-3 pt-4">
+                            <div className="flex justify-center space-x-3 pt-4">
                                 <Button
                                   className="px-4 py-2 rounded-lg transition-all duration-200 hover:opacity-90"
+                                  onClick={() => handlePhotoUpload(member.id)}
                                   style={{ 
                                     backgroundColor: '#e65039',
                                     color: 'white',
@@ -373,6 +414,26 @@ export function TeamMembersCTPage({ onEditTeamMember, onAddTeamMember }: TeamMem
                     <strong>Note:</strong> The Excel file should contain columns for Name, Age, Gender, ID Number, Specialization, Date of Joining, Class, Role, Email, and DOB.
                   </p>
                 </div>
+              </div>
+            </DialogContent>
+          </Dialog>
+
+          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+            <DialogContent className="max-w-md bg-white rounded-lg border-2" style={{ backgroundColor: 'white', borderColor: '#BDC3C7' }}>
+              <DialogHeader>
+                <DialogTitle style={{ color: '#3C3C3C' }}>Photo Update</DialogTitle>
+                <DialogDescription style={{ color: '#6C757D' }}>
+                  Photo has been successfully updated.
+                </DialogDescription>
+              </DialogHeader>
+              <div className="flex justify-end space-x-3 pt-2">
+                <Button
+                  onClick={() => setIsDialogOpen(false)}
+                  className="px-4 py-2 border-2 transition-all duration-200"
+                  style={{ backgroundColor: 'white', borderColor: '#BDC3C7', color: '#3C3C3C' }}
+                >
+                  Ok
+                </Button>
               </div>
             </DialogContent>
           </Dialog>

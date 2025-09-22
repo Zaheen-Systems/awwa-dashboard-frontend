@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useQueryClient } from "@tanstack/react-query";
 import { Button } from './ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from './ui/table';
 import { Upload, Plus, Edit, FileSpreadsheet, Download, Camera } from 'lucide-react';
@@ -6,6 +7,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { StudentBaseRead } from '../types/class';
 import { useStudents } from '../hooks/useStudents';
 import { useUploadStudentsCSV } from '../hooks/useUploadFile';
+import { useUploadStudentPhoto } from '../hooks/useUploadFile';
 // import logoImage from 'figma:asset/71b57c03c5488fc89f49e890a42dd4691fd017ee.png';
 
 interface ClientPageProps {
@@ -22,12 +24,15 @@ export function ClientPage({
     hasPhoto: boolean; 
     photoUrl?: string;
   } | null>(null);
+  const queryClient = useQueryClient();
   const [isBulkUploadOpen, setIsBulkUploadOpen] = useState(false);
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   const { data: clients } = useStudents();
 
   const uploadMutation = useUploadStudentsCSV();
+  
 
   const handlePhotoClick = (clientName: string) => {
     // In a real implementation, this would check if the client has a photo
@@ -100,6 +105,42 @@ export function ClientPage({
   const resetUploadDialog = () => {
     setUploadedFile(null);
     setIsBulkUploadOpen(false);
+  };
+
+  const uploadMutationPhoto = useUploadStudentPhoto();
+
+  const handlePhotoUpload = (studentId: number) => {
+    // Create a file input element
+    const fileInput = document.createElement('input');
+    fileInput.type = 'file';
+    fileInput.accept = 'image/*';
+    fileInput.style.display = 'none';
+    
+    fileInput.onchange = (e) => {
+      const file = (e.target as HTMLInputElement).files?.[0];
+      if (file) {
+        uploadMutationPhoto.mutate(
+          { studentId, file },
+          {
+            onSuccess: (data) => {
+              console.log("Uploaded:", data);
+              setIsDialogOpen(true);
+              queryClient.invalidateQueries({ queryKey: ["allstudents"] });
+            },
+            onError: (error) => {
+              console.error("Upload failed", error);
+            },
+          }
+        );
+        // const photoUrl = URL.createObjectURL(file);
+        // handleInputChange('photo', photoUrl);
+        // console.log('Photo uploaded:', file.name);
+      }
+    };
+    
+    document.body.appendChild(fileInput);
+    fileInput.click();
+    document.body.removeChild(fileInput);
   };
 
   return (
@@ -184,10 +225,11 @@ export function ClientPage({
                                   className="rounded-lg flex items-center justify-center overflow-hidden"
                                   style={{ backgroundColor: '#E8F4F8' }}
                                 >
-                                  {selectedClientPhoto.hasPhoto && selectedClientPhoto.photoUrl ? (
-                                    <img 
-                                      src={selectedClientPhoto.photoUrl} 
-                                      alt={`Photo of ${selectedClientPhoto.name}`}
+                                  {client.photo ? (
+                                    <img
+                                      key={client.photo}
+                                      src={client.photo} 
+                                      alt={`Photo of ${client.name}`}
                                       className="max-w-full h-auto rounded-lg"
                                       style={{ maxHeight: '300px', maxWidth: '300px' }}
                                     />
@@ -205,6 +247,7 @@ export function ClientPage({
                               <div className="flex justify-center space-x-3 pt-4">
                                 <Button
                                   className="px-4 py-2 rounded-lg transition-all duration-200 hover:opacity-90"
+                                  onClick={() => handlePhotoUpload(client.id)}
                                   style={{ 
                                     backgroundColor: '#e65039',
                                     color: 'white',
@@ -382,6 +425,26 @@ export function ClientPage({
                     Cancel
                   </Button>
                 </DialogClose>
+              </div>
+            </DialogContent>
+          </Dialog>
+
+          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+            <DialogContent className="max-w-md bg-white rounded-lg border-2" style={{ backgroundColor: 'white', borderColor: '#BDC3C7' }}>
+              <DialogHeader>
+                <DialogTitle style={{ color: '#3C3C3C' }}>Photo Update</DialogTitle>
+                <DialogDescription style={{ color: '#6C757D' }}>
+                  Photo has been successfully updated.
+                </DialogDescription>
+              </DialogHeader>
+              <div className="flex justify-end space-x-3 pt-2">
+                <Button
+                  onClick={() => setIsDialogOpen(false)}
+                  className="px-4 py-2 border-2 transition-all duration-200"
+                  style={{ backgroundColor: 'white', borderColor: '#BDC3C7', color: '#3C3C3C' }}
+                >
+                  Ok
+                </Button>
               </div>
             </DialogContent>
           </Dialog>

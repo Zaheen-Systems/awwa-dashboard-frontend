@@ -1,11 +1,14 @@
 import { useState } from 'react';
+import { useQueryClient } from "@tanstack/react-query";
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Label } from './ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from './ui/dialog';
 import { Upload, User } from 'lucide-react';
 import { StudentBaseRead } from '../types/class';
-import { useCreateStudent, useUpdateStudent} from '../hooks/useStudents';
+import { useCreateStudent, useUpdateStudent } from '../hooks/useStudents';
+import { useUploadStudentPhoto } from '../hooks/useUploadFile';
 // import userIconImage from 'figma:asset/175b30eba12976a029330759350f9c338ba2c59d.png';
 
 interface EditClientPageProps {
@@ -27,9 +30,13 @@ export function EditClientPage({
     guardian_contact: client.guardian_contact || '',
     date_of_enrollment: client.date_of_enrollment || new Date().toISOString().split('T')[0]
   });
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const queryClient = useQueryClient();
 
-    const createStudent = useCreateStudent();
-    const updateStudent = useUpdateStudent();
+  const createStudent = useCreateStudent();
+  const updateStudent = useUpdateStudent();
+
+  const uploadMutation = useUploadStudentPhoto();
 
   const handleInputChange = (field: keyof StudentBaseRead, value: any) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -49,7 +56,7 @@ export function EditClientPage({
     onSave(formData);
   };
 
-  const handlePhotoUpload = () => {
+  const handlePhotoUpload = (studentId: number) => {
     // Create a file input element
     const fileInput = document.createElement('input');
     fileInput.type = 'file';
@@ -59,8 +66,19 @@ export function EditClientPage({
     fileInput.onchange = (e) => {
       const file = (e.target as HTMLInputElement).files?.[0];
       if (file) {
-        // In a real implementation, you would upload the file to a server
-        // For now, we'll create a temporary URL
+        uploadMutation.mutate(
+          { studentId, file },
+          {
+            onSuccess: (data) => {
+              console.log("Uploaded:", data);
+              setIsDialogOpen(true);
+              queryClient.invalidateQueries({ queryKey: ["allstudents"] });
+            },
+            onError: (error) => {
+              console.error("Upload failed", error);
+            },
+          }
+        );
         const photoUrl = URL.createObjectURL(file);
         handleInputChange('photo', photoUrl);
         console.log('Photo uploaded:', file.name);
@@ -296,7 +314,7 @@ export function EditClientPage({
               {/* Change Photo Button */}
               <button
                 type="button"
-                onClick={handlePhotoUpload}
+                onClick={() => handlePhotoUpload(formData.id)}
                 className="flex items-center space-x-2 px-4 py-2 border-2 rounded-lg transition-all duration-200 hover:bg-blue-50"
                 style={{ 
                   borderColor: '#e65039',
@@ -339,6 +357,26 @@ export function EditClientPage({
                 {isNewClient ? 'Create Client' : 'Update Client'}
               </Button>
             </div>
+
+            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+              <DialogContent className="max-w-md bg-white rounded-lg border-2" style={{ backgroundColor: 'white', borderColor: '#BDC3C7' }}>
+                <DialogHeader>
+                  <DialogTitle style={{ color: '#3C3C3C' }}>Photo Update</DialogTitle>
+                  <DialogDescription style={{ color: '#6C757D' }}>
+                    Photo has been successfully updated.
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="flex justify-end space-x-3 pt-2">
+                  <Button
+                    onClick={() => setIsDialogOpen(false)}
+                    className="px-4 py-2 border-2 transition-all duration-200"
+                    style={{ backgroundColor: 'white', borderColor: '#BDC3C7', color: '#3C3C3C' }}
+                  >
+                    Ok
+                  </Button>
+                </div>
+              </DialogContent>
+            </Dialog>
 
             {/* Info Note */}
             <div className="mt-6 pt-4">

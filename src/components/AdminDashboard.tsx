@@ -28,7 +28,7 @@ export function AdminDashboard({  onClassClick }: AdminDashboardProps) {
       <div className="max-w-7xl mx-auto">
         {/* Welcome Message */}
         <div className="mb-8">
-          <h2 className="text-2xl font-bold mb-2" style={{ color: '#3C3C3C' }}>Hi, Ms. Jamila</h2>
+          <h2 className="text-2xl font-bold mb-2" style={{ color: '#3C3C3C' }}>Hi, {localStorage.getItem("name")}</h2>
           <div className="w-16 h-1 rounded" style={{ backgroundColor: '#FF8C42' }}></div>
         </div>
 
