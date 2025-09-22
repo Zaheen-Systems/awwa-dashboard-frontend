@@ -5,6 +5,7 @@ import { Upload, Plus, Edit, FileSpreadsheet, Download, Camera } from 'lucide-re
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, DialogClose } from './ui/dialog';
 import { StudentBaseRead } from '../types/class';
 import { useStudents } from '../hooks/useStudents';
+import { useUploadStudentsCSV } from '../hooks/useUploadFile';
 // import logoImage from 'figma:asset/71b57c03c5488fc89f49e890a42dd4691fd017ee.png';
 
 interface ClientPageProps {
@@ -25,6 +26,8 @@ export function ClientPage({
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
 
   const { data: clients } = useStudents();
+
+  const uploadMutation = useUploadStudentsCSV();
 
   const handlePhotoClick = (clientName: string) => {
     // In a real implementation, this would check if the client has a photo
@@ -72,6 +75,9 @@ export function ClientPage({
   const handleBulkUploadSubmit = () => {
     if (uploadedFile) {
       console.log('Processing client bulk upload for file:', uploadedFile.name);
+      if (uploadedFile) {
+        uploadMutation.mutate(uploadedFile);
+      }
       // In a real implementation, process the Excel and import clients here
       setUploadedFile(null);
       setIsBulkUploadOpen(false);

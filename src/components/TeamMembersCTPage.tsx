@@ -5,6 +5,7 @@ import { Upload, Plus, Edit, Camera, FileSpreadsheet, Download } from 'lucide-re
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from './ui/dialog';
 import { useUsers } from '../hooks/useUsers';
 import { TeamMember } from '../types/users';
+import { useUploadUsersCSV } from '../hooks/useUploadFile';
 
 // import noPhotoImage from 'figma:asset/59199c214065bea516a2cb6b06390172087b4e22.png';
 
@@ -23,6 +24,8 @@ export function TeamMembersCTPage({ onEditTeamMember, onAddTeamMember }: TeamMem
   } | null>(null);
   const [isBulkUploadOpen, setIsBulkUploadOpen] = useState(false);
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
+
+  const uploadMutation = useUploadUsersCSV();
   
   const handlePhotoClick = (memberName: string) => {
     // In a real implementation, this would check if the member has a photo
@@ -66,6 +69,9 @@ export function TeamMembersCTPage({ onEditTeamMember, onAddTeamMember }: TeamMem
   const handleBulkUploadSubmit = () => {
     if (uploadedFile) {
       console.log('Processing bulk upload for file:', uploadedFile.name);
+      if (uploadedFile) {
+        uploadMutation.mutate(uploadedFile);
+      }
       // In a real implementation, this would process the Excel file
       // and bulk import team members
       setUploadedFile(null);
