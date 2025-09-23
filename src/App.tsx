@@ -459,7 +459,6 @@ export default function App() {
                     type="text"
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
-                    placeholder="Enter 'admin' for admin portal"
                     className="w-full px-3 sm:px-4 py-2 sm:py-3 border-2 rounded-none focus:outline-none"
                     style={{ 
                       backgroundColor: 'white',
