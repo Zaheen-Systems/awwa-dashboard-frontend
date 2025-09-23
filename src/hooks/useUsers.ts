@@ -52,11 +52,20 @@ export function useDeleteUser() {
 
   return useMutation({
     mutationFn: async (id: number) => {
+      console.log(`Attempting to delete user with ID: ${id}`);
       const res = await api.delete(`/api/users/${id}`);
+      console.log('Delete response:', res.data);
       return res.data;
     },
-    onSuccess: () => {
+    onSuccess: (data, id) => {
+      console.log(`Successfully deleted user with ID: ${id}`);
+      // Invalidate and refetch users list
       queryClient.invalidateQueries({ queryKey: ["users"] });
+      // Also invalidate user detail queries
+      queryClient.invalidateQueries({ queryKey: ["user"] });
+    },
+    onError: (error, id) => {
+      console.error(`Failed to delete user with ID: ${id}`, error);
     },
   });
 }

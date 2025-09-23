@@ -68,14 +68,17 @@ export function EditTeamMemberPage({
   const handleDelete = () => {
     if (formData.id && formData.id !== 0) {
       deleteUser.mutate(formData.id, {
-        onSuccess: () => {
+        onSuccess: (data) => {
+          console.log('Successfully deleted team member:', data);
+          setIsDeleteDialogOpen(false);
           onBack(); // Go back to the previous page after successful deletion
         },
         onError: (error) => {
           console.error('Error deleting team member:', error);
+          // Keep dialog open on error so user can try again
+          // You could also show a toast notification here
         }
       });
-      setIsDeleteDialogOpen(false);
     }
   };
 
@@ -456,10 +459,11 @@ export function EditTeamMemberPage({
                   </Button>
                   <Button
                     onClick={handleDelete}
+                    disabled={deleteUser.isPending}
                     className="px-4 py-2 transition-all duration-200"
                     style={{ backgroundColor: '#DC3545', color: 'white', borderColor: '#DC3545' }}
                   >
-                    Delete
+                    {deleteUser.isPending ? 'Deleting...' : 'Delete'}
                   </Button>
                 </div>
               </DialogContent>
