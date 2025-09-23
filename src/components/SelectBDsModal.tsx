@@ -4,6 +4,14 @@ import { Button } from './ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from './ui/table';
 import { Checkbox } from './ui/checkbox';
 
+
+interface IEPGoalBasic {
+  id: number;
+  description?: string | null;
+  gco?: string | null;    // will become boolean later
+}
+
+
 interface BehaviorDescriptor {
   id: number;
   selected: boolean;
@@ -13,15 +21,22 @@ interface BehaviorDescriptor {
   action: string;
   trigger: string;
   context: string;
-  gco: string;
-  iepGoal?: string;
+  gco_id: string;
+  created_at: string;
+  iepGoal?: IEPGoalBasic;
+}
+
+interface BehavioralDescriptorUI extends BehaviorDescriptor {
+  selected: boolean;
+  date: string;
+  time: string;
 }
 
 interface SelectBDsModalProps {
   isOpen: boolean;
   onClose: () => void;
   onGenerate: (selectedBDs: BehaviorDescriptor[]) => void;
-  behaviourDescriptors: BehaviorDescriptor[];
+  behaviourDescriptors: BehavioralDescriptorUI[];
   iepBehaviourDescriptors: BehaviorDescriptor[];
 }
 
@@ -161,7 +176,7 @@ export function SelectBDsModal({
                           <TableCell style={{ color: isSelected ? 'white' : '#3C3C3C' }} className="max-w-48 truncate">
                             <div title={descriptor.context}>{descriptor.context}</div>
                           </TableCell>
-                          <TableCell style={{ color: isSelected ? 'white' : '#3C3C3C' }}>{descriptor.gco}</TableCell>
+                          <TableCell style={{ color: isSelected ? 'white' : '#3C3C3C' }}>{descriptor.gco_id}</TableCell>
                         </TableRow>
                       );
                     })}
@@ -227,8 +242,8 @@ export function SelectBDsModal({
                           <TableCell style={{ color: isSelected ? 'white' : '#3C3C3C' }} className="max-w-40 truncate">
                             <div title={descriptor.context}>{descriptor.context}</div>
                           </TableCell>
-                          <TableCell style={{ color: isSelected ? 'white' : '#3C3C3C' }}>{descriptor.iepGoal}</TableCell>
-                          <TableCell style={{ color: isSelected ? 'white' : '#3C3C3C' }}>{descriptor.gco}</TableCell>
+                          <TableCell style={{ color: isSelected ? 'white' : '#3C3C3C' }}>{descriptor.iepGoal?.description}</TableCell>
+                          <TableCell style={{ color: isSelected ? 'white' : '#3C3C3C' }}>{descriptor.iepGoal?.gco}</TableCell>
                         </TableRow>
                       );
                     })}

@@ -4,7 +4,7 @@ import { Sidebar } from './Sidebar';
 interface LayoutProps {
   children: ReactNode;
   currentPage: string;
-  userType: 'user' | 'admin';
+  userType: 'teacher' | 'admin';
   onDashboardClick: () => void;
   onTeamMembersClick: () => void;
   onClientClick: () => void;

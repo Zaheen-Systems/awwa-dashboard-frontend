@@ -1,25 +1,15 @@
 import { useState } from 'react';
+import { useQueryClient } from "@tanstack/react-query";
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Label } from './ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from './ui/dialog';
 import { Upload, User } from 'lucide-react';
+import { TeamMember } from '../types/users';
+import { useCreateUser, useUpdateUser } from '../hooks/useUsers';
+import { useUploadUserPhoto } from '../hooks/useUploadFile';
 // import userIconImage from 'figma:asset/175b30eba12976a029330759350f9c338ba2c59d.png';
-
-interface TeamMember {
-  id: number;
-  name: string;
-  age: number;
-  gender: string;
-  idNumber: string;
-  specialization: string;
-  dateOfJoining: string;
-  class: string;
-  role: string;
-  email?: string;
-  dob?: string;
-  photoUrl?: string;
-}
 
 interface EditTeamMemberPageProps {
   teamMember: TeamMember;
@@ -36,15 +26,18 @@ export function EditTeamMemberPage({
     ...teamMember,
     email: teamMember.email || '',
     dob: teamMember.dob || '',
-    dateOfJoining: teamMember.dateOfJoining || new Date().toISOString().split('T')[0]
   });
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const queryClient = useQueryClient();
+
+  const createUser = useCreateUser();
+  const updateUser = useUpdateUser();
+
+  const uploadMutation = useUploadUserPhoto();
 
   // Available classes for assignment (should come from backend in real app)
   const availableClasses: string[] = [
     'Class 1',
-    'Class 1.2',
-    'Class 1.3',
-    'Class 2.1'
   ];
 
   const handleInputChange = (field: keyof TeamMember, value: string) => {
@@ -53,15 +46,24 @@ export function EditTeamMemberPage({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    console.log(formData);
+    if (formData.id && formData.id != 0) {
+      updateUser.mutate(
+        { id: formData.id, data: formData },
+        { onSuccess: () => onSave(formData) }
+      );
+    } else {
+      createUser.mutate(formData, { onSuccess: () => onSave(formData) });
+    }
     onSave(formData);
   };
 
   const handleResetPassword = () => {
     // In a real implementation, this would trigger a password reset
-    console.log('Password reset requested for:', formData.name);
+    console.log('Password reset requested for:', formData.first_name);
   };
 
-  const handlePhotoUpload = () => {
+  const handlePhotoUpload = (userId: number) => {
     // Create a file input element
     const fileInput = document.createElement('input');
     fileInput.type = 'file';
@@ -71,10 +73,21 @@ export function EditTeamMemberPage({
     fileInput.onchange = (e) => {
       const file = (e.target as HTMLInputElement).files?.[0];
       if (file) {
-        // In a real implementation, you would upload the file to a server
-        // For now, we'll create a temporary URL
-        const photoUrl = URL.createObjectURL(file);
-        handleInputChange('photoUrl', photoUrl);
+        uploadMutation.mutate(
+          { userId, file },
+          {
+            onSuccess: (data) => {
+              console.log("Uploaded:", data);
+              setIsDialogOpen(true);
+              queryClient.invalidateQueries({ queryKey: ["allstudents"] });
+            },
+            onError: (error) => {
+              console.error("Upload failed", error);
+            },
+          }
+        );
+        const photo = URL.createObjectURL(file);
+        handleInputChange('photo', photo);
         console.log('Photo uploaded:', file.name);
       }
     };
@@ -84,7 +97,7 @@ export function EditTeamMemberPage({
     document.body.removeChild(fileInput);
   };
 
-  const isNewMember = !teamMember.name || teamMember.id === Date.now() || teamMember.name === '';
+  const isNewMember = !teamMember.first_name || teamMember.id === Date.now() || teamMember.first_name === '';
 
   return (
     <div className="flex-1 px-6 py-8" style={{ backgroundColor: '#F8F9FA' }}>
@@ -116,16 +129,48 @@ export function EditTeamMemberPage({
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Left Column */}
               <div className="space-y-6">
-                {/* Name */}
+                {/* First Name */}
                 <div>
-                  <Label htmlFor="name" className="block mb-2" style={{ color: '#3C3C3C' }}>
-                    Name
+                  <Label htmlFor="first_name" className="block mb-2" style={{ color: '#3C3C3C' }}>
+                    First Name
                   </Label>
                   <Input
-                    id="name"
+                    id="first_name"
                     type="text"
-                    value={formData.name}
-                    onChange={(e) => handleInputChange('name', e.target.value)}
+                    value={formData.first_name}
+                    onChange={(e) => handleInputChange('first_name', e.target.value)}
+                    className="w-full border-2 px-3 py-2 rounded-none"
+                    style={{ borderColor: '#BDC3C7' }}
+                    required
+                  />
+                </div>
+
+                {/* Last Name */}
+                <div>
+                  <Label htmlFor="last_name" className="block mb-2" style={{ color: '#3C3C3C' }}>
+                    Last Name
+                  </Label>
+                  <Input
+                    id="last_name"
+                    type="text"
+                    value={formData.last_name}
+                    onChange={(e) => handleInputChange('last_name', e.target.value)}
+                    className="w-full border-2 px-3 py-2 rounded-none"
+                    style={{ borderColor: '#BDC3C7' }}
+                    required
+                  />
+                </div>
+
+                {/* ID Number */}
+                <div>
+                  <Label htmlFor="id_number" className="block mb-2" style={{ color: '#3C3C3C' }}>
+                    ID Number
+                  </Label>
+                  <Input
+                    id="id_number"
+                    type="text"
+                    value={formData.id_number}
+                    onChange={(e) => handleInputChange('id_number', e.target.value)}
                     className="w-full border-2 px-3 py-2 rounded-none"
                     style={{ borderColor: '#BDC3C7' }}
                     required
@@ -198,8 +243,8 @@ export function EditTeamMemberPage({
                         boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)'
                       }}
                     >
-                      <SelectItem value="Team member" className="hover:bg-gray-100 focus:bg-gray-100" style={{ color: '#3C3C3C' }}>Team member</SelectItem>
-                      <SelectItem value="CT" className="hover:bg-gray-100 focus:bg-gray-100" style={{ color: '#3C3C3C' }}>CT</SelectItem>
+                      <SelectItem value="teacher" className="hover:bg-gray-100 focus:bg-gray-100" style={{ color: '#3C3C3C' }}>Team member</SelectItem>
+                      <SelectItem value="ct" className="hover:bg-gray-100 focus:bg-gray-100" style={{ color: '#3C3C3C' }}>CT</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -221,8 +266,9 @@ export function EditTeamMemberPage({
                         boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)'
                       }}
                     >
-                      <SelectItem value="M" className="hover:bg-gray-100 focus:bg-gray-100" style={{ color: '#3C3C3C' }}>Male</SelectItem>
-                      <SelectItem value="F" className="hover:bg-gray-100 focus:bg-gray-100" style={{ color: '#3C3C3C' }}>Female</SelectItem>
+                      <SelectItem value="Male" className="hover:bg-gray-100 focus:bg-gray-100" style={{ color: '#3C3C3C' }}>Male</SelectItem>
+                      <SelectItem value="Female" className="hover:bg-gray-100 focus:bg-gray-100" style={{ color: '#3C3C3C' }}>Female</SelectItem>
+                      <SelectItem value="Other" className="hover:bg-gray-100 focus:bg-gray-100" style={{ color: '#3C3C3C' }}>Other</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -232,7 +278,7 @@ export function EditTeamMemberPage({
                   <Label htmlFor="class" className="block mb-2" style={{ color: '#3C3C3C' }}>
                     Classes
                   </Label>
-                  <Select value={formData.class} onValueChange={(value) => handleInputChange('class', value)}>
+                  <Select value={formData.classes} onValueChange={(value) => handleInputChange('classes', value)}>
                     <SelectTrigger className="w-full border-2 rounded-none" style={{ borderColor: '#BDC3C7' }}>
                       <SelectValue placeholder="Select class" />
                     </SelectTrigger>
@@ -255,14 +301,14 @@ export function EditTeamMemberPage({
 
                 {/* Date of joining */}
                 <div>
-                  <Label htmlFor="dateOfJoining" className="block mb-2" style={{ color: '#3C3C3C' }}>
+                  <Label htmlFor="date_of_joining" className="block mb-2" style={{ color: '#3C3C3C' }}>
                     Date of joining
                   </Label>
                   <Input
-                    id="dateOfJoining"
+                    id="date_of_joining"
                     type="date"
-                    value={formData.dateOfJoining}
-                    onChange={(e) => handleInputChange('dateOfJoining', e.target.value)}
+                    value={formData.date_of_joining}
+                    onChange={(e) => handleInputChange('date_of_joining', e.target.value)}
                     className="w-full border-2 px-3 py-2 rounded-none"
                     style={{ borderColor: '#BDC3C7' }}
                   />
@@ -274,10 +320,10 @@ export function EditTeamMemberPage({
             <div className="flex flex-col items-center space-y-4 py-6">
               {/* Profile Image Display */}
               <div className="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center overflow-hidden border-2" style={{ borderColor: '#BDC3C7' }}>
-                {formData.photoUrl ? (
+                {formData.photo ? (
                   <img 
-                    src={formData.photoUrl} 
-                    alt={`${formData.name}'s photo`}
+                    src={formData.photo} 
+                    alt={`${formData.first_name}'s photo`}
                     className="w-full h-full object-cover"
                     onError={(e) => {
                       // If the image fails to load, hide it and show the generic icon
@@ -287,7 +333,7 @@ export function EditTeamMemberPage({
                   />
                 ) : null}
                 <User 
-                  className={`w-8 h-8 ${formData.photoUrl ? 'hidden' : ''}`}
+                  className={`w-8 h-8 ${formData.photo ? 'hidden' : ''}`}
                   style={{ color: '#BDC3C7' }}
                 />
               </div>
@@ -295,7 +341,7 @@ export function EditTeamMemberPage({
               {/* Change Photo Button */}
               <button
                 type="button"
-                onClick={handlePhotoUpload}
+                onClick={() => handlePhotoUpload(formData.id)}
                 className="flex items-center space-x-2 px-4 py-2 border-2 rounded-lg transition-all duration-200 hover:bg-blue-50"
                 style={{ 
                   borderColor: '#e65039',
@@ -335,6 +381,26 @@ export function EditTeamMemberPage({
                 {isNewMember ? 'Create' : 'Update'}
               </Button>
             </div>
+
+            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+              <DialogContent className="max-w-md bg-white rounded-lg border-2" style={{ backgroundColor: 'white', borderColor: '#BDC3C7' }}>
+                <DialogHeader>
+                  <DialogTitle style={{ color: '#3C3C3C' }}>Photo Update</DialogTitle>
+                  <DialogDescription style={{ color: '#6C757D' }}>
+                    Photo has been successfully updated.
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="flex justify-end space-x-3 pt-2">
+                  <Button
+                    onClick={() => setIsDialogOpen(false)}
+                    className="px-4 py-2 border-2 transition-all duration-200"
+                    style={{ backgroundColor: 'white', borderColor: '#BDC3C7', color: '#3C3C3C' }}
+                  >
+                    Ok
+                  </Button>
+                </div>
+              </DialogContent>
+            </Dialog>
 
             {/* Admin Note */}
             <div className="mt-6 pt-4">

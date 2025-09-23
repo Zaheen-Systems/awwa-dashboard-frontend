@@ -1,85 +1,36 @@
 import { useState } from 'react';
+import { useQueryClient } from "@tanstack/react-query";
 import { Button } from './ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from './ui/table';
 import { Upload, Plus, Edit, Camera, FileSpreadsheet, Download } from 'lucide-react';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from './ui/dialog';
+import { useUsers } from '../hooks/useUsers';
+import { TeamMember } from '../types/users';
+import { useUploadUsersCSV, useUploadUserPhoto } from '../hooks/useUploadFile';
 
 // import noPhotoImage from 'figma:asset/59199c214065bea516a2cb6b06390172087b4e22.png';
-
-interface TeamMember {
-  id: number;
-  name: string;
-  age: number;
-  gender: string;
-  idNumber: string;
-  specialization: string;
-  dateOfJoining: string;
-  class: string;
-  role: string;
-  photoUrl?: string;
-  email?: string;
-  dob?: string;
-}
 
 interface TeamMembersCTPageProps {
   onEditTeamMember?: (member: TeamMember) => void;
   onAddTeamMember?: () => void;
 }
 
-// Mock team members data matching the image
-const mockTeamMembers: TeamMember[] = [
-  {
-    id: 1,
-    name: "Asuzhan",
-    age: 30,
-    gender: "F",
-    idNumber: "50000",
-    specialization: "Speech",
-    dateOfJoining: "2020-01-01",
-    class: "Class 1.1, Class 2.1",
-    role: "Team member",
-    photoUrl: "",
-    email: "asuzhan@awwa.org",
-    dob: "1994-05-15"
-  },
-  {
-    id: 2,
-    name: "Dawn",
-    age: 28,
-    gender: "F",
-    idNumber: "50000",
-    specialization: "Social worker",
-    dateOfJoining: "2021-07-03",
-    class: "",
-    role: "CT",
-    photoUrl: "",
-    email: "dawn@awwa.org",
-    dob: "1996-03-20"
-  },
-  {
-    id: 3,
-    name: "Joanne",
-    age: 28,
-    gender: "F",
-    idNumber: "50000",
-    specialization: "Social worker",
-    dateOfJoining: "2021-07-03",
-    class: "Class 1.2",
-    role: "Team member/ CT",
-    photoUrl: "",
-    email: "joanne@awwa.org",
-    dob: "1996-08-10"
-  }
-];
-
 export function TeamMembersCTPage({ onEditTeamMember, onAddTeamMember }: TeamMembersCTPageProps) {
+  const { data: users } = useUsers();
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+
   const [selectedMemberPhoto, setSelectedMemberPhoto] = useState<{ 
     name: string; 
     hasPhoto: boolean; 
     photoUrl?: string;
   } | null>(null);
+  const queryClient = useQueryClient();
   const [isBulkUploadOpen, setIsBulkUploadOpen] = useState(false);
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
+
+  const uploadMutation = useUploadUsersCSV();
+
+  const uploadMutationPhoto = useUploadUserPhoto();
   
   const handlePhotoClick = (memberName: string) => {
     // In a real implementation, this would check if the member has a photo
@@ -99,6 +50,40 @@ export function TeamMembersCTPage({ onEditTeamMember, onAddTeamMember }: TeamMem
       hasPhoto,
       photoUrl: hasPhoto ? memberPhotoUrls[memberName] : undefined
     });
+  };
+
+  const handlePhotoUpload = (userId: number) => {
+    // Create a file input element
+    const fileInput = document.createElement('input');
+    fileInput.type = 'file';
+    fileInput.accept = 'image/*';
+    fileInput.style.display = 'none';
+    
+    fileInput.onchange = (e) => {
+      const file = (e.target as HTMLInputElement).files?.[0];
+      if (file) {
+        uploadMutationPhoto.mutate(
+          { userId, file },
+          {
+            onSuccess: (data) => {
+              console.log("Uploaded:", data);
+              setIsDialogOpen(true);
+              queryClient.invalidateQueries({ queryKey: ["users"] });
+            },
+            onError: (error) => {
+              console.error("Upload failed", error);
+            },
+          }
+        );
+        // const photo = URL.createObjectURL(file);
+        // handleInputChange('photo', photo);
+        // console.log('Photo uploaded:', file.name);
+      }
+    };
+    
+    document.body.appendChild(fileInput);
+    fileInput.click();
+    document.body.removeChild(fileInput);
   };
 
   const handleExcelUpload = () => {
@@ -123,6 +108,9 @@ export function TeamMembersCTPage({ onEditTeamMember, onAddTeamMember }: TeamMem
   const handleBulkUploadSubmit = () => {
     if (uploadedFile) {
       console.log('Processing bulk upload for file:', uploadedFile.name);
+      if (uploadedFile) {
+        uploadMutation.mutate(uploadedFile);
+      }
       // In a real implementation, this would process the Excel file
       // and bulk import team members
       setUploadedFile(null);
@@ -178,7 +166,7 @@ export function TeamMembersCTPage({ onEditTeamMember, onAddTeamMember }: TeamMem
               </TableRow>
             </TableHeader>
             <TableBody>
-              {mockTeamMembers.map((member, index) => (
+              {users?.map((member, index) => (
                 <TableRow 
                   key={member.id} 
                   style={{ 
@@ -189,7 +177,7 @@ export function TeamMembersCTPage({ onEditTeamMember, onAddTeamMember }: TeamMem
                   <TableCell className="text-center" style={{ color: '#3C3C3C' }}>
                     {index + 1}
                   </TableCell>
-                  <TableCell style={{ color: '#3C3C3C' }}>{member.name}</TableCell>
+                  <TableCell style={{ color: '#3C3C3C' }}>{member.first_name} {member.last_name}</TableCell>
                   <TableCell className="text-center" style={{ color: '#3C3C3C' }}>
                     {member.age}
                   </TableCell>
@@ -197,25 +185,21 @@ export function TeamMembersCTPage({ onEditTeamMember, onAddTeamMember }: TeamMem
                     {member.gender}
                   </TableCell>
                   <TableCell className="text-center" style={{ color: '#3C3C3C' }}>
-                    {member.idNumber}
+                    {member.id_number}
                   </TableCell>
                   <TableCell style={{ color: '#3C3C3C' }}>{member.specialization}</TableCell>
                   <TableCell style={{ color: '#3C3C3C' }}>
-                    {new Date(member.dateOfJoining).toLocaleDateString('en-GB', {
-                      day: '2-digit',
-                      month: '2-digit',
-                      year: 'numeric'
-                    }).replace(/\//g, '.')}
+                    {member.date_of_joining}
                   </TableCell>
-                  <TableCell style={{ color: '#3C3C3C' }}>{member.class}</TableCell>
+                  <TableCell style={{ color: '#3C3C3C' }}>{member.classes}</TableCell>
                   <TableCell style={{ color: '#3C3C3C' }}>{member.role}</TableCell>
                   <TableCell className="text-center">
                     <Dialog>
                       <DialogTrigger asChild>
                         <button 
                           className="w-10 h-8 border border-red-500 bg-red-50 flex items-center justify-center hover:bg-red-100 transition-colors rounded"
-                          onClick={() => handlePhotoClick(member.name)}
-                          title={`View/Upload photo for ${member.name}`}
+                          onClick={() => handlePhotoClick(member.first_name)}
+                          title={`View/Upload photo for ${member.first_name}`}
                         >
                           <Camera className="w-4 h-4" style={{ color: '#DC3545' }} />
                         </button>
@@ -246,10 +230,11 @@ export function TeamMembersCTPage({ onEditTeamMember, onAddTeamMember }: TeamMem
                                 className="rounded-lg flex items-center justify-center overflow-hidden"
                                 style={{ backgroundColor: '#E8F4F8' }}
                               >
-                                {selectedMemberPhoto.hasPhoto && selectedMemberPhoto.photoUrl ? (
+                                {member.photo ? (
                                   <img 
-                                    src={selectedMemberPhoto.photoUrl} 
-                                    alt={`Photo of ${selectedMemberPhoto.name}`}
+                                    src={member.photo}
+                                    key={member.photo}
+                                    alt={`Photo of ${member.first_name}`}
                                     className="max-w-full h-auto rounded-lg"
                                     style={{ maxHeight: '300px', maxWidth: '300px' }}
                                   />
@@ -264,9 +249,10 @@ export function TeamMembersCTPage({ onEditTeamMember, onAddTeamMember }: TeamMem
                               </div>
                             </div>
 
-                                                          <div className="flex justify-center space-x-3 pt-4">
+                            <div className="flex justify-center space-x-3 pt-4">
                                 <Button
                                   className="px-4 py-2 rounded-lg transition-all duration-200 hover:opacity-90"
+                                  onClick={() => handlePhotoUpload(member.id)}
                                   style={{ 
                                     backgroundColor: '#e65039',
                                     color: 'white',
@@ -299,7 +285,7 @@ export function TeamMembersCTPage({ onEditTeamMember, onAddTeamMember }: TeamMem
                     <button 
                       onClick={() => onEditTeamMember && onEditTeamMember(member)}
                       className="p-1 hover:bg-gray-100 rounded transition-colors"
-                      title={`Edit ${member.name}`}
+                      title={`Edit ${member.first_name}`}
                     >
                       <Edit className="w-4 h-4" style={{ color: '#3C3C3C' }} />
                     </button>
@@ -428,6 +414,26 @@ export function TeamMembersCTPage({ onEditTeamMember, onAddTeamMember }: TeamMem
                     <strong>Note:</strong> The Excel file should contain columns for Name, Age, Gender, ID Number, Specialization, Date of Joining, Class, Role, Email, and DOB.
                   </p>
                 </div>
+              </div>
+            </DialogContent>
+          </Dialog>
+
+          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+            <DialogContent className="max-w-md bg-white rounded-lg border-2" style={{ backgroundColor: 'white', borderColor: '#BDC3C7' }}>
+              <DialogHeader>
+                <DialogTitle style={{ color: '#3C3C3C' }}>Photo Update</DialogTitle>
+                <DialogDescription style={{ color: '#6C757D' }}>
+                  Photo has been successfully updated.
+                </DialogDescription>
+              </DialogHeader>
+              <div className="flex justify-end space-x-3 pt-2">
+                <Button
+                  onClick={() => setIsDialogOpen(false)}
+                  className="px-4 py-2 border-2 transition-all duration-200"
+                  style={{ backgroundColor: 'white', borderColor: '#BDC3C7', color: '#3C3C3C' }}
+                >
+                  Ok
+                </Button>
               </div>
             </DialogContent>
           </Dialog>

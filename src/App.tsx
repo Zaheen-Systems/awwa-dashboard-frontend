@@ -5,6 +5,12 @@ import { Label } from './components/ui/label';
 
 import { Layout } from './components/Layout';
 import { Dashboard } from './components/Dashboard';
+import api from "./lib/axios";
+import { useMutation } from "@tanstack/react-query";
+import { TeamMember } from './types/users';
+import { ClassData, StudentBaseRead } from './types/class';
+
+
 // Lazy load heavy components
 const StudentDetailPage = lazy(() => import('./components/StudentDetailPage').then(module => ({ default: module.StudentDetailPage })));
 const BehaviorDescriptorDetailPage = lazy(() => import('./components/BehaviorDescriptorDetailPage').then(module => ({ default: module.BehaviorDescriptorDetailPage })));
@@ -17,15 +23,37 @@ const EditTeamMemberPage = lazy(() => import('./components/EditTeamMemberPage').
 const ClientPage = lazy(() => import('./components/ClientPage').then(module => ({ default: module.ClientPage })));
 const EditClientPage = lazy(() => import('./components/EditClientPage').then(module => ({ default: module.EditClientPage })));
 
-interface Student {
+interface IndividualIEPGoal {
   id: number;
+  student_id: string; // UUID as string
+  description?: string | null;
+  goal_met?: string | null;     // will become boolean later
+  processed?: string | null;    // will become boolean later
+  gco?: string | null;    // will become boolean later
+}
+
+interface Student {
+  id: string; // UUID
   name: string;
-  chronologicalAge: number;
-  ageBand: string;
-  primaryDiagnosis: string;
-  secondaryDiagnosis: string;
-  lastGCODate: string;
-  status: string;
+  chronological_age: number;
+  age_band?: string | null;
+  functional_age?: string | null;
+  primary_diagnosis?: string | null;
+  secondary_diagnosis?: string | null;
+  entry_type: string;
+  ct?: string | null;
+  last_gco_date?: string | null; // ISO date string
+  gco_1_functional_age?: string | null;
+  gco_2_functional_age?: string | null;
+  gco_3_functional_age?: string | null;
+  created_at: string; // ISO datetime string
+  iep_goals: IndividualIEPGoal[];
+}
+
+interface IEPGoalBasic {
+  id: number;
+  description?: string | null;
+  gco?: string | null;    // will become boolean later
 }
 
 interface BehaviorDescriptor {
@@ -37,8 +65,10 @@ interface BehaviorDescriptor {
   action: string;
   trigger: string;
   context: string;
-  gco: string;
-  iepGoal?: string;
+  gco_id: string;
+  created_at: string;
+  iep_goal?: IEPGoalBasic;
+  video_url?: string;
 }
 
 interface BehaviorComment {
@@ -49,49 +79,21 @@ interface BehaviorComment {
   timestamp: string;
 }
 
-interface ClassData {
-  id: number;
+export interface LoginResponse {
+  access_token: string;
+  token_type: string;
+  user_type: "admin" | "teacher";
   name: string;
-  days: string;
-  classTime: string;
-  numStudents: number;
-  numTeamMembers: number;
-  numCTs: number;
+  user_id: string;
 }
 
-interface TeamMember {
-  id: number;
-  name: string;
-  age: number;
-  gender: string;
-  idNumber: string;
-  specialization: string;
-  dateOfJoining: string;
-  class: string;
-  role: string;
-  email?: string;
-  dob?: string;
-  photoUrl?: string;
-}
-
-interface Client {
-  id: number;
-  name: string;
-  age: number;
-  gender: string;
-  idNumber: string;
-  primaryDiagnosis: string;
-  secondaryDiagnosis: string;
-  dateOfEnrollment: string;
-  photoUrl?: string;
-  email?: string;
-  dob?: string;
-  guardianName?: string;
-  guardianContact?: string;
-}
+const loginApi = async (username: string, password: string): Promise<LoginResponse> => {
+  const { data } = await api.post<LoginResponse>("/api/auth/login", { username, password });
+  return data;
+};
 
 type CurrentPage = 'login' | 'dashboard' | 'admin-dashboard' | 'class-detail' | 'student-detail' | 'behavior-detail' | 'report-generation' | 'profile-settings' | 'team-members-ct' | 'edit-team-member' | 'client' | 'edit-client';
-type UserType = 'user' | 'admin' | null;
+type UserType = 'teacher' | 'admin' | null;
 type NavigationContext = 'dashboard' | 'admin-dashboard' | 'client' | 'student-detail' | null;
 
 export default function App() {
@@ -104,21 +106,47 @@ export default function App() {
   const [selectedBehaviorDescriptor, setSelectedBehaviorDescriptor] = useState<BehaviorDescriptor | null>(null);
   const [selectedBDsForReport, setSelectedBDsForReport] = useState<BehaviorDescriptor[]>([]);
   const [selectedTeamMember, setSelectedTeamMember] = useState<TeamMember | null>(null);
-  const [selectedClient, setSelectedClient] = useState<Client | null>(null);
+  const [selectedClient, setSelectedClient] = useState<StudentBaseRead | null>(null);
   const [navigationContext, setNavigationContext] = useState<NavigationContext>(null);
+  const [error, setError] = useState("");
+
+    const loginMutation = useMutation({
+      mutationFn: () => loginApi(username, password),
+      onSuccess: (data) => {
+        // Save token (localStorage/sessionStorage or context)
+        localStorage.setItem("token", data.access_token);
+        localStorage.setItem("name", data.name);
+        localStorage.setItem("user_id", data.user_id);
+
+        // Use user_type instead of checking username
+        setUserType(data.user_type);
+
+        if (data.user_type === "admin") {
+          setCurrentPage("admin-dashboard");
+        } else {
+          setCurrentPage("dashboard");
+        }
+      },
+      onError: () => {
+        setError("Invalid username or password");
+      },
+    });
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
     console.log('Login attempted with:', { username, password });
     
-    // Check if admin login
-    if (username.toLowerCase().includes('admin')) {
-      setUserType('admin');
-      setCurrentPage('admin-dashboard');
-    } else {
-      setUserType('user');
-      setCurrentPage('dashboard');
+    setError(""); // clear old error
+
+    // validation
+    setError("");
+
+    if (!username.trim() || !password.trim()) {
+      setError("Enter valid username and password.");
+      return;
     }
+
+    loginMutation.mutate();
   };
 
   const handleLogout = () => {
@@ -281,10 +309,10 @@ export default function App() {
     handleBackToStudentDetail();
   };
 
-  const handleGenerateReport = (selectedBDs: BehaviorDescriptor[]) => {
-    setSelectedBDsForReport(selectedBDs);
-    setCurrentPage('report-generation');
-  };
+  // const handleGenerateReport = (selectedBDs: BehaviorDescriptor[]) => {
+  //   setSelectedBDsForReport(selectedBDs);
+  //   setCurrentPage('report-generation');
+  // };
 
   const handleBackFromReport = () => {
     setSelectedBDsForReport([]);
@@ -300,18 +328,16 @@ export default function App() {
   const handleAddTeamMember = () => {
     // Create a new team member with default values
     const newTeamMember: TeamMember = {
-      id: Date.now(), // Temporary ID for new member
-      name: '',
+      id: 0,
+      first_name: '',
+      last_name: '',
       age: 0,
       gender: '',
-      idNumber: '',
       specialization: '',
-      dateOfJoining: new Date().toISOString().split('T')[0], // Today's date
-      class: '',
+      classes: '',
       role: 'Team member',
       email: '',
-      dob: '',
-      photoUrl: ''
+      photo: ''
     };
     setSelectedTeamMember(newTeamMember);
     setCurrentPage('edit-team-member');
@@ -331,27 +357,27 @@ export default function App() {
   };
 
   // Client management functions
-  const handleEditClient = (client: Client) => {
+  const handleEditClient = (client: StudentBaseRead) => {
     setSelectedClient(client);
     setCurrentPage('edit-client');
   };
 
   const handleAddClient = () => {
     // Create a new client with default values
-    const newClient: Client = {
-      id: Date.now(), // Temporary ID for new client
+    const newClient: StudentBaseRead = {
+      id: 0, // Temporary ID for new client
       name: '',
-      age: 0,
+      chronological_age: 10,
       gender: '',
-      idNumber: '',
-      primaryDiagnosis: '',
-      secondaryDiagnosis: '',
-      dateOfEnrollment: new Date().toISOString().split('T')[0], // Today's date
-      photoUrl: '',
+      id_number: '',
+      primary_diagnosis: '',
+      secondary_diagnosis: '',
+      date_of_enrollment: new Date().toISOString().split('T')[0], // Today's date
+      photo: '',
       email: '',
       dob: '',
-      guardianName: '',
-      guardianContact: ''
+      guardian_name: '',
+      guardian_contact: ''
     };
     setSelectedClient(newClient);
     setCurrentPage('edit-client');
@@ -362,7 +388,7 @@ export default function App() {
     setCurrentPage('client');
   };
 
-  const handleSaveClient = (updatedClient: Client) => {
+  const handleSaveClient = (updatedClient: StudentBaseRead) => {
     console.log('Client updated:', updatedClient);
     // In a real implementation, this would save to backend
     setSelectedClient(null);
@@ -417,6 +443,9 @@ export default function App() {
               </h2>
               
               <form onSubmit={handleLogin} className="space-y-6">
+                  {error && (
+                    <p className="text-red-600 text-sm font-medium">{error}</p>
+                  )}
                 <div>
                   <Label 
                     htmlFor="username" 
@@ -609,7 +638,7 @@ export default function App() {
             student={selectedStudent} 
             onBack={handleBackToDashboard}
             onBehaviorDescriptorClick={handleBehaviorDescriptorClick}
-            onGenerateReport={handleGenerateReport}
+            // onGenerateReport={handleGenerateReport}
           />
         );
       }

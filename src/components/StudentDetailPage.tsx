@@ -7,17 +7,42 @@ import { Checkbox } from './ui/checkbox';
 import { Filter, ArrowLeft } from 'lucide-react';
 import { AddNewBDModal } from './AddNewBDModal';
 import { SelectBDsModal } from './SelectBDsModal';
+import api from "../lib/axios";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { format } from "date-fns";
 // import awwaLogo from 'figma:asset/71b57c03c5488fc89f49e890a42dd4691fd017ee.png';
 
-interface Student {
+interface IndividualIEPGoal {
   id: number;
+  student_id: string; // UUID as string
+  description?: string | null;
+  goal_met?: string | null;     // will become boolean later
+  processed?: string | null;    // will become boolean later
+  gco?: string | null;    // will become boolean later
+}
+
+interface IEPGoalBasic {
+  id: number;
+  description?: string | null;
+  gco?: string | null;    // will become boolean later
+}
+
+interface Student {
+  id: string; // UUID
   name: string;
-  chronologicalAge: number;
-  ageBand: string;
-  primaryDiagnosis: string;
-  secondaryDiagnosis: string;
-  lastGCODate: string;
-  status: string;
+  chronological_age: number;
+  age_band?: string | null;
+  functional_age?: string | null;
+  primary_diagnosis?: string | null;
+  secondary_diagnosis?: string | null;
+  entry_type: string;
+  ct?: string | null;
+  last_gco_date?: string | null; // ISO date string
+  gco_1_functional_age?: string | null;
+  gco_2_functional_age?: string | null;
+  gco_3_functional_age?: string | null;
+  created_at: string; // ISO datetime string
+  iep_goals: IndividualIEPGoal[];
 }
 
 interface BehaviorDescriptor {
@@ -29,8 +54,16 @@ interface BehaviorDescriptor {
   action: string;
   trigger: string;
   context: string;
-  gco: string;
-  iepGoal?: string;
+  gco_id: string;
+  created_at: string;
+  iep_goal?: IEPGoalBasic;
+  video_url?: string;
+}
+
+interface BehavioralDescriptorUI extends BehaviorDescriptor {
+  selected: boolean;
+  date: string;
+  time: string;
 }
 
 interface BDFormData {
@@ -41,171 +74,102 @@ interface BDFormData {
   time: string;
   staff: string;
   gcoClassification: string;
-  iepGoal: string;
+  iep_goal_id: string;
 }
 
 interface StudentDetailPageProps {
   student: Student;
   onBack: () => void;
   onBehaviorDescriptorClick: (behaviorDescriptor: BehaviorDescriptor) => void;
-  onGenerateReport: (selectedBDs: BehaviorDescriptor[]) => void;
+  // onGenerateReport: (selectedBDs: BehaviorDescriptor[]) => void;
 }
 
-// Mock GCO data structure - expanded for scrolling
-const mockGCOData = {
-  gco1: [
-    "1.1.1 - 2",
-    "1.1.2 - 3", 
-    "1.1.3 - 4",
-    "1.2.1 - 3",
-    "1.2.2 - 1",
-    "1.3.1 - 1",
-    "1.3.2 - 2",
-    "1.4.1 - 0"
-  ],
-  gco2: [
-    "2.1.1 - 4",
-    "2.1.2 - 0",
-    "2.2.1 - 5",
-    "2.3.1 - 1",
-    "",
-    "",
-    "",
-    ""
-  ],
-  gco3: [
-    "3.1.1 - 4",
-    "3.1.2 - 3",
-    "3.1.3 - 2", 
-    "3.2.1 - 5",
-    "3.2.1 - 5",
-    "3.3.1 - 5",
-    "",
-    ""
-  ]
+
+interface GroupedDescriptors {
+  "gco1": string[];
+  "gco2": string[];
+  "gco3": string[];
 };
 
-const mockGCOFunctionalAges = {
-  gco1: "18-24 months",
-  gco2: "13 - 18 months", 
-  gco3: "19 - 24 months"
+// const fetchStudentDetail = async (id: number): Promise<Student> => {
+//   const response = await axios.get(`/api/students/${id}`);
+//   return response.data;
+// };
+
+function useBehavioralDescriptors(studentId: number) {
+  return useQuery<BehavioralDescriptorUI[]>({
+    queryKey: ["behavioralDescriptors", studentId],
+    queryFn: async () => {
+      const { data } = await api.get<BehaviorDescriptor[]>(
+        `/api/students/${studentId}/behavioral_descriptors`
+      );
+
+      return data.map((item) => {
+        const createdAt = new Date(item.created_at);
+
+        return {
+          ...item,
+          selected: false,
+          date: format(createdAt, "dd.MM.yy"),
+          time: format(createdAt, "h:mm a"),
+        };
+      });
+    },
+  });
+}
+
+const fetchGroupedDescriptors = async (studentId: number) => {
+  const { data } = await api.get(`/api/behavioral-descriptors/grouped_gcos/${studentId}`);
+  return data;
 };
 
-const mockIEPGoals = [
-  { id: 1, text: "Aarav will participate in Play Time in EC", gco: "GCO 1" },
-  { id: 2, text: "", gco: "GCO 2" }
-];
-
-// Mock behaviour descriptors data for GCO
-const mockBehaviourDescriptors = [
-  {
-    id: 1,
-    selected: false,
-    date: "02.03.24",
-    time: "8:03 am",
-    source: "Snack time",
-    action: "Child 'X' pointed 'west more wheat crackers'",
-    trigger: "When teacher asked 'What do you want?'",
-    context: "During snack time",
-    gco: "3.1.1"
-  },
-  {
-    id: 2,
-    selected: false,
-    date: "02.03.24",
-    time: "8:03 am",
-    source: "Snack time",
-    action: "Child 'X' pointed 'west more wheat crackers'",
-    trigger: "When teacher asked 'What do you want?'",
-    context: "During snack time",
-    gco: "3.1.2"
-  },
-  {
-    id: 3,
-    selected: false,
-    date: "05.03.24",
-    time: "10:15 am",
-    source: "Free play",
-    action: "Child initiated eye contact and smiled",
-    trigger: "When peer approached with toy",
-    context: "During free play time",
-    gco: "2.1.1"
-  },
-  {
-    id: 4,
-    selected: false,
-    date: "05.03.24", 
-    time: "2:30 pm",
-    source: "Circle time",
-    action: "Child raised hand to answer question",
-    trigger: "When teacher asked about colors",
-    context: "During circle time activity",
-    gco: "1.2.1"
-  },
-  {
-    id: 5,
-    selected: false,
-    date: "06.03.24",
-    time: "9:45 am", 
-    source: "Art activity",
-    action: "Child requested help using gesture",
-    trigger: "When struggling with scissors",
-    context: "During art and craft time",
-    gco: "3.2.1"
-  }
-];
-
-// Mock behaviour descriptors data for IEP
-const mockIEPBehaviourDescriptors = [
-  {
-    id: 1,
-    selected: false,
-    date: "02.03.24",
-    time: "9:00 am",
-    source: "Snack time",
-    action: "Child 'X' pointed 'west more wheat crackers'",
-    trigger: "When teacher asked 'What do you want?'",
-    context: "During snack time",
-    iepGoal: "Goal 1",
-    gco: "1"
-  },
-  {
-    id: 2,
-    selected: false,
-    date: "02.03.24",
-    time: "9:00 am",
-    source: "Snack time",
-    action: "Child 'X' pointed 'west more wheat crackers'",
-    trigger: "When teacher asked 'What do you want?'",
-    context: "During snack time",
-    iepGoal: "Goal 2",
-    gco: "2"
-  }
-];
-
-export function StudentDetailPage({ student, onBack, onBehaviorDescriptorClick, onGenerateReport }: StudentDetailPageProps) {
+export function StudentDetailPage({ student, onBack, onBehaviorDescriptorClick }: StudentDetailPageProps) {
   const [date, setDate] = useState("");
-  const [behaviourDescriptors, setBehaviourDescriptors] = useState(mockBehaviourDescriptors);
-  const [iepBehaviourDescriptors, setIepBehaviourDescriptors] = useState(mockIEPBehaviourDescriptors);
+  const queryClient = useQueryClient();
+  // const [behaviourDescriptors, setBehaviourDescriptors] = useState<BehavioralDescriptorUI[]>([]);
+  // const [iepBehaviourDescriptors, setIepBehaviourDescriptors] = useState<BehaviorDescriptor[]>(mockIEPBehaviourDescriptors);
+
+  // const {
+  //   data: student,
+  //   // isLoading,
+  //   // isError,
+  //   // error,
+  // } = useQuery({
+  //   queryKey: ["student", studentId],
+  //   queryFn: () => fetchStudentDetail(studentId),
+  //   enabled: !!studentId, // only run if we have an id
+  // });
+
+  const { data: behaviourDescriptorsAll } = useBehavioralDescriptors(parseInt(student.id));
+  const iepBehaviourDescriptors = behaviourDescriptorsAll?.filter((bd) => Boolean(bd.iep_goal))
+  const behaviourDescriptors = behaviourDescriptorsAll?.filter((bd) => !Boolean(bd.iep_goal))
+
+    const { data: mockGCOData  } = useQuery<GroupedDescriptors>({
+    queryKey: ["groupedDescriptors", student.id],
+    queryFn: () => fetchGroupedDescriptors(parseInt(student.id)),
+    enabled: !!student.id, // don’t run until we have a studentId
+  });
 
   // Modal states
   const [showAddBDModal, setShowAddBDModal] = useState(false);
   const [showSelectBDsModal, setShowSelectBDsModal] = useState(false);
 
   const handleBehaviourSelect = (id: number, selected: boolean) => {
-    setBehaviourDescriptors(prev => 
-      prev.map(item => 
-        item.id === id ? { ...item, selected } : item
-      )
-    );
+    console.log(id, selected)
+    // setBehaviourDescriptors(prev => 
+    //   prev.map(item => 
+    //     item.id === id ? { ...item, selected } : item
+    //   )
+    // );
   };
 
   const handleIepBehaviourSelect = (id: number, selected: boolean) => {
-    setIepBehaviourDescriptors(prev => 
-      prev.map(item => 
-        item.id === id ? { ...item, selected } : item
-      )
-    );
+    console.log(id, selected)
+    // setIepBehaviourDescriptors(prev => 
+    //   prev.map(item => 
+    //     item.id === id ? { ...item, selected } : item
+    //   )
+    // );
   };
 
   const handleRowClick = (descriptor: BehaviorDescriptor, event: React.MouseEvent) => {
@@ -221,28 +185,89 @@ export function StudentDetailPage({ student, onBack, onBehaviorDescriptorClick, 
     setShowAddBDModal(true);
   };
 
+  const createBehaviorDescriptor = async (data: BDFormData) => {
+  const payload = {
+    source: data.source,
+    action: data.action,
+    trigger: data.trigger,
+    tag_time: data.time,               // maps to Time column
+    gco_id: data.gcoClassification,    // maps to FK
+    iep_goal_id: Number(data.iep_goal_id), // ensure it's number
+    student_id: student.id,
+  };
+
+    const res = await api.post("/api/behavioral-descriptors/", payload);
+    return res.data;
+  };
+
+  const useCreateBD = () => {
+    return useMutation({ mutationFn: createBehaviorDescriptor });
+  };
+
+  const { mutate: submitBD } = useCreateBD();
+
   const handleBDSubmit = (bdData: BDFormData) => {
     console.log("Team Member BD submitted:", bdData);
-    const newBD = {
-      id: Math.max(...behaviourDescriptors.map(bd => bd.id)) + 1,
-      selected: false,
-      date: bdData.date,
-      time: bdData.time || "N/A",
-      source: bdData.source,
-      action: bdData.action,
-      trigger: bdData.trigger,
-      context: "During " + bdData.source.toLowerCase(),
-      gco: bdData.gcoClassification
-    };
-    setBehaviourDescriptors(prev => [...prev, newBD]);
+
+    submitBD(bdData, {
+      onSuccess: (res) => {
+        console.log("BD saved:", res);
+
+        queryClient.invalidateQueries({
+          queryKey: ["behavioralDescriptors", parseInt(student.id)],
+        });
+      },
+      onError: (err) => {
+        console.error("Error saving BD:", err);
+      }
+    });
+
+    // const newBD = {
+    //   id: Math.max(...behaviourDescriptors.map(bd => bd.id)) + 1,
+    //   selected: false,
+    //   date: bdData.date,
+    //   time: bdData.time || "N/A",
+    //   source: bdData.source,
+    //   action: bdData.action,
+    //   trigger: bdData.trigger,
+    //   context: "During " + bdData.source.toLowerCase(),
+    //   gco_id: bdData.gcoClassification
+    // };
+    // setBehaviourDescriptors(prev => [...prev, newBD]);
   };
 
   const handleGenerateReportClick = () => {
-    setShowSelectBDsModal(true);
+    // setShowSelectBDsModal(true);
+    generateReport(student.id)
   };
 
+  function useGenerateReport() {
+    return useMutation({
+      mutationFn: async (studentId: string) => {
+        const response = await api.get(`/api/students/${studentId}/gcowmr`);
+        return response.data; // expects { download_url: string }
+      },
+      onSuccess: (data) => {
+        const { download_url } = data;
+        if (!download_url) return;
+
+        // trigger download automatically
+        const link = document.createElement("a");
+        link.href = download_url;
+        link.setAttribute("download", "report.xlsx"); // optional
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+      },
+    });
+  }
+
+  const { mutate: generateReport, isPending: isReportPending } = useGenerateReport();
+
   const handleReportGenerate = (selectedBDs: BehaviorDescriptor[]) => {
-    onGenerateReport(selectedBDs);
+    console.log(selectedBDs)
+    // onGenerateReport(selectedBDs);
+    generateReport(student.id)
   };
 
   return (
@@ -282,7 +307,7 @@ export function StudentDetailPage({ student, onBack, onBehaviorDescriptorClick, 
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center space-x-2">
               <ArrowLeft className="w-4 h-4" style={{ color: '#e65039' }} />
-              <span style={{ color: '#e65039' }}>Home &gt; {student.name}</span>
+              <span style={{ color: '#e65039' }}>Home &gt; {student?.name}</span>
             </div>
             
             <Button
@@ -310,39 +335,39 @@ export function StudentDetailPage({ student, onBack, onBehaviorDescriptorClick, 
               <TableBody>
                 <TableRow className="border-b" style={{ borderColor: '#BDC3C7' }}>
                   <TableCell className="font-medium" style={{ color: '#3C3C3C', backgroundColor: '#F8F9FA' }}>Name</TableCell>
-                  <TableCell style={{ color: '#3C3C3C' }}>{student.name}</TableCell>
+                  <TableCell style={{ color: '#3C3C3C' }}>{student?.name}</TableCell>
                   <TableCell className="font-medium" style={{ color: '#3C3C3C', backgroundColor: '#F8F9FA' }}>Chronological age (months)</TableCell>
-                  <TableCell style={{ color: '#3C3C3C' }}>{student.chronologicalAge}</TableCell>
+                  <TableCell style={{ color: '#3C3C3C' }}>{student?.chronological_age}</TableCell>
                 </TableRow>
                 <TableRow className="border-b" style={{ borderColor: '#BDC3C7' }}>
                   <TableCell className="font-medium" style={{ color: '#3C3C3C', backgroundColor: '#F8F9FA' }}>Primary Diagnosis</TableCell>
-                  <TableCell style={{ color: '#3C3C3C' }}>{student.primaryDiagnosis}</TableCell>
+                  <TableCell style={{ color: '#3C3C3C' }}>{student?.primary_diagnosis}</TableCell>
                   <TableCell className="font-medium" style={{ color: '#3C3C3C', backgroundColor: '#F8F9FA' }}>Age band (months)</TableCell>
-                  <TableCell style={{ color: '#3C3C3C' }}>{student.ageBand}</TableCell>
+                  <TableCell style={{ color: '#3C3C3C' }}>{student?.age_band}</TableCell>
                 </TableRow>
                 <TableRow className="border-b" style={{ borderColor: '#BDC3C7' }}>
                   <TableCell className="font-medium" style={{ color: '#3C3C3C', backgroundColor: '#F8F9FA' }}>Secondary Diagnosis</TableCell>
-                  <TableCell style={{ color: '#3C3C3C' }}>{student.secondaryDiagnosis}</TableCell>
+                  <TableCell style={{ color: '#3C3C3C' }}>{student?.secondary_diagnosis}</TableCell>
                   <TableCell className="font-medium" style={{ color: '#3C3C3C', backgroundColor: '#F8F9FA' }}>Functional Age</TableCell>
                   <TableCell style={{ color: '#3C3C3C' }}></TableCell>
                 </TableRow>
                 <TableRow className="border-b" style={{ borderColor: '#BDC3C7' }}>
                   <TableCell className="font-medium" style={{ color: '#3C3C3C', backgroundColor: '#F8F9FA' }}>Entry/Review/Exit</TableCell>
-                  <TableCell style={{ color: '#3C3C3C' }}>{student.status}</TableCell>
+                  <TableCell style={{ color: '#3C3C3C' }}>{student?.entry_type}</TableCell>
                   <TableCell className="font-medium" style={{ color: '#3C3C3C', backgroundColor: '#F8F9FA' }}>GCO 1</TableCell>
-                  <TableCell style={{ color: '#3C3C3C' }}>{mockGCOFunctionalAges.gco1}</TableCell>
+                  <TableCell style={{ color: '#3C3C3C' }}>{student.gco_1_functional_age}</TableCell>
                 </TableRow>
                 <TableRow className="border-b" style={{ borderColor: '#BDC3C7' }}>
                   <TableCell className="font-medium" style={{ color: '#3C3C3C', backgroundColor: '#F8F9FA' }}>CT</TableCell>
-                  <TableCell style={{ color: '#3C3C3C' }}>Jaylene</TableCell>
+                  <TableCell style={{ color: '#3C3C3C' }}></TableCell>
                   <TableCell className="font-medium" style={{ color: '#3C3C3C', backgroundColor: '#F8F9FA' }}>GCO 2</TableCell>
-                  <TableCell style={{ color: '#3C3C3C' }}>{mockGCOFunctionalAges.gco2}</TableCell>
+                  <TableCell style={{ color: '#3C3C3C' }}>{student.gco_2_functional_age}</TableCell>
                 </TableRow>
                 <TableRow>
                   <TableCell className="font-medium" style={{ color: '#3C3C3C', backgroundColor: '#F8F9FA' }}>Last GCO</TableCell>
-                  <TableCell style={{ color: '#3C3C3C' }}>{student.lastGCODate}</TableCell>
+                  <TableCell style={{ color: '#3C3C3C' }}>{student?.last_gco_date }</TableCell>
                   <TableCell className="font-medium" style={{ color: '#3C3C3C', backgroundColor: '#F8F9FA' }}>GCO 3</TableCell>
-                  <TableCell style={{ color: '#3C3C3C' }}>{mockGCOFunctionalAges.gco3}</TableCell>
+                  <TableCell style={{ color: '#3C3C3C' }}>{student.gco_3_functional_age}</TableCell>
                 </TableRow>
               </TableBody>
             </Table>
@@ -355,11 +380,11 @@ export function StudentDetailPage({ student, onBack, onBehaviorDescriptorClick, 
             </div>
             <Table>
               <TableBody>
-                {mockIEPGoals.map((goal, index) => (
-                  <TableRow key={goal.id} className={index < mockIEPGoals.length - 1 ? "border-b" : ""} style={{ borderColor: '#BDC3C7' }}>
+                {student.iep_goals.map((goal, index) => (
+                  <TableRow key={goal.id} className={index < student.iep_goals.length - 1 ? "border-b" : ""} style={{ borderColor: '#BDC3C7' }}>
                     <TableCell style={{ color: '#3C3C3C' }}>{index + 1}.</TableCell>
-                    <TableCell style={{ color: '#3C3C3C' }}>{goal.text}</TableCell>
-                    <TableCell style={{ color: '#3C3C3C', backgroundColor: '#F8F9FA' }}>{goal.gco}</TableCell>
+                    <TableCell style={{ color: '#3C3C3C' }}>{goal.description}</TableCell>
+                    <TableCell style={{ color: '#3C3C3C', backgroundColor: '#F8F9FA' }}>GCO {goal.gco}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>
@@ -402,7 +427,7 @@ export function StudentDetailPage({ student, onBack, onBehaviorDescriptorClick, 
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {mockGCOData.gco1.map((_, index) => (
+                  {mockGCOData?.gco1.map((_, index) => (
                     <TableRow key={index} className={index < mockGCOData.gco1.length - 1 ? "border-b" : ""} style={{ borderColor: '#BDC3C7' }}>
                       <TableCell className="w-12 text-center text-sm" style={{ 
                         color: '#3C3C3C', 
@@ -464,7 +489,7 @@ export function StudentDetailPage({ student, onBack, onBehaviorDescriptorClick, 
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {behaviourDescriptors.map((descriptor, index) => (
+                  {behaviourDescriptors?.map((descriptor, index) => (
                     <TableRow 
                       key={descriptor.id} 
                       className={`${index < behaviourDescriptors.length - 1 ? "border-b" : ""} cursor-pointer hover:bg-gray-50 transition-colors`} 
@@ -491,7 +516,7 @@ export function StudentDetailPage({ student, onBack, onBehaviorDescriptorClick, 
                       <TableCell style={{ color: descriptor.selected ? 'white' : '#3C3C3C' }}>{descriptor.action}</TableCell>
                       <TableCell style={{ color: descriptor.selected ? 'white' : '#3C3C3C' }}>{descriptor.trigger}</TableCell>
                       <TableCell style={{ color: descriptor.selected ? 'white' : '#3C3C3C' }}>{descriptor.context}</TableCell>
-                      <TableCell style={{ color: descriptor.selected ? 'white' : '#3C3C3C' }}>{descriptor.gco}</TableCell>
+                      <TableCell style={{ color: descriptor.selected ? 'white' : '#3C3C3C' }}>{descriptor.gco_id}</TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
@@ -530,7 +555,7 @@ export function StudentDetailPage({ student, onBack, onBehaviorDescriptorClick, 
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {iepBehaviourDescriptors.map((descriptor, index) => (
+                  {iepBehaviourDescriptors?.map((descriptor, index) => (
                     <TableRow 
                       key={descriptor.id} 
                       className={`${index < iepBehaviourDescriptors.length - 1 ? "border-b" : ""} cursor-pointer hover:bg-gray-50 transition-colors`} 
@@ -557,8 +582,8 @@ export function StudentDetailPage({ student, onBack, onBehaviorDescriptorClick, 
                       <TableCell style={{ color: descriptor.selected ? 'white' : '#3C3C3C' }}>{descriptor.action}</TableCell>
                       <TableCell style={{ color: descriptor.selected ? 'white' : '#3C3C3C' }}>{descriptor.trigger}</TableCell>
                       <TableCell style={{ color: descriptor.selected ? 'white' : '#3C3C3C' }}>{descriptor.context}</TableCell>
-                      <TableCell style={{ color: descriptor.selected ? 'white' : '#3C3C3C' }}>{descriptor.iepGoal}</TableCell>
-                      <TableCell style={{ color: descriptor.selected ? 'white' : '#3C3C3C' }}>{descriptor.gco}</TableCell>
+                      <TableCell style={{ color: descriptor.selected ? 'white' : '#3C3C3C' }}>{descriptor.iep_goal?.description}</TableCell>
+                      <TableCell style={{ color: descriptor.selected ? 'white' : '#3C3C3C' }}>GCO {descriptor.iep_goal?.gco}</TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
@@ -583,13 +608,14 @@ export function StudentDetailPage({ student, onBack, onBehaviorDescriptorClick, 
             <Button
               onClick={handleGenerateReportClick}
               className="px-6 py-2 font-medium transition-all duration-200 hover:opacity-90"
+              disabled={isReportPending}
               style={{ 
                 backgroundColor: '#e65039', 
                 color: 'white',
                 borderColor: '#e65039'
               }}
             >
-              Generate Report
+              {isReportPending ? "Generating..." : "Generate Report"}
             </Button>
           </div>
         </div>
@@ -600,13 +626,14 @@ export function StudentDetailPage({ student, onBack, onBehaviorDescriptorClick, 
         isOpen={showAddBDModal}
         onClose={() => setShowAddBDModal(false)}
         onSubmit={handleBDSubmit}
+        iepGoals={student.iep_goals}
       />
 
       <SelectBDsModal
         isOpen={showSelectBDsModal}
         onClose={() => setShowSelectBDsModal(false)}
-        behaviourDescriptors={behaviourDescriptors}
-        iepBehaviourDescriptors={iepBehaviourDescriptors}
+        behaviourDescriptors={behaviourDescriptors? behaviourDescriptors: []}
+        iepBehaviourDescriptors={iepBehaviourDescriptors? iepBehaviourDescriptors: []}
         onGenerate={handleReportGenerate}
       />
     </div>

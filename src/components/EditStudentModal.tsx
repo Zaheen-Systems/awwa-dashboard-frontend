@@ -8,14 +8,16 @@ import { Textarea } from './ui/textarea';
 import { Plus, Minus } from 'lucide-react';
 
 interface Student {
-  id: number;
+  id: string; // UUID
   name: string;
-  chronologicalAge: number;
-  ageBand: string;
-  primaryDiagnosis: string;
-  secondaryDiagnosis: string;
-  lastGCODate: string;
-  status: string;
+  chronological_age: number;
+  age_band?: string | null;
+  functional_age?: string | null;
+  primary_diagnosis?: string | null;
+  secondary_diagnosis?: string | null;
+  entry_type: string;
+  ct?: string | null;
+  last_gco_date?: string | null; // ISO date string
 }
 
 interface IEPGoal {
@@ -57,13 +59,13 @@ export function EditStudentModal({ isOpen, onClose, student, onSubmit }: EditStu
       setFormData({
         // Populated fields - show existing student data
         name: student.name,
-        chronologicalAge: student.chronologicalAge,
-        ageBand: student.ageBand,
-        primaryDiagnosis: student.primaryDiagnosis,
-        secondaryDiagnosis: student.secondaryDiagnosis,
+        chronologicalAge: student.chronological_age,
+        ageBand: student.age_band? student.age_band: "",
+        primaryDiagnosis: student.primary_diagnosis? student.primary_diagnosis: "",
+        secondaryDiagnosis: student.secondary_diagnosis? student.secondary_diagnosis: "",
         // Entered fields - empty for manual input
         lastGCODate: '',
-        status: student.status,
+        status: student.entry_type,
         // Functional age fields - empty for manual selection
         gco1: '',
         gco2: '',
@@ -108,12 +110,12 @@ export function EditStudentModal({ isOpen, onClose, student, onSubmit }: EditStu
       const updatedStudent: Student = {
         ...student,
         name: formData.name,
-        chronologicalAge: formData.chronologicalAge,
-        ageBand: formData.ageBand,
-        primaryDiagnosis: formData.primaryDiagnosis,
-        secondaryDiagnosis: formData.secondaryDiagnosis,
-        lastGCODate: formData.lastGCODate,
-        status: formData.status
+        chronological_age: formData.chronologicalAge,
+        age_band: formData.ageBand,
+        primary_diagnosis: formData.primaryDiagnosis,
+        secondary_diagnosis: formData.secondaryDiagnosis,
+        last_gco_date: formData.lastGCODate,
+        entry_type: formData.status
       };
       onSubmit(updatedStudent);
       onClose();

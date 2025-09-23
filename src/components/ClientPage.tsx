@@ -1,64 +1,19 @@
 import { useState } from 'react';
+import { useQueryClient } from "@tanstack/react-query";
 import { Button } from './ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from './ui/table';
 import { Upload, Plus, Edit, FileSpreadsheet, Download, Camera } from 'lucide-react';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, DialogClose } from './ui/dialog';
+import { StudentBaseRead } from '../types/class';
+import { useStudents } from '../hooks/useStudents';
+import { useUploadStudentsCSV } from '../hooks/useUploadFile';
+import { useUploadStudentPhoto } from '../hooks/useUploadFile';
 // import logoImage from 'figma:asset/71b57c03c5488fc89f49e890a42dd4691fd017ee.png';
 
-interface Client {
-  id: number;
-  name: string;
-  age: number;
-  gender: string;
-  idNumber: string;
-  primaryDiagnosis: string;
-  secondaryDiagnosis: string;
-  dateOfEnrollment: string;
-  photoUrl?: string;
-  email?: string;
-  dob?: string;
-  guardianName?: string;
-  guardianContact?: string;
-}
-
 interface ClientPageProps {
-  onEditClient?: (client: Client) => void;
+  onEditClient?: (client: StudentBaseRead) => void;
   onAddClient?: () => void;
 }
-
-// Mock data for clients
-const clients: Client[] = [
-  {
-    id: 1,
-    name: "Aaron Kumar",
-    age: 24,
-    gender: "M",
-    idNumber: "S0001",
-    primaryDiagnosis: "Speech and Language Difficulty",
-    secondaryDiagnosis: "Speech and Language Difficulty",
-    dateOfEnrollment: "21.01.2020",
-    photoUrl: "",
-    email: "aaron.kumar@example.com",
-    dob: "1999-03-15",
-    guardianName: "Priya Kumar",
-    guardianContact: "+65 9123 4567"
-  },
-  {
-    id: 2,
-    name: "Mei Ling Tan",
-    age: 28,
-    gender: "F",
-    idNumber: "S0002",
-    primaryDiagnosis: "Speech and Language Difficulty",
-    secondaryDiagnosis: "Speech and Language Difficulty",
-    dateOfEnrollment: "03.07.2021",
-    photoUrl: "",
-    email: "meiling.tan@example.com",
-    dob: "1995-11-22",
-    guardianName: "David Tan",
-    guardianContact: "+65 8765 4321"
-  }
-];
 
 export function ClientPage({ 
   onEditClient, 
@@ -69,8 +24,15 @@ export function ClientPage({
     hasPhoto: boolean; 
     photoUrl?: string;
   } | null>(null);
+  const queryClient = useQueryClient();
   const [isBulkUploadOpen, setIsBulkUploadOpen] = useState(false);
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+
+  const { data: clients } = useStudents();
+
+  const uploadMutation = useUploadStudentsCSV();
+  
 
   const handlePhotoClick = (clientName: string) => {
     // In a real implementation, this would check if the client has a photo
@@ -118,13 +80,16 @@ export function ClientPage({
   const handleBulkUploadSubmit = () => {
     if (uploadedFile) {
       console.log('Processing client bulk upload for file:', uploadedFile.name);
+      if (uploadedFile) {
+        uploadMutation.mutate(uploadedFile);
+      }
       // In a real implementation, process the Excel and import clients here
       setUploadedFile(null);
       setIsBulkUploadOpen(false);
     }
   };
 
-  const handleEditClient = (client: Client, event: React.MouseEvent) => {
+  const handleEditClient = (client: StudentBaseRead, event: React.MouseEvent) => {
     event.stopPropagation();
     if (onEditClient) {
       onEditClient(client);
@@ -140,6 +105,42 @@ export function ClientPage({
   const resetUploadDialog = () => {
     setUploadedFile(null);
     setIsBulkUploadOpen(false);
+  };
+
+  const uploadMutationPhoto = useUploadStudentPhoto();
+
+  const handlePhotoUpload = (studentId: number) => {
+    // Create a file input element
+    const fileInput = document.createElement('input');
+    fileInput.type = 'file';
+    fileInput.accept = 'image/*';
+    fileInput.style.display = 'none';
+    
+    fileInput.onchange = (e) => {
+      const file = (e.target as HTMLInputElement).files?.[0];
+      if (file) {
+        uploadMutationPhoto.mutate(
+          { studentId, file },
+          {
+            onSuccess: (data) => {
+              console.log("Uploaded:", data);
+              setIsDialogOpen(true);
+              queryClient.invalidateQueries({ queryKey: ["allstudents"] });
+            },
+            onError: (error) => {
+              console.error("Upload failed", error);
+            },
+          }
+        );
+        // const photoUrl = URL.createObjectURL(file);
+        // handleInputChange('photo', photoUrl);
+        // console.log('Photo uploaded:', file.name);
+      }
+    };
+    
+    document.body.appendChild(fileInput);
+    fileInput.click();
+    document.body.removeChild(fileInput);
   };
 
   return (
@@ -173,7 +174,7 @@ export function ClientPage({
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {clients.map((client, index) => (
+                {clients?.map((client, index) => (
                   <TableRow 
                     key={client.id} 
                     className={`${index < clients.length - 1 ? "border-b" : ""} hover:bg-gray-50 transition-colors`} 
@@ -181,12 +182,12 @@ export function ClientPage({
                   >
                     <TableCell style={{ color: '#3C3C3C' }}>{index + 1}</TableCell>
                     <TableCell style={{ color: '#3C3C3C' }}>{client.name}</TableCell>
-                    <TableCell style={{ color: '#3C3C3C' }}>{client.age}</TableCell>
+                    <TableCell style={{ color: '#3C3C3C' }}>{client.chronological_age}</TableCell>
                     <TableCell style={{ color: '#3C3C3C' }}>{client.gender}</TableCell>
-                    <TableCell style={{ color: '#3C3C3C' }}>{client.idNumber}</TableCell>
-                    <TableCell style={{ color: '#3C3C3C' }}>{client.primaryDiagnosis}</TableCell>
-                    <TableCell style={{ color: '#3C3C3C' }}>{client.secondaryDiagnosis}</TableCell>
-                    <TableCell style={{ color: '#3C3C3C' }}>{client.dateOfEnrollment}</TableCell>
+                    <TableCell style={{ color: '#3C3C3C' }}>{client.id_number}</TableCell>
+                    <TableCell style={{ color: '#3C3C3C' }}>{client.primary_diagnosis}</TableCell>
+                    <TableCell style={{ color: '#3C3C3C' }}>{client.secondary_diagnosis}</TableCell>
+                    <TableCell style={{ color: '#3C3C3C' }}>{client.date_of_enrollment}</TableCell>
                     <TableCell className="text-center">
                       <Dialog>
                         <DialogTrigger asChild>
@@ -224,10 +225,11 @@ export function ClientPage({
                                   className="rounded-lg flex items-center justify-center overflow-hidden"
                                   style={{ backgroundColor: '#E8F4F8' }}
                                 >
-                                  {selectedClientPhoto.hasPhoto && selectedClientPhoto.photoUrl ? (
-                                    <img 
-                                      src={selectedClientPhoto.photoUrl} 
-                                      alt={`Photo of ${selectedClientPhoto.name}`}
+                                  {client.photo ? (
+                                    <img
+                                      key={client.photo}
+                                      src={client.photo} 
+                                      alt={`Photo of ${client.name}`}
                                       className="max-w-full h-auto rounded-lg"
                                       style={{ maxHeight: '300px', maxWidth: '300px' }}
                                     />
@@ -245,6 +247,7 @@ export function ClientPage({
                               <div className="flex justify-center space-x-3 pt-4">
                                 <Button
                                   className="px-4 py-2 rounded-lg transition-all duration-200 hover:opacity-90"
+                                  onClick={() => handlePhotoUpload(client.id)}
                                   style={{ 
                                     backgroundColor: '#e65039',
                                     color: 'white',
@@ -422,6 +425,26 @@ export function ClientPage({
                     Cancel
                   </Button>
                 </DialogClose>
+              </div>
+            </DialogContent>
+          </Dialog>
+
+          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+            <DialogContent className="max-w-md bg-white rounded-lg border-2" style={{ backgroundColor: 'white', borderColor: '#BDC3C7' }}>
+              <DialogHeader>
+                <DialogTitle style={{ color: '#3C3C3C' }}>Photo Update</DialogTitle>
+                <DialogDescription style={{ color: '#6C757D' }}>
+                  Photo has been successfully updated.
+                </DialogDescription>
+              </DialogHeader>
+              <div className="flex justify-end space-x-3 pt-2">
+                <Button
+                  onClick={() => setIsDialogOpen(false)}
+                  className="px-4 py-2 border-2 transition-all duration-200"
+                  style={{ backgroundColor: 'white', borderColor: '#BDC3C7', color: '#3C3C3C' }}
+                >
+                  Ok
+                </Button>
               </div>
             </DialogContent>
           </Dialog>

@@ -4,7 +4,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 
 interface SidebarProps {
   currentPage: string;
-  userType: 'user' | 'admin';
+  userType: 'teacher' | 'admin';
   onDashboardClick: () => void;
   onTeamMembersClick: () => void;
   onClientClick: () => void;
