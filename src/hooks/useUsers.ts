@@ -57,7 +57,7 @@ export function useDeleteUser() {
       console.log('Delete response:', res.data);
       return res.data;
     },
-    onSuccess: (data, id) => {
+    onSuccess: (_, id) => {
       console.log(`Successfully deleted user with ID: ${id}`);
       // Invalidate and refetch users list
       queryClient.invalidateQueries({ queryKey: ["users"] });
