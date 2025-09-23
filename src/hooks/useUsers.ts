@@ -46,6 +46,21 @@ export function useUpdateUser() {
   });
 }
 
+// ---------------- Delete User ----------------
+export function useDeleteUser() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (id: number) => {
+      const res = await api.delete(`/api/users/${id}`);
+      return res.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["users"] });
+    },
+  });
+}
+
 
 const getUserById = async (userId: string | null): Promise<UserWithClasses> => {
   const { data } = await api.get(`/api/users/${userId}`);

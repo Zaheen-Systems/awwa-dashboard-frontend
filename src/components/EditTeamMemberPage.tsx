@@ -5,9 +5,9 @@ import { Input } from './ui/input';
 import { Label } from './ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from './ui/dialog';
-import { Upload, User } from 'lucide-react';
+import { Upload, User, Trash2 } from 'lucide-react';
 import { TeamMember } from '../types/users';
-import { useCreateUser, useUpdateUser } from '../hooks/useUsers';
+import { useCreateUser, useUpdateUser, useDeleteUser } from '../hooks/useUsers';
 import { useUploadUserPhoto } from '../hooks/useUploadFile';
 // import userIconImage from 'figma:asset/175b30eba12976a029330759350f9c338ba2c59d.png';
 
@@ -28,10 +28,12 @@ export function EditTeamMemberPage({
     dob: teamMember.dob || '',
   });
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const queryClient = useQueryClient();
 
   const createUser = useCreateUser();
   const updateUser = useUpdateUser();
+  const deleteUser = useDeleteUser();
 
   const uploadMutation = useUploadUserPhoto();
 
@@ -61,6 +63,20 @@ export function EditTeamMemberPage({
   const handleResetPassword = () => {
     // In a real implementation, this would trigger a password reset
     console.log('Password reset requested for:', formData.first_name);
+  };
+
+  const handleDelete = () => {
+    if (formData.id && formData.id !== 0) {
+      deleteUser.mutate(formData.id, {
+        onSuccess: () => {
+          onBack(); // Go back to the previous page after successful deletion
+        },
+        onError: (error) => {
+          console.error('Error deleting team member:', error);
+        }
+      });
+      setIsDeleteDialogOpen(false);
+    }
   };
 
   const handlePhotoUpload = (userId: number) => {
@@ -313,6 +329,25 @@ export function EditTeamMemberPage({
                     style={{ borderColor: '#BDC3C7' }}
                   />
                 </div>
+
+                {/* Delete Button */}
+                {!isNewMember && (
+                  <div className="flex justify-end">
+                    <Button
+                      type="button"
+                      onClick={() => setIsDeleteDialogOpen(true)}
+                      className="px-6 py-2 font-medium transition-all duration-200 hover:opacity-90 flex items-center space-x-2"
+                      style={{ 
+                        backgroundColor: '#DC3545', 
+                        color: 'white',
+                        borderColor: '#DC3545'
+                      }}
+                    >
+                      <Trash2 className="w-4 h-4" />
+                      <span>Delete Team Member</span>
+                    </Button>
+                  </div>
+                )}
               </div>
             </div>
 
@@ -397,6 +432,34 @@ export function EditTeamMemberPage({
                     style={{ backgroundColor: 'white', borderColor: '#BDC3C7', color: '#3C3C3C' }}
                   >
                     Ok
+                  </Button>
+                </div>
+              </DialogContent>
+            </Dialog>
+
+            {/* Delete Confirmation Dialog */}
+            <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+              <DialogContent className="max-w-md bg-white rounded-lg border-2" style={{ backgroundColor: 'white', borderColor: '#DC3545' }}>
+                <DialogHeader>
+                  <DialogTitle style={{ color: '#DC3545' }}>Delete Team Member</DialogTitle>
+                  <DialogDescription style={{ color: '#6C757D' }}>
+                    Are you sure you want to delete {formData.first_name} {formData.last_name}? This action cannot be undone.
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="flex justify-end space-x-3 pt-2">
+                  <Button
+                    onClick={() => setIsDeleteDialogOpen(false)}
+                    className="px-4 py-2 border-2 transition-all duration-200"
+                    style={{ backgroundColor: 'white', borderColor: '#BDC3C7', color: '#3C3C3C' }}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    onClick={handleDelete}
+                    className="px-4 py-2 transition-all duration-200"
+                    style={{ backgroundColor: '#DC3545', color: 'white', borderColor: '#DC3545' }}
+                  >
+                    Delete
                   </Button>
                 </div>
               </DialogContent>
