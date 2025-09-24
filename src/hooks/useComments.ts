@@ -17,7 +17,7 @@ export function useAddComment(descriptorId: number) {
   return useMutation({
     mutationFn: async (newComment: { content: string; parent_id?: number }) => {
       const { data } = await api.post(
-        `/api/comments/${descriptorId}`,
+        `/api/comments/${descriptorId}/`,
         newComment
       );
       return data;

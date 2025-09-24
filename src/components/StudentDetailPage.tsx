@@ -18,7 +18,7 @@ interface IndividualIEPGoal {
   description?: string | null;
   goal_met?: string | null;     // will become boolean later
   processed?: string | null;    // will become boolean later
-  gco?: string | null;    // will become boolean later
+  gco_number?: string | null;    // will become boolean later
 }
 
 interface IEPGoalBasic {
@@ -54,7 +54,7 @@ interface BehaviorDescriptor {
   action: string;
   trigger: string;
   context: string;
-  gco_id: string;
+  gco_classification: string;
   created_at: string;
   iep_goal?: IEPGoalBasic;
   video_url?: string;
@@ -384,7 +384,7 @@ export function StudentDetailPage({ student, onBack, onBehaviorDescriptorClick }
                   <TableRow key={goal.id} className={index < student.iep_goals.length - 1 ? "border-b" : ""} style={{ borderColor: '#BDC3C7' }}>
                     <TableCell style={{ color: '#3C3C3C' }}>{index + 1}.</TableCell>
                     <TableCell style={{ color: '#3C3C3C' }}>{goal.description}</TableCell>
-                    <TableCell style={{ color: '#3C3C3C', backgroundColor: '#F8F9FA' }}>GCO {goal.gco}</TableCell>
+                    <TableCell style={{ color: '#3C3C3C', backgroundColor: '#F8F9FA' }}>GCO {goal.gco_number}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>
@@ -516,7 +516,7 @@ export function StudentDetailPage({ student, onBack, onBehaviorDescriptorClick }
                       <TableCell style={{ color: descriptor.selected ? 'white' : '#3C3C3C' }}>{descriptor.action}</TableCell>
                       <TableCell style={{ color: descriptor.selected ? 'white' : '#3C3C3C' }}>{descriptor.trigger}</TableCell>
                       <TableCell style={{ color: descriptor.selected ? 'white' : '#3C3C3C' }}>{descriptor.context}</TableCell>
-                      <TableCell style={{ color: descriptor.selected ? 'white' : '#3C3C3C' }}>{descriptor.gco_id}</TableCell>
+                      <TableCell style={{ color: descriptor.selected ? 'white' : '#3C3C3C' }}>{descriptor.gco_classification}</TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
@@ -583,7 +583,7 @@ export function StudentDetailPage({ student, onBack, onBehaviorDescriptorClick }
                       <TableCell style={{ color: descriptor.selected ? 'white' : '#3C3C3C' }}>{descriptor.trigger}</TableCell>
                       <TableCell style={{ color: descriptor.selected ? 'white' : '#3C3C3C' }}>{descriptor.context}</TableCell>
                       <TableCell style={{ color: descriptor.selected ? 'white' : '#3C3C3C' }}>{descriptor.iep_goal?.description}</TableCell>
-                      <TableCell style={{ color: descriptor.selected ? 'white' : '#3C3C3C' }}>GCO {descriptor.iep_goal?.gco}</TableCell>
+                      <TableCell style={{ color: descriptor.selected ? 'white' : '#3C3C3C' }}>GCO {descriptor.gco_classification}</TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
