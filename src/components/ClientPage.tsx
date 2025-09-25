@@ -45,9 +45,9 @@ export function ClientPage({
   };
 
   const handleDownloadTemplate = () => {
-    // Download a simple CSV template for clients
-    const csvContent = 'Name,Age,Gender,ID Number,Primary Diagnosis,Secondary Diagnosis,Date of Enrollment,Email,DOB,Guardian Name,Guardian Contact\n' +
-                      'John Doe,25,M,CL001,Speech and Language,,2024-01-15,john@example.com,1999-03-15,Jane Doe,+65 9123 4567';
+    // Download a simple CSV template for clients with Class Name column
+    const csvContent = 'Name,Age,Gender,ID Number,Primary Diagnosis,Secondary Diagnosis,Date of Enrollment,Email,DOB,Guardian Name,Guardian Contact,Class Name\n' +
+                      'John Doe,25,M,CL001,Speech and Language,,2024-01-15,john@example.com,1999-03-15,Jane Doe,+65 9123 4567,Class A';
     const blob = new Blob([csvContent], { type: 'text/csv' });
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement('a');

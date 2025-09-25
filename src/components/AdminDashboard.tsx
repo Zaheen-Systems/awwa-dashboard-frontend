@@ -1,9 +1,11 @@
 import { useState } from 'react';
 import { Input } from './ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from './ui/table';
-import { Search } from 'lucide-react';
+import { Button } from './ui/button';
+import { Search, Plus } from 'lucide-react';
 import { ClassData } from '../types/class';
-import { useClasses } from '../hooks/useClasses';
+import { useClasses, useCreateClass } from '../hooks/useClasses';
+import { AddClassModal } from './AddClassModal';
 
 interface AdminDashboardProps {
   onLogout: () => void;
@@ -13,15 +15,41 @@ interface AdminDashboardProps {
   onClientClick?: () => void;
 }
 
+interface ClassFormData {
+  className: string;
+  days: string;
+  classTimings: string;
+}
+
 export function AdminDashboard({  onClassClick }: AdminDashboardProps) {
   const { data: classes } = useClasses();
+  const createClassMutation = useCreateClass();
 
   const [searchTerm, setSearchTerm] = useState("");
+  const [isAddClassModalOpen, setIsAddClassModalOpen] = useState(false);
 
   const filteredClasses = classes?.filter(classItem => 
     classItem.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     classItem.days.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  const handleAddClass = async (classData: ClassFormData) => {
+    try {
+      await createClassMutation.mutateAsync(classData);
+      setIsAddClassModalOpen(false);
+    } catch (error) {
+      console.error('Error creating class:', error);
+      // You could add error handling UI here
+    }
+  };
+
+  const handleOpenAddClassModal = () => {
+    setIsAddClassModalOpen(true);
+  };
+
+  const handleCloseAddClassModal = () => {
+    setIsAddClassModalOpen(false);
+  };
 
   return (
     <div className="flex-1 px-6 py-8" style={{ backgroundColor: '#F8F9FA' }}>
@@ -120,7 +148,30 @@ export function AdminDashboard({  onClassClick }: AdminDashboardProps) {
             </Table>
           </div>
         </div>
+
+        {/* Add Class Button */}
+        <div className="flex justify-end mb-6">
+          <Button
+            onClick={handleOpenAddClassModal}
+            className="px-6 py-2 font-medium transition-all duration-200 hover:opacity-90 flex items-center space-x-2"
+            style={{ 
+              backgroundColor: '#e65039', 
+              color: 'white',
+              borderColor: '#e65039'
+            }}
+          >
+            <Plus className="w-4 h-4" />
+            <span>Add Class</span>
+          </Button>
+        </div>
       </div>
+
+      {/* Add Class Modal */}
+      <AddClassModal
+        isOpen={isAddClassModalOpen}
+        onClose={handleCloseAddClassModal}
+        onSubmit={handleAddClass}
+      />
     </div>
   );
 }

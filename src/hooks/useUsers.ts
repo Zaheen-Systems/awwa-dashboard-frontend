@@ -46,6 +46,30 @@ export function useUpdateUser() {
   });
 }
 
+// ---------------- Delete User ----------------
+export function useDeleteUser() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (id: number) => {
+      console.log(`Attempting to delete user with ID: ${id}`);
+      const res = await api.delete(`/api/users/${id}`);
+      console.log('Delete response:', res.data);
+      return res.data;
+    },
+    onSuccess: (_, id) => {
+      console.log(`Successfully deleted user with ID: ${id}`);
+      // Invalidate and refetch users list
+      queryClient.invalidateQueries({ queryKey: ["users"] });
+      // Also invalidate user detail queries
+      queryClient.invalidateQueries({ queryKey: ["user"] });
+    },
+    onError: (error, id) => {
+      console.error(`Failed to delete user with ID: ${id}`, error);
+    },
+  });
+}
+
 
 const getUserById = async (userId: string | null): Promise<UserWithClasses> => {
   const { data } = await api.get(`/api/users/${userId}`);

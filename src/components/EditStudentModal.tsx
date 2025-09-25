@@ -6,6 +6,7 @@ import { Label } from './ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { Textarea } from './ui/textarea';
 import { Plus, Minus } from 'lucide-react';
+import { useClasses } from '../hooks/useClasses';
 
 interface Student {
   id: string; // UUID
@@ -18,6 +19,7 @@ interface Student {
   entry_type: string;
   ct?: string | null;
   last_gco_date?: string | null; // ISO date string
+  class_name?: string | null;
 }
 
 interface IEPGoal {
@@ -33,6 +35,8 @@ interface EditStudentModalProps {
 }
 
 export function EditStudentModal({ isOpen, onClose, student, onSubmit }: EditStudentModalProps) {
+  const { data: classes } = useClasses();
+  
   const [formData, setFormData] = useState({
     // Populated fields - auto-filled with student data
     name: '',
@@ -40,6 +44,7 @@ export function EditStudentModal({ isOpen, onClose, student, onSubmit }: EditStu
     ageBand: '',
     primaryDiagnosis: '',
     secondaryDiagnosis: '',
+    className: '',
     // Entered fields - empty for manual input
     lastGCODate: '',
     status: 'Review',
@@ -63,6 +68,7 @@ export function EditStudentModal({ isOpen, onClose, student, onSubmit }: EditStu
         ageBand: student.age_band? student.age_band: "",
         primaryDiagnosis: student.primary_diagnosis? student.primary_diagnosis: "",
         secondaryDiagnosis: student.secondary_diagnosis? student.secondary_diagnosis: "",
+        className: student.class_name? student.class_name: "",
         // Entered fields - empty for manual input
         lastGCODate: '',
         status: student.entry_type,
@@ -114,6 +120,7 @@ export function EditStudentModal({ isOpen, onClose, student, onSubmit }: EditStu
         age_band: formData.ageBand,
         primary_diagnosis: formData.primaryDiagnosis,
         secondary_diagnosis: formData.secondaryDiagnosis,
+        class_name: formData.className,
         last_gco_date: formData.lastGCODate,
         entry_type: formData.status
       };
@@ -277,6 +284,38 @@ export function EditStudentModal({ isOpen, onClose, student, onSubmit }: EditStu
                 onFocus={(e) => e.target.style.borderColor = '#e65039'}
                 onBlur={(e) => e.target.style.borderColor = '#BDC3C7'}
               />
+            </div>
+
+            {/* Class Name */}
+            <div>
+              <Label htmlFor="className" style={{ color: '#3C3C3C' }}>Class Name</Label>
+              <Select value={formData.className} onValueChange={(value) => handleInputChange('className', value)}>
+                <SelectTrigger className="bg-white border-2" style={{ borderColor: '#BDC3C7' }}>
+                  <SelectValue placeholder="Select class..." />
+                </SelectTrigger>
+                <SelectContent 
+                  className="bg-white border border-gray-200 shadow-lg rounded-md max-h-60 overflow-y-auto"
+                  style={{ 
+                    backgroundColor: 'white',
+                    borderColor: '#BDC3C7',
+                    boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)'
+                  }}
+                  position="popper"
+                  side="bottom"
+                  align="start"
+                >
+                  {classes?.map((classItem) => (
+                    <SelectItem 
+                      key={classItem.id} 
+                      value={classItem.name}
+                      className="hover:bg-gray-100 focus:bg-gray-100"
+                      style={{ color: '#3C3C3C' }}
+                    >
+                      {classItem.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
 
             {/* Date of last GCO */}

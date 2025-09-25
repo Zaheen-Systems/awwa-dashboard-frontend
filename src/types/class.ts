@@ -26,6 +26,7 @@ export interface StudentBaseRead {
   photo?: string;
   guardian_name?: string;
   guardian_contact?: string;
+  class_name?: string;
 }
 
 export interface UserRead {

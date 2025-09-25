@@ -1,5 +1,5 @@
 // hooks/useClasses.ts
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import api from "../lib/axios";
 import { ClassData, ClassDetail } from "../types/class";
 
@@ -25,5 +25,35 @@ export const useClassDetail = (classId: number) => {
     queryKey: ["classDetail", classId],
     queryFn: () => fetchClassDetail(classId),
     enabled: !!classId, // only run if classId is defined
+  });
+};
+
+interface CreateClassData {
+  className: string;
+  days: string;
+  classTimings: string;
+}
+
+const createClass = async (classData: CreateClassData): Promise<ClassData> => {
+  const { data } = await api.post<ClassData>("/api/classes/", {
+    name: classData.className,
+    days: classData.days,
+    class_timing: classData.classTimings,
+    number_of_students: 0,
+    number_of_team_members: 0,
+    number_of_cts: 0
+  });
+  return data;
+};
+
+export const useCreateClass = () => {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: createClass,
+    onSuccess: () => {
+      // Invalidate and refetch classes list
+      queryClient.invalidateQueries({ queryKey: ["classes"] });
+    },
   });
 };

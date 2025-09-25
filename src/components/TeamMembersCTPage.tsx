@@ -171,7 +171,7 @@ export function TeamMembersCTPage({ onEditTeamMember, onAddTeamMember }: TeamMem
                   key={member.id} 
                   style={{ 
                     borderColor: '#BDC3C7',
-                    backgroundColor: index === 2 ? '#E3F2FD' : 'white'
+                    backgroundColor: 'white'
                   }}
                 >
                   <TableCell className="text-center" style={{ color: '#3C3C3C' }}>
