@@ -32,7 +32,7 @@ interface BehaviorDescriptor {
   action: string;
   trigger: string;
   context: string;
-  gco_id: string;
+  gco_classification: string;
   created_at: string;
   iep_goal?: IEPGoalBasic;
   video_url?: string;
@@ -196,7 +196,7 @@ export function ReportGenerationPage({
                       <TableCell style={{ color: 'white' }}>{descriptor.action}</TableCell>
                       <TableCell style={{ color: 'white' }}>{descriptor.trigger}</TableCell>
                       <TableCell style={{ color: 'white' }}>{descriptor.context}</TableCell>
-                      <TableCell style={{ color: 'white' }}>{descriptor.gco_id}</TableCell>
+                      <TableCell style={{ color: 'white' }}>{descriptor.gco_classification}</TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
