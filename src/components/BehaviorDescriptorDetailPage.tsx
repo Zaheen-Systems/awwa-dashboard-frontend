@@ -27,7 +27,7 @@ interface BehaviorDescriptor {
   action: string;
   trigger: string;
   context: string;
-  gco_id: string;
+  gco_classification: string;
   created_at: string;
   iep_goal?: IEPGoalBasic;
   video_url?: string;
@@ -224,7 +224,7 @@ export function BehaviorDescriptorDetailPage({
                 </div>
                 <div className="mb-3">
                   <strong style={{ color: '#3C3C3C' }}>GCO:</strong>
-                  <span className="ml-2" style={{ color: '#3C3C3C' }}>{behaviorDescriptor.gco_id}</span>
+                  <span className="ml-2" style={{ color: '#3C3C3C' }}>{behaviorDescriptor.gco_classification}</span>
                 </div>
               </div>
               <div>

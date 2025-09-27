@@ -21,7 +21,7 @@ interface BehaviorDescriptor {
   action: string;
   trigger: string;
   context: string;
-  gco_id: string;
+  gco_classification: string;
   created_at: string;
   iepGoal?: IEPGoalBasic;
 }
@@ -176,7 +176,7 @@ export function SelectBDsModal({
                           <TableCell style={{ color: isSelected ? 'white' : '#3C3C3C' }} className="max-w-48 truncate">
                             <div title={descriptor.context}>{descriptor.context}</div>
                           </TableCell>
-                          <TableCell style={{ color: isSelected ? 'white' : '#3C3C3C' }}>{descriptor.gco_id}</TableCell>
+                          <TableCell style={{ color: isSelected ? 'white' : '#3C3C3C' }}>{descriptor.gco_classification}</TableCell>
                         </TableRow>
                       );
                     })}
@@ -243,7 +243,7 @@ export function SelectBDsModal({
                             <div title={descriptor.context}>{descriptor.context}</div>
                           </TableCell>
                           <TableCell style={{ color: isSelected ? 'white' : '#3C3C3C' }}>{descriptor.iepGoal?.description}</TableCell>
-                          <TableCell style={{ color: isSelected ? 'white' : '#3C3C3C' }}>{descriptor.iepGoal?.gco}</TableCell>
+                          <TableCell style={{ color: isSelected ? 'white' : '#3C3C3C' }}>{descriptor?.gco_classification}</TableCell>
                         </TableRow>
                       );
                     })}

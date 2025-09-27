@@ -65,7 +65,7 @@ interface BehaviorDescriptor {
   action: string;
   trigger: string;
   context: string;
-  gco_id: string;
+  gco_classification: string;
   created_at: string;
   iep_goal?: IEPGoalBasic;
   video_url?: string;
