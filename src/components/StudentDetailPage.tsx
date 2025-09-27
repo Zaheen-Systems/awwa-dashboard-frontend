@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from './ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from './ui/table';
 import { Input } from './ui/input';
@@ -10,39 +10,13 @@ import { SelectBDsModal } from './SelectBDsModal';
 import api from "../lib/axios";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
+import { Student } from '../types/students';
 // import awwaLogo from 'figma:asset/71b57c03c5488fc89f49e890a42dd4691fd017ee.png';
-
-interface IndividualIEPGoal {
-  id: number;
-  student_id: string; // UUID as string
-  description?: string | null;
-  goal_met?: string | null;     // will become boolean later
-  processed?: string | null;    // will become boolean later
-  gco_number?: string | null;    // will become boolean later
-}
 
 interface IEPGoalBasic {
   id: number;
   description?: string | null;
   gco?: string | null;    // will become boolean later
-}
-
-interface Student {
-  id: string; // UUID
-  name: string;
-  chronological_age: number;
-  age_band?: string | null;
-  functional_age?: string | null;
-  primary_diagnosis?: string | null;
-  secondary_diagnosis?: string | null;
-  entry_type: string;
-  ct?: string | null;
-  last_gco_date?: string | null; // ISO date string
-  gco_1_functional_age?: string | null;
-  gco_2_functional_age?: string | null;
-  gco_3_functional_age?: string | null;
-  created_at: string; // ISO datetime string
-  iep_goals: IndividualIEPGoal[];
 }
 
 interface BehaviorDescriptor {
@@ -126,23 +100,17 @@ const fetchGroupedDescriptors = async (studentId: number) => {
 export function StudentDetailPage({ student, onBack, onBehaviorDescriptorClick }: StudentDetailPageProps) {
   const [date, setDate] = useState("");
   const queryClient = useQueryClient();
-  // const [behaviourDescriptors, setBehaviourDescriptors] = useState<BehavioralDescriptorUI[]>([]);
-  // const [iepBehaviourDescriptors, setIepBehaviourDescriptors] = useState<BehaviorDescriptor[]>(mockIEPBehaviourDescriptors);
-
-  // const {
-  //   data: student,
-  //   // isLoading,
-  //   // isError,
-  //   // error,
-  // } = useQuery({
-  //   queryKey: ["student", studentId],
-  //   queryFn: () => fetchStudentDetail(studentId),
-  //   enabled: !!studentId, // only run if we have an id
-  // });
+  const [behaviourDescriptors, setBehaviourDescriptors] = useState<BehavioralDescriptorUI[]>([]);
+  const [iepBehaviourDescriptors, setIepBehaviourDescriptors] = useState<BehaviorDescriptor[]>([]);
 
   const { data: behaviourDescriptorsAll } = useBehavioralDescriptors(parseInt(student.id));
-  const iepBehaviourDescriptors = behaviourDescriptorsAll?.filter((bd) => Boolean(bd.iep_goal))
-  const behaviourDescriptors = behaviourDescriptorsAll?.filter((bd) => !Boolean(bd.iep_goal))
+
+  useEffect(() => {
+    if (behaviourDescriptorsAll) {
+      setBehaviourDescriptors(behaviourDescriptorsAll.filter(bd => !bd.iep_goal));
+      setIepBehaviourDescriptors(behaviourDescriptorsAll.filter(bd => Boolean(bd.iep_goal)));
+    }
+  }, [behaviourDescriptorsAll]);
 
     const { data: mockGCOData  } = useQuery<GroupedDescriptors>({
     queryKey: ["groupedDescriptors", student.id],
@@ -156,20 +124,20 @@ export function StudentDetailPage({ student, onBack, onBehaviorDescriptorClick }
 
   const handleBehaviourSelect = (id: number, selected: boolean) => {
     console.log(id, selected)
-    // setBehaviourDescriptors(prev => 
-    //   prev.map(item => 
-    //     item.id === id ? { ...item, selected } : item
-    //   )
-    // );
+    setBehaviourDescriptors(prev => 
+      prev.map(item => 
+        item.id === id ? { ...item, selected } : item
+      )
+    );
   };
 
   const handleIepBehaviourSelect = (id: number, selected: boolean) => {
     console.log(id, selected)
-    // setIepBehaviourDescriptors(prev => 
-    //   prev.map(item => 
-    //     item.id === id ? { ...item, selected } : item
-    //   )
-    // );
+    setIepBehaviourDescriptors(prev => 
+      prev.map(item => 
+        item.id === id ? { ...item, selected } : item
+      )
+    );
   };
 
   const handleRowClick = (descriptor: BehaviorDescriptor, event: React.MouseEvent) => {
@@ -190,8 +158,8 @@ export function StudentDetailPage({ student, onBack, onBehaviorDescriptorClick }
     source: data.source,
     action: data.action,
     trigger: data.trigger,
-    tag_time: data.time,               // maps to Time column
-    gco_id: data.gcoClassification,    // maps to FK
+    timestamp: data.time,               // maps to Time column
+    gco_classification: data.gcoClassification,    // maps to FK
     iep_goal_id: Number(data.iep_goal_id), // ensure it's number
     student_id: student.id,
   };
@@ -237,37 +205,44 @@ export function StudentDetailPage({ student, onBack, onBehaviorDescriptorClick }
   };
 
   const handleGenerateReportClick = () => {
+    const selectedIds = behaviourDescriptors.filter(d => d.selected).map(d => d.id);
+    const selectediepIds = iepBehaviourDescriptors.filter(d => d.selected).map(d => d.id);
+    const allIds = [...selectedIds,  ...selectediepIds]
+    console.log(allIds)
     // setShowSelectBDsModal(true);
-    generateReport(student.id)
+    generateReport({ studentId: student.id, ids: allIds })
   };
 
-  function useGenerateReport() {
-    return useMutation({
-      mutationFn: async (studentId: string) => {
-        const response = await api.get(`/api/students/${studentId}/gcowmr`);
-        return response.data; // expects { download_url: string }
-      },
-      onSuccess: (data) => {
-        const { download_url } = data;
-        if (!download_url) return;
+function useGenerateReport() {
+  return useMutation({
+    mutationFn: async ({ studentId, ids }: { studentId: string; ids: number[] }) => {
+      const queryParams = ids && ids.length > 0 
+        ? `?${ids.map(id => `ids=${id}`).join("&")}` 
+        : "";
+      const response = await api.get(`/api/students/${studentId}/gcowmr${queryParams}`);
+      return response.data; // expects { download_url: string }
+    },
+    onSuccess: (data) => {
+      const { download_url } = data;
+      if (!download_url) return;
 
-        // trigger download automatically
-        const link = document.createElement("a");
-        link.href = download_url;
-        link.setAttribute("download", "report.xlsx"); // optional
-        document.body.appendChild(link);
-        link.click();
-        link.remove();
-      },
-    });
-  }
+      // trigger download automatically
+      const link = document.createElement("a");
+      link.href = download_url;
+      link.setAttribute("download", "report.xlsx"); // optional filename
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    },
+  });
+}
 
   const { mutate: generateReport, isPending: isReportPending } = useGenerateReport();
 
   const handleReportGenerate = (selectedBDs: BehaviorDescriptor[]) => {
     console.log(selectedBDs)
     // onGenerateReport(selectedBDs);
-    generateReport(student.id)
+    // generateReport(student.id)
   };
 
   return (
@@ -276,7 +251,7 @@ export function StudentDetailPage({ student, onBack, onBehaviorDescriptorClick }
       <div className="px-4 sm:px-6 py-4 sm:py-6 lg:py-8" style={{ backgroundColor: '#fff5f3' }}>
         <div className="max-w-7xl mx-auto">
           {/* Navigation buttons in header */}
-          <div className="flex justify-start space-x-2 sm:space-x-4">
+          {/* <div className="flex justify-start space-x-2 sm:space-x-4">
             <button
               className="px-3 sm:px-6 py-2 sm:py-3 text-sm sm:text-base border-2 transition-all duration-200"
               style={{ 
@@ -297,7 +272,7 @@ export function StudentDetailPage({ student, onBack, onBehaviorDescriptorClick }
             >
               Core Team (CT)
             </button>
-          </div>
+          </div> */}
         </div>
       </div>
 
@@ -359,7 +334,7 @@ export function StudentDetailPage({ student, onBack, onBehaviorDescriptorClick }
                 </TableRow>
                 <TableRow className="border-b" style={{ borderColor: '#BDC3C7' }}>
                   <TableCell className="font-medium" style={{ color: '#3C3C3C', backgroundColor: '#F8F9FA' }}>CT</TableCell>
-                  <TableCell style={{ color: '#3C3C3C' }}></TableCell>
+                  <TableCell style={{ color: '#3C3C3C' }}>{student.ct?.first_name}</TableCell>
                   <TableCell className="font-medium" style={{ color: '#3C3C3C', backgroundColor: '#F8F9FA' }}>GCO 2</TableCell>
                   <TableCell style={{ color: '#3C3C3C' }}>{student.gco_2_functional_age}</TableCell>
                 </TableRow>
@@ -627,6 +602,7 @@ export function StudentDetailPage({ student, onBack, onBehaviorDescriptorClick }
         onClose={() => setShowAddBDModal(false)}
         onSubmit={handleBDSubmit}
         iepGoals={student.iep_goals}
+        studentId={student.id}
       />
 
       <SelectBDsModal

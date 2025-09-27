@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useQueryClient } from "@tanstack/react-query";
 import { Input } from './ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from './ui/table';
 import { Button } from './ui/button';
@@ -24,6 +25,7 @@ interface ClassFormData {
 export function AdminDashboard({  onClassClick }: AdminDashboardProps) {
   const { data: classes } = useClasses();
   const createClassMutation = useCreateClass();
+  const queryClient = useQueryClient();
 
   const [searchTerm, setSearchTerm] = useState("");
   const [isAddClassModalOpen, setIsAddClassModalOpen] = useState(false);
@@ -37,6 +39,7 @@ export function AdminDashboard({  onClassClick }: AdminDashboardProps) {
     try {
       await createClassMutation.mutateAsync(classData);
       setIsAddClassModalOpen(false);
+      queryClient.invalidateQueries({ queryKey: ["classes"] });
     } catch (error) {
       console.error('Error creating class:', error);
       // You could add error handling UI here

@@ -9,6 +9,7 @@ import api from "./lib/axios";
 import { useMutation } from "@tanstack/react-query";
 import { TeamMember } from './types/users';
 import { ClassData, StudentBaseRead } from './types/class';
+import { Student } from './types/students';
 
 
 // Lazy load heavy components
@@ -22,33 +23,6 @@ const TeamMembersCTPage = lazy(() => import('./components/TeamMembersCTPage').th
 const EditTeamMemberPage = lazy(() => import('./components/EditTeamMemberPage').then(module => ({ default: module.EditTeamMemberPage })));
 const ClientPage = lazy(() => import('./components/ClientPage').then(module => ({ default: module.ClientPage })));
 const EditClientPage = lazy(() => import('./components/EditClientPage').then(module => ({ default: module.EditClientPage })));
-
-interface IndividualIEPGoal {
-  id: number;
-  student_id: string; // UUID as string
-  description?: string | null;
-  goal_met?: string | null;     // will become boolean later
-  processed?: string | null;    // will become boolean later
-  gco?: string | null;    // will become boolean later
-}
-
-interface Student {
-  id: string; // UUID
-  name: string;
-  chronological_age: number;
-  age_band?: string | null;
-  functional_age?: string | null;
-  primary_diagnosis?: string | null;
-  secondary_diagnosis?: string | null;
-  entry_type: string;
-  ct?: string | null;
-  last_gco_date?: string | null; // ISO date string
-  gco_1_functional_age?: string | null;
-  gco_2_functional_age?: string | null;
-  gco_3_functional_age?: string | null;
-  created_at: string; // ISO datetime string
-  iep_goals: IndividualIEPGoal[];
-}
 
 interface IEPGoalBasic {
   id: number;
@@ -82,9 +56,10 @@ interface BehaviorComment {
 export interface LoginResponse {
   access_token: string;
   token_type: string;
-  user_type: "admin" | "teacher";
+  user_type: "admin" | "teacher" | "ct";
   name: string;
   user_id: string;
+  is_ct: string;
 }
 
 const loginApi = async (username: string, password: string): Promise<LoginResponse> => {
@@ -93,12 +68,13 @@ const loginApi = async (username: string, password: string): Promise<LoginRespon
 };
 
 type CurrentPage = 'login' | 'dashboard' | 'admin-dashboard' | 'class-detail' | 'student-detail' | 'behavior-detail' | 'report-generation' | 'profile-settings' | 'team-members-ct' | 'edit-team-member' | 'client' | 'edit-client';
-type UserType = 'teacher' | 'admin' | null;
+type UserType = 'teacher' | 'admin' | 'ct' | null;
 type NavigationContext = 'dashboard' | 'admin-dashboard' | 'client' | 'student-detail' | null;
 
 export default function App() {
   const [currentPage, setCurrentPage] = useState<CurrentPage>('login');
   const [userType, setUserType] = useState<UserType>(null);
+  const [isCT, setIsCT] = useState<string>('');
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
@@ -117,9 +93,12 @@ export default function App() {
         localStorage.setItem("token", data.access_token);
         localStorage.setItem("name", data.name);
         localStorage.setItem("user_id", data.user_id);
+        localStorage.setItem("user_type", data.user_type);
+        localStorage.setItem("is_ct", data.is_ct);
 
         // Use user_type instead of checking username
         setUserType(data.user_type);
+        setIsCT(data.is_ct);
 
         if (data.user_type === "admin") {
           setCurrentPage("admin-dashboard");
@@ -658,6 +637,7 @@ export default function App() {
           onStudentClick={handleStudentClick}
           onSwitchToAdminDashboard={handleSwitchToAdminDashboard}
           userType={userType}
+          is_ct={isCT}
         />
       );
       break;

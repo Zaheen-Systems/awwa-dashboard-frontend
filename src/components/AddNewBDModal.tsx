@@ -15,6 +15,7 @@ interface IEPGoalBasic {
 }
 
 interface AddNewBDModalProps {
+  studentId: string;
   isOpen: boolean;
   onClose: () => void;
   onSubmit: (bdData: BDFormData) => void;
@@ -32,7 +33,7 @@ interface BDFormData {
   iep_goal_id: string;
 }
 
-export function AddNewBDModal({ isOpen, onClose, onSubmit, iepGoals }: AddNewBDModalProps) {
+export function AddNewBDModal({ isOpen, onClose, onSubmit, iepGoals, studentId }: AddNewBDModalProps) {
   const name = localStorage.getItem("name")
   const [formData, setFormData] = useState<BDFormData>({
     date: '',
@@ -64,7 +65,7 @@ export function AddNewBDModal({ isOpen, onClose, onSubmit, iepGoals }: AddNewBDM
   }, [isOpen]);
 
   const fetchIds = async (): Promise<string[]> => {
-    const res = await api.get<string[]>("/api/document-gcos/ids"); // adjust URL to your API route
+    const res = await api.get<string[]>(`/api/students/${studentId}/gcos`); // adjust URL to your API route
     return res.data;
   };
 

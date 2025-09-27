@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useMutation } from '@tanstack/react-query';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Label } from './ui/label';
@@ -12,6 +13,7 @@ import { Badge } from './ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
 import { User, Shield, Edit2, Camera, ChevronLeft } from 'lucide-react';
 import { useUser, useUpdateUser } from '../hooks/useUsers';
+import api from "../lib/axios";
 interface ProfileSettingsPageProps {
   onBack: () => void;
 }
@@ -53,6 +55,24 @@ export function ProfileSettingsPage({
 
   const updateUser = useUpdateUser();
 
+  const { mutate: changePassword } = useChangePassword(user?.id);
+
+  const changePasswordApi = async (userId: any, oldPassword: string, newPassword: string) => {
+  const { data } = await api.post(`/api/users/${userId}/change-password`, {
+    old_password: oldPassword,
+    new_password: newPassword,
+  });
+  return data;
+};
+
+// Hook
+  function useChangePassword(userId: any) {
+    return useMutation({
+      mutationFn: (payload: { oldPassword: string; newPassword: string }) =>
+        changePasswordApi(userId, payload.oldPassword, payload.newPassword),
+    });
+  }
+
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
     console.log('Profile updated:', { 
@@ -87,10 +107,21 @@ export function ProfileSettingsPage({
       return;
     }
     console.log('Password changed successfully');
-    setCurrentPassword('');
-    setNewPassword('');
-    setConfirmPassword('');
-    setShowPasswordFields(false);
+    changePassword(
+      { oldPassword: currentPassword, newPassword },
+      {
+        onSuccess: () => {
+          alert('Password changed successfully');
+          setCurrentPassword('');
+          setNewPassword('');
+          setConfirmPassword('');
+          setShowPasswordFields(false);
+        },
+        onError: (err: any) => {
+          alert(err.response?.data?.detail || 'Failed to change password');
+        },
+      }
+    );
   };
 
   const handlePhotoUpload = () => {

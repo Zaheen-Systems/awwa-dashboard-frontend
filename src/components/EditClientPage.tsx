@@ -200,8 +200,23 @@ export function EditClientPage({
                   />
                 </div>
 
-                {/* Email */}
+                {/* Date of Enrollment */}
                 <div>
+                  <Label htmlFor="date_of_enrollment" className="block mb-2" style={{ color: '#3C3C3C' }}>
+                    Date of Enrollment
+                  </Label>
+                  <Input
+                    id="date_of_enrollment"
+                    type="date"
+                    value={formData.date_of_enrollment}
+                    onChange={(e) => handleInputChange('date_of_enrollment', e.target.value)}
+                    className="w-full border-2 px-3 py-2 rounded-none"
+                    style={{ borderColor: '#BDC3C7' }}
+                  />
+                </div>
+
+                {/* Email */}
+                {/* <div>
                   <Label htmlFor="email" className="block mb-2" style={{ color: '#3C3C3C' }}>
                     Email
                   </Label>
@@ -213,7 +228,7 @@ export function EditClientPage({
                     className="w-full border-2 px-3 py-2 rounded-none"
                     style={{ borderColor: '#BDC3C7' }}
                   />
-                </div>
+                </div> */}
               </div>
 
               {/* Right Column */}
@@ -251,9 +266,9 @@ export function EditClientPage({
                         boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)'
                       }}
                     >
-                      <SelectItem value="Male" className="hover:bg-gray-100 focus:bg-gray-100" style={{ color: '#3C3C3C' }}>Male</SelectItem>
-                      <SelectItem value="Female" className="hover:bg-gray-100 focus:bg-gray-100" style={{ color: '#3C3C3C' }}>Female</SelectItem>
-                      <SelectItem value="Other" className="hover:bg-gray-100 focus:bg-gray-100" style={{ color: '#3C3C3C' }}>Other</SelectItem>
+                      <SelectItem value="M" className="hover:bg-gray-100 focus:bg-gray-100" style={{ color: '#3C3C3C' }}>Male</SelectItem>
+                      <SelectItem value="F" className="hover:bg-gray-100 focus:bg-gray-100" style={{ color: '#3C3C3C' }}>Female</SelectItem>
+                      <SelectItem value="O" className="hover:bg-gray-100 focus:bg-gray-100" style={{ color: '#3C3C3C' }}>Other</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -288,20 +303,6 @@ export function EditClientPage({
                   />
                 </div>
 
-                {/* Date of Enrollment */}
-                <div>
-                  <Label htmlFor="date_of_enrollment" className="block mb-2" style={{ color: '#3C3C3C' }}>
-                    Date of Enrollment
-                  </Label>
-                  <Input
-                    id="date_of_enrollment"
-                    type="date"
-                    value={formData.date_of_enrollment}
-                    onChange={(e) => handleInputChange('date_of_enrollment', e.target.value)}
-                    className="w-full border-2 px-3 py-2 rounded-none"
-                    style={{ borderColor: '#BDC3C7' }}
-                  />
-                </div>
 
                 {/* Delete Button */}
                 {!isNewClient && (

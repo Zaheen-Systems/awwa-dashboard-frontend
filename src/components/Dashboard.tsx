@@ -1,4 +1,5 @@
 import { useState } from 'react';
+// import { useQueryClient } from "@tanstack/react-query";
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from './ui/table';
@@ -7,59 +8,38 @@ import { Search, Edit } from 'lucide-react';
 import { EditStudentModal } from './EditStudentModal';
 import { useQuery } from "@tanstack/react-query";
 import api from "../lib/axios";
-
-interface IndividualIEPGoal {
-  id: number;
-  student_id: string; // UUID as string
-  description?: string | null;
-  goal_met?: string | null;     // will become boolean later
-  processed?: string | null;    // will become boolean later
-  gco?: string | null;    // will become boolean later
-}
-
-interface Student {
-  id: string; // UUID
-  name: string;
-  chronological_age: number;
-  age_band?: string | null;
-  functional_age?: string | null;
-  primary_diagnosis?: string | null;
-  secondary_diagnosis?: string | null;
-  entry_type: string;
-  ct?: string | null;
-  last_gco_date?: string | null; // ISO date string
-  gco_1_functional_age?: string | null;
-  gco_2_functional_age?: string | null;
-  gco_3_functional_age?: string | null;
-  created_at: string; // ISO datetime string
-  iep_goals: IndividualIEPGoal[];
-}
+import { Student } from '../types/students';
 
 interface DashboardProps {
   onStudentClick: (student: Student) => void;
   onSwitchToAdminDashboard?: () => void;
-  userType?: 'teacher' | 'admin';
+  userType?: 'teacher' | 'admin' | 'ct';
+  is_ct?: string;
 }
 
-
-async function fetchStudents(): Promise<Student[]> {
-  const res = await api.get("/api/students/"); // 👈 your FastAPI endpoint
-  return res.data;
-}
-
-export function Dashboard({ onStudentClick, onSwitchToAdminDashboard, userType }: DashboardProps) {
+export function Dashboard({ onStudentClick, onSwitchToAdminDashboard, userType, is_ct }: DashboardProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const [sortColumn, setSortColumn] = useState<keyof Student | null>(null);
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
   const [showEditModal, setShowEditModal] = useState(false);
   const [selectedStudentForEdit, setSelectedStudentForEdit] = useState<Student | null>(null);
+  const [activeTab, setActiveTab] = useState<"team" | "ct">(userType == "teacher"? "team": "ct");
+  // const queryClient = useQueryClient();
+
+
+  async function fetchStudents(): Promise<Student[]> {
+    console.log("ctct", activeTab)
+    const queryparam = activeTab == "ct"? "?filter_ct_students=true": ""
+    const res = await api.get(`/api/students/${queryparam}`);
+    return res.data;
+  }
 
   const { 
       data: students = [], 
       // isLoading, 
       // isError
      } = useQuery<Student[]>({
-    queryKey: ["students"],
+    queryKey: ["students", activeTab],
     queryFn: fetchStudents,
   });
 
@@ -155,6 +135,40 @@ export function Dashboard({ onStudentClick, onSwitchToAdminDashboard, userType }
           )}
         </div>
 
+          <div
+            className="px-4 sm:px-6 py-4 sm:py-6 lg:py-8"
+            style={{ backgroundColor: "#fff5f3" }}
+          >
+            <div className="max-w-7xl mx-auto">
+              {/* Tabs Row */}
+              <div className="flex space-x-2 sm:space-x-4">
+                {/* Team Member */}
+                <div
+                  onClick={() => setActiveTab("team")}
+                  className={`px-3 sm:px-6 py-2 sm:py-3 text-sm sm:text-base border-2 transition-all duration-200 cursor-pointer ${
+                    activeTab === "team"
+                      ? "bg-[#e65039] text-white border-[#e65039]"
+                      : "bg-white text-[#6C757D] border-[#BDC3C7]"
+                  } ${userType != 'teacher'? 'hidden': ''}`}
+                >
+                  Team member
+                </div>
+
+                {/* Core Team */}
+                <div
+                  onClick={() => setActiveTab("ct")}
+                  className={`px-3 sm:px-6 py-2 sm:py-3 text-sm sm:text-base border-2 transition-all duration-200 cursor-pointer ${
+                    activeTab === "ct"
+                      ? "bg-[#e65039] text-white border-[#e65039]"
+                      : "bg-white text-[#6C757D] border-[#BDC3C7]"
+                  } ${is_ct == 'false'? 'hidden': ''}`}
+                >
+                  Core Team (CT)
+                </div>
+              </div>
+            </div>
+          </div>
+
         {/* Search */}
         <div className="flex justify-start mb-6">
           <div className="relative w-full sm:w-96">
@@ -191,7 +205,14 @@ export function Dashboard({ onStudentClick, onSwitchToAdminDashboard, userType }
                   </TableHead>
                   <TableHead 
                     className="cursor-pointer hover:bg-gray-100 transition-colors"
-                    onClick={() => handleSort('chronological_age')}
+                    onClick={() => handleSort('class_name')}
+                    style={{ color: '#3C3C3C' }}
+                  >
+                    Class {sortColumn === 'chronological_age' && (sortDirection === 'asc' ? '↑' : '↓')}
+                  </TableHead>
+                  <TableHead 
+                    className="cursor-pointer hover:bg-gray-100 transition-colors"
+                    onClick={() => handleSort('class_name')}
                     style={{ color: '#3C3C3C' }}
                   >
                     Chronological Age (months) {sortColumn === 'chronological_age' && (sortDirection === 'asc' ? '↑' : '↓')}
@@ -254,11 +275,12 @@ export function Dashboard({ onStudentClick, onSwitchToAdminDashboard, userType }
                     <TableCell style={{ color: '#e65039' }} className="hover:underline">
                       {student.name}
                     </TableCell>
+                    <TableCell style={{ color: '#3C3C3C' }}>{student?.class_name}</TableCell>
                     <TableCell style={{ color: '#3C3C3C' }}>{student?.chronological_age}</TableCell>
                     <TableCell style={{ color: '#3C3C3C' }}>{student.age_band}</TableCell>
                     <TableCell style={{ color: '#3C3C3C' }}>{student.primary_diagnosis}</TableCell>
                     <TableCell style={{ color: '#3C3C3C' }}>{student.secondary_diagnosis}</TableCell>
-                    <TableCell style={{ color: '#3C3C3C' }}>{student.ct}</TableCell>
+                    <TableCell style={{ color: '#3C3C3C' }}>{student.ct?.first_name}</TableCell>
                     <TableCell style={{ color: '#3C3C3C' }}>{student.last_gco_date}</TableCell>
                     <TableCell>
                       <Badge 

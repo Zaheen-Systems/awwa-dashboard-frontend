@@ -46,6 +46,21 @@ export function useUpdateUser() {
   });
 }
 
+// ---------------- Update User ----------------
+export function useResetUserPassword() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (id: number) => {
+      const res = await api.post(`/api/users/${id}/reset-password/`);
+      return res.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["users"] });
+    },
+  });
+}
+
 // ---------------- Delete User ----------------
 export function useDeleteUser() {
   const queryClient = useQueryClient();

@@ -3,7 +3,7 @@ import api from "../lib/axios";
 import { StudentBaseRead } from "../types/class";
 
 async function fetchStudents(): Promise<StudentBaseRead[]> {
-  const res = await api.get("/api/students/?use_base_read=true"); // 👈 your FastAPI endpoint
+  const res = await api.get("/api/students/center-students/"); // 👈 your FastAPI endpoint
   return res.data;
 }
 

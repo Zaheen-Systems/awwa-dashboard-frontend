@@ -7,8 +7,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from './ui/dialog';
 import { Upload, User, Trash2 } from 'lucide-react';
 import { TeamMember } from '../types/users';
-import { useCreateUser, useUpdateUser, useDeleteUser } from '../hooks/useUsers';
+import { useCreateUser, useUpdateUser, useDeleteUser, useResetUserPassword } from '../hooks/useUsers';
 import { useUploadUserPhoto } from '../hooks/useUploadFile';
+import { useClasses } from '../hooks/useClasses';
 // import userIconImage from 'figma:asset/175b30eba12976a029330759350f9c338ba2c59d.png';
 
 interface EditTeamMemberPageProps {
@@ -29,18 +30,20 @@ export function EditTeamMemberPage({
   });
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [isPasswordDialogOpen, setIsPasswordDialogOpen] = useState(false);
+  const { data: classes } = useClasses();
+
   const queryClient = useQueryClient();
 
   const createUser = useCreateUser();
   const updateUser = useUpdateUser();
   const deleteUser = useDeleteUser();
+  const resetPasswordUser = useResetUserPassword();
 
   const uploadMutation = useUploadUserPhoto();
 
   // Available classes for assignment (should come from backend in real app)
-  const availableClasses: string[] = [
-    'Class 1',
-  ];
+  const availableClasses: string[] = classes? classes.map(e => e.name): []
 
   const handleInputChange = (field: keyof TeamMember, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -62,6 +65,20 @@ export function EditTeamMemberPage({
 
   const handleResetPassword = () => {
     // In a real implementation, this would trigger a password reset
+    if (formData.id && formData.id !== 0) {
+      resetPasswordUser.mutate(formData.id, {
+        onSuccess: () => {
+          console.log('Successfully password rest of team member:');
+          setIsPasswordDialogOpen(true);
+          // onBack(); // Go back to the previous page after successful deletion
+        },
+        onError: (error) => {
+          console.error('Error deleting team member:', error);
+          // Keep dialog open on error so user can try again
+          // You could also show a toast notification here
+        }
+      });
+    }
     console.log('Password reset requested for:', formData.first_name);
   };
 
@@ -431,6 +448,26 @@ export function EditTeamMemberPage({
                 <div className="flex justify-end space-x-3 pt-2">
                   <Button
                     onClick={() => setIsDialogOpen(false)}
+                    className="px-4 py-2 border-2 transition-all duration-200"
+                    style={{ backgroundColor: 'white', borderColor: '#BDC3C7', color: '#3C3C3C' }}
+                  >
+                    Ok
+                  </Button>
+                </div>
+              </DialogContent>
+            </Dialog>
+
+            <Dialog open={isPasswordDialogOpen} onOpenChange={setIsPasswordDialogOpen}>
+              <DialogContent className="max-w-md bg-white rounded-lg border-2" style={{ backgroundColor: 'white', borderColor: '#BDC3C7' }}>
+                <DialogHeader>
+                  <DialogTitle style={{ color: '#3C3C3C' }}>Password Update</DialogTitle>
+                  <DialogDescription style={{ color: '#6C757D' }}>
+                    Password has been reset succesfully.
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="flex justify-end space-x-3 pt-2">
+                  <Button
+                    onClick={() => setIsPasswordDialogOpen(false)}
                     className="px-4 py-2 border-2 transition-all duration-200"
                     style={{ backgroundColor: 'white', borderColor: '#BDC3C7', color: '#3C3C3C' }}
                   >

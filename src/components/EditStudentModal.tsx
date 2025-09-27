@@ -7,20 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { Textarea } from './ui/textarea';
 import { Plus, Minus } from 'lucide-react';
 import { useClasses } from '../hooks/useClasses';
-
-interface Student {
-  id: string; // UUID
-  name: string;
-  chronological_age: number;
-  age_band?: string | null;
-  functional_age?: string | null;
-  primary_diagnosis?: string | null;
-  secondary_diagnosis?: string | null;
-  entry_type: string;
-  ct?: string | null;
-  last_gco_date?: string | null; // ISO date string
-  class_name?: string | null;
-}
+import { Student } from '../types/students';
 
 interface IEPGoal {
   id: number;
