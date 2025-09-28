@@ -123,7 +123,7 @@ export function ClassDetailPage({ classData, onBack }: ClassDetailPageProps) {
                           {client.date_of_enrollment}
                         </TableCell>
                         <TableCell className="text-sm" style={{ color: '#3C3C3C' }}>
-                          {client.ct}
+                          {client.ct?.first_name}
                         </TableCell>
                         <TableCell>
                           <button
