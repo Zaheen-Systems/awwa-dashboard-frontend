@@ -45,9 +45,12 @@ export function ClientPage({
   };
 
   const handleDownloadTemplate = () => {
-    // Download a simple CSV template for clients with Class Name column
-    const csvContent = 'Name,Age,Gender,ID Number,Primary Diagnosis,Secondary Diagnosis,Date of Enrollment,Email,DOB,Guardian Name,Guardian Contact,Class Name\n' +
-                      'John Doe,25,M,CL001,Speech and Language,,2024-01-15,john@example.com,1999-03-15,Jane Doe,+65 9123 4567,Class A';
+    // Download a simple CSV template for clients with Class and CT columns
+    const csvContent =
+      'Name,Age,Gender,ID Number,Primary Diagnosis,Secondary Diagnosis,Date of Enrollment,Email,DOB,Guardian Name,Guardian Contact,Class,CT\n' +
+      'John Doe,25,M,CL001,Speech and Language,,2024-01-15,john@example.com,1999-03-15,Jane Doe,+65 9123 4567,Class A,\n' +
+      'Mary Smith,30,F,CL002,Autism,,2024-02-10,mary@example.com,1994-07-22,John Smith,+65 9876 5432,Class A,Sarah';
+
     const blob = new Blob([csvContent], { type: 'text/csv' });
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -168,6 +171,7 @@ export function ClientPage({
                   <TableHead style={{ color: '#3C3C3C' }}>ID</TableHead>
                   <TableHead style={{ color: '#3C3C3C' }}>Primary Diagnosis</TableHead>
                   <TableHead style={{ color: '#3C3C3C' }}>Secondary Diagnosis</TableHead>
+                  <TableHead style={{ color: '#3C3C3C' }}>CT Assigned</TableHead>
                   <TableHead style={{ color: '#3C3C3C' }}>Date of Enrollment</TableHead>
                   <TableHead style={{ color: '#3C3C3C' }}>Photo</TableHead>
                   <TableHead style={{ color: '#3C3C3C' }}>Edit</TableHead>
@@ -187,6 +191,7 @@ export function ClientPage({
                     <TableCell style={{ color: '#3C3C3C' }}>{client.id_number}</TableCell>
                     <TableCell style={{ color: '#3C3C3C' }}>{client.primary_diagnosis}</TableCell>
                     <TableCell style={{ color: '#3C3C3C' }}>{client.secondary_diagnosis}</TableCell>
+                    <TableCell style={{ color: '#3C3C3C' }}>{client.ct?.first_name}</TableCell>
                     <TableCell style={{ color: '#3C3C3C' }}>{client.date_of_enrollment}</TableCell>
                     <TableCell className="text-center">
                       <Dialog>

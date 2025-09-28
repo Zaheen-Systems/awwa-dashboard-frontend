@@ -9,6 +9,10 @@ export interface ClassData {
   number_of_cts: number;
 }
 
+interface UserName {
+  first_name: string;
+}
+
 export interface StudentBaseRead {
   id: number;
   name: string;
@@ -22,7 +26,7 @@ export interface StudentBaseRead {
   entry_type?: string;
   dob?: string;
   date_of_enrollment?: string;
-  ct?: string;
+  ct?: UserName | null;
   photo?: string;
   guardian_name?: string;
   guardian_contact?: string;

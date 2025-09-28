@@ -315,6 +315,7 @@ export default function App() {
       specialization: '',
       classes: '',
       role: 'Team member',
+      is_ct: false,
       email: '',
       photo: ''
     };

@@ -24,6 +24,7 @@ export interface TeamMember {
   gender: string;
   id_number?: string;
   specialization: string;
+  is_ct: boolean;
   classes: string;
   role: string;
   email?: string;

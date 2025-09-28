@@ -441,6 +441,28 @@ export function EditStudentModal({ isOpen, onClose, student, onSubmit }: EditStu
                 ))}
               </div>
             </div>
+
+            {/* GCO Theme */}
+            <div>
+                <Label htmlFor="gco3" className="text-sm" style={{ color: '#6C757D' }}>GCO Theme</Label>
+                <Select value={formData.gco3} onValueChange={(value) => handleInputChange('gco3', value)}>
+                  <SelectTrigger className="bg-white border-2" style={{ borderColor: '#BDC3C7' }}>
+                    <SelectValue placeholder="Select..." />
+                  </SelectTrigger>
+                  <SelectContent 
+                    className="bg-white border border-gray-200 shadow-lg rounded-md"
+                    style={{ 
+                      backgroundColor: 'white',
+                      borderColor: '#BDC3C7',
+                      boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)'
+                    }}
+                  >
+                    <SelectItem value="0-6" className="hover:bg-gray-100 focus:bg-gray-100" style={{ color: '#3C3C3C' }}>GCO 1</SelectItem>
+                    <SelectItem value="7-12" className="hover:bg-gray-100 focus:bg-gray-100" style={{ color: '#3C3C3C' }}>GCO 2</SelectItem>
+                    <SelectItem value="13-18" className="hover:bg-gray-100 focus:bg-gray-100" style={{ color: '#3C3C3C' }}>GCO 3</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
           </div>
         </div>
 

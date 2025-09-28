@@ -3,6 +3,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Label } from './ui/label';
+import { Checkbox } from './ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from './ui/dialog';
 import { Upload, User, Trash2 } from 'lucide-react';
@@ -45,7 +46,7 @@ export function EditTeamMemberPage({
   // Available classes for assignment (should come from backend in real app)
   const availableClasses: string[] = classes? classes.map(e => e.name): []
 
-  const handleInputChange = (field: keyof TeamMember, value: string) => {
+  const handleInputChange = (field: keyof TeamMember, value: string | boolean) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
@@ -284,6 +285,21 @@ export function EditTeamMemberPage({
                     </SelectContent>
                   </Select>
                 </div>
+
+                {/* CT Toggle (only shown if role is teacher or ct) */}
+                {(formData.role === "teacher" || formData.role === "ct") && (
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="is_ct"
+                      checked={formData.is_ct? formData.is_ct: false}
+                      onCheckedChange={(checked) => handleInputChange("is_ct", checked)}
+                      disabled={formData.role === "ct"} // lock toggle ON when role is CT
+                    />
+                    <Label htmlFor="is_ct" className="text-sm text-gray-700">
+                      Also CT
+                    </Label>
+                  </div>
+                )}
 
                 {/* Gender */}
                 <div>

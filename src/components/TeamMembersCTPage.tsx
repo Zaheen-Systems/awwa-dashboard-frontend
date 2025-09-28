@@ -119,14 +119,23 @@ export function TeamMembersCTPage({ onEditTeamMember, onAddTeamMember }: TeamMem
     }
   };
 
+  const getRole = (member: TeamMember) => {
+    if( member.role == "ct")
+      return "CT"
+    else if (member.role == "teacher")
+      return member.is_ct? "Team member/ CT": "Team member"
+  }
+
   const handleDownloadTemplate = () => {
     // In a real implementation, this would download an Excel template
     console.log('Downloading Excel template for bulk upload');
     // Create a sample CSV content for demonstration
-    const csvContent = 'Name,Age,Gender,ID Number,Specialization,Date of Joining,Class,Role,Email,DOB\n' +
-                      'John Doe,25,Male,TM001,Speech Therapy,2024-01-15,Class A,Team member,john@awwa.org,1999-03-15\n' +
-                      'Jane Smith,30,Female,CT001,Occupational Therapy,2023-08-20,Class B,CT,jane@awwa.org,1994-07-22';
-    
+    const csvContent =
+      'Name,Age,Gender,ID Number,Specialization,Date of Joining,Class,Role,Email,DOB\n' +
+      'John Doe,25,Male,TM001,Speech Therapy,2024-01-15,Class A,Team member,john@awwa.org,1999-03-15\n' +
+      'Jane Smith,30,Female,CT001,Occupational Therapy,2023-08-20,Class B,CT,jane@awwa.org,1994-07-22\n' +
+      'Michael Tan,28,Male,TMCT001,Physiotherapy,2024-05-12,Class A,Team member/CT,michael@awwa.org,1996-11-03';
+
     const blob = new Blob([csvContent], { type: 'text/csv' });
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -192,7 +201,7 @@ export function TeamMembersCTPage({ onEditTeamMember, onAddTeamMember }: TeamMem
                     {member.date_of_joining}
                   </TableCell>
                   <TableCell style={{ color: '#3C3C3C' }}>{member.classes}</TableCell>
-                  <TableCell style={{ color: '#3C3C3C' }}>{member.role}</TableCell>
+                  <TableCell style={{ color: '#3C3C3C' }}>{getRole(member)}</TableCell>
                   <TableCell className="text-center">
                     <Dialog>
                       <DialogTrigger asChild>
