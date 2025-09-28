@@ -59,7 +59,25 @@ export function EditTeamMemberPage({
         { onSuccess: () => onSave(formData) }
       );
     } else {
-      createUser.mutate(formData, { onSuccess: () => onSave(formData) });
+      console.log("creating")
+      createUser.mutate(formData, {
+      onSuccess: (data) => {
+        console.log("✅ User created:", data);
+        console.log("sending photo");
+
+        if (data?.user?.id) {
+          handlePhotoUpload(data.id);
+        }
+
+        onSave(data);
+      },
+      onError: (error) => {
+        console.error("❌ Error creating user:", error);
+      },
+      onSettled: () => {
+        console.log("ℹ️ createUser.mutate finished (success or error)");
+      },
+    });
     }
     onSave(formData);
   };
@@ -110,19 +128,21 @@ export function EditTeamMemberPage({
     fileInput.onchange = (e) => {
       const file = (e.target as HTMLInputElement).files?.[0];
       if (file) {
-        uploadMutation.mutate(
+        if (userId != 0) {
+          uploadMutation.mutate(
           { userId, file },
           {
             onSuccess: (data) => {
               console.log("Uploaded:", data);
               setIsDialogOpen(true);
-              queryClient.invalidateQueries({ queryKey: ["allstudents"] });
+              queryClient.invalidateQueries({ queryKey: ["users"] });
             },
             onError: (error) => {
               console.error("Upload failed", error);
             },
           }
         );
+        }
         const photo = URL.createObjectURL(file);
         handleInputChange('photo', photo);
         console.log('Photo uploaded:', file.name);

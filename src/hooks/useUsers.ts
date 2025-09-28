@@ -18,16 +18,18 @@ export const useUsers = () => {
 
 // ---------------- Create User ----------------
 export function useCreateUser() {
-  const queryClient = useQueryClient();
+  // const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: async (newUser: any) => {
-      const res = await api.post("/api/users/", newUser);
+      const { id, ...rest } = newUser;
+      const res = await api.post("/api/users/", rest);
       return res.data;
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["users"] });
-    },
+    // just invalidate queries in onSettled
+    // onSettled: () => {
+    //   queryClient.invalidateQueries({ queryKey: ["users"] });
+    // },
   });
 }
 

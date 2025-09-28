@@ -55,15 +55,17 @@ export const useUploadStudentPhoto = () => {
 };
 
 const uploadUserPhoto = async (userId: number, file: File) => {
-  const formData = new FormData();
-  formData.append("file", file);
+  if (userId != 0) {
+    const formData = new FormData();
+    formData.append("file", file);
 
-  const { data } = await api.post(`/api/users/${userId}/upload-photo`, formData, {
-    headers: {
-      "Content-Type": "multipart/form-data",
-    },
-  });
-  return data;
+    const { data } = await api.post(`/api/users/${userId}/upload-photo`, formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+    return data;
+  }
 };
 
 export const useUploadUserPhoto = () => {

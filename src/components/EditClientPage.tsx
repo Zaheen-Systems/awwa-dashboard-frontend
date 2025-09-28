@@ -9,6 +9,7 @@ import { Upload, User, Trash2 } from 'lucide-react';
 import { StudentBaseRead } from '../types/class';
 import { useCreateStudent, useUpdateStudent, useDeleteStudent } from '../hooks/useStudents';
 import { useUploadStudentPhoto } from '../hooks/useUploadFile';
+import { useClasses } from '../hooks/useClasses';
 // import userIconImage from 'figma:asset/175b30eba12976a029330759350f9c338ba2c59d.png';
 
 interface EditClientPageProps {
@@ -37,6 +38,9 @@ export function EditClientPage({
   const createStudent = useCreateStudent();
   const updateStudent = useUpdateStudent();
   const deleteStudent = useDeleteStudent();
+  const { data: classes } = useClasses();
+
+  const availableClasses: string[] = classes? classes.map(e => e.name): []
 
   const uploadMutation = useUploadStudentPhoto();
 
@@ -59,6 +63,7 @@ export function EditClientPage({
   };
 
   const handleDelete = () => {
+    console.log(formData)
     if (formData.id && formData.id !== 0) {
       deleteStudent.mutate(formData.id, {
         onSuccess: () => {
@@ -301,6 +306,32 @@ export function EditClientPage({
                     className="w-full border-2 px-3 py-2 rounded-none"
                     style={{ borderColor: '#BDC3C7' }}
                   />
+                </div>
+
+                {/* Classes */}
+                <div>
+                  <Label htmlFor="class_name" className="block mb-2" style={{ color: '#3C3C3C' }}>
+                    Class
+                  </Label>
+                  <Select value={formData.class_name} onValueChange={(value) => handleInputChange('class_name', value)}>
+                    <SelectTrigger className="w-full border-2 rounded-none" style={{ borderColor: '#BDC3C7' }}>
+                      <SelectValue placeholder="Select class" />
+                    </SelectTrigger>
+                    <SelectContent 
+                      className="bg-white border border-gray-200 shadow-lg rounded-md"
+                      style={{ 
+                        backgroundColor: 'white',
+                        borderColor: '#BDC3C7',
+                        boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)'
+                      }}
+                    >
+                      {availableClasses.map((cls) => (
+                        <SelectItem key={cls} value={cls} className="hover:bg-gray-100 focus:bg-gray-100" style={{ color: '#3C3C3C' }}>
+                          {cls}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
 
 
