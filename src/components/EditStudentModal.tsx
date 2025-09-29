@@ -11,7 +11,7 @@ import { StudentUpdate } from '../types/students';
 
 interface IEPGoal {
   id: number;
-  text: string;
+  description: string;
 }
 
 interface EditStudentModalProps {
@@ -43,7 +43,7 @@ export function EditStudentModal({ isOpen, onClose, student, onSubmit }: EditStu
   });
 
   const [iepGoals, setIepGoals] = useState<IEPGoal[]>([
-    { id: 1, text: '' } // Start empty for teacher input
+    { id: 1, description: '' } // Start empty for teacher input
   ]);
 
   // Update form data when student changes or modal opens
@@ -68,7 +68,7 @@ export function EditStudentModal({ isOpen, onClose, student, onSubmit }: EditStu
       });
       
       // Reset IEP goals to empty for teacher input
-      setIepGoals([{ id: 1, text: '' }]);
+      setIepGoals([{ id: 1, description: '' }]);
     }
   }, [student, isOpen]);
 
@@ -82,7 +82,7 @@ export function EditStudentModal({ isOpen, onClose, student, onSubmit }: EditStu
   const addIEPGoal = () => {
     const newGoal: IEPGoal = {
       id: Math.max(...iepGoals.map(g => g.id), 0) + 1,
-      text: ''
+      description: ''
     };
     setIepGoals(prev => [...prev, newGoal]);
   };
@@ -96,7 +96,7 @@ export function EditStudentModal({ isOpen, onClose, student, onSubmit }: EditStu
 
   const updateIEPGoal = (id: number, text: string) => {
     setIepGoals(prev => prev.map(goal => 
-      goal.id === id ? { ...goal, text } : goal
+      goal.id === id ? { ...goal, description: text } : goal
     ));
   };
 
@@ -112,7 +112,7 @@ export function EditStudentModal({ isOpen, onClose, student, onSubmit }: EditStu
         class_name: formData.className,
         last_gco_date: formData.lastGCODate,
         entry_type: formData.status,
-        iep_goals: iepGoals.map(e => e.text),
+        iep_goals_new: iepGoals.map(e => e.description),
         gco_1_functional_age: formData.gco1,
         gco_2_functional_age: formData.gco2,
         gco_3_functional_age: formData.gco3,
@@ -432,7 +432,7 @@ export function EditStudentModal({ isOpen, onClose, student, onSubmit }: EditStu
                       Goal {index + 1}:
                     </Label>
                     <Textarea
-                      value={goal.text}
+                      value={goal.description}
                       onChange={(e) => updateIEPGoal(goal.id, e.target.value)}
                       className="bg-white border-2 min-h-[60px] focus:outline-none"
                       style={{ 

@@ -46,7 +46,8 @@ export interface StudentUpdate {
   gco_2_functional_age?: string | null;
   gco_3_functional_age?: string | null;
   created_at: string; // ISO datetime string
-  iep_goals: string[];
+  iep_goals: IndividualIEPGoal[];
+  iep_goals_new: string[];
   class_name?: string;
   gco_theme?: string;
 }
