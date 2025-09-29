@@ -6,11 +6,14 @@ import { Label } from './ui/label';
 import { Checkbox } from './ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from './ui/dialog';
+import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover"
+import { Command, CommandGroup, CommandItem } from "./ui/command"
 import { Upload, User, Trash2 } from 'lucide-react';
 import { TeamMember } from '../types/users';
 import { useCreateUser, useUpdateUser, useDeleteUser, useResetUserPassword } from '../hooks/useUsers';
 import { useUploadUserPhoto } from '../hooks/useUploadFile';
 import { useClasses } from '../hooks/useClasses';
+import { Check, ChevronsUpDown } from "lucide-react"
 // import userIconImage from 'figma:asset/175b30eba12976a029330759350f9c338ba2c59d.png';
 
 interface EditTeamMemberPageProps {
@@ -45,6 +48,22 @@ export function EditTeamMemberPage({
 
   // Available classes for assignment (should come from backend in real app)
   const availableClasses: string[] = classes? classes.map(e => e.name): []
+
+  const [open, setOpen] = useState(false)
+  const [selected, setSelected] = useState<string[]>(
+    formData.classes ? formData.classes.split(",") : []
+  )
+
+  const toggleClass = (cls: string) => {
+    let updated: string[]
+    if (selected.includes(cls)) {
+      updated = selected.filter((c) => c !== cls)
+    } else {
+      updated = [...selected, cls]
+    }
+    setSelected(updated)
+    handleInputChange("classes", updated.join(",")) // 🔹 update as comma string
+  }
 
   const handleInputChange = (field: keyof TeamMember, value: string | boolean) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -345,30 +364,43 @@ export function EditTeamMemberPage({
                   </Select>
                 </div>
 
-                {/* Classes */}
                 <div>
-                  <Label htmlFor="class" className="block mb-2" style={{ color: '#3C3C3C' }}>
+                  <Label htmlFor="class" className="block mb-2" style={{ color: "#3C3C3C" }}>
                     Classes
                   </Label>
-                  <Select value={formData.classes} onValueChange={(value) => handleInputChange('classes', value)}>
-                    <SelectTrigger className="w-full border-2 rounded-none" style={{ borderColor: '#BDC3C7' }}>
-                      <SelectValue placeholder="Select class" />
-                    </SelectTrigger>
-                    <SelectContent 
-                      className="bg-white border border-gray-200 shadow-lg rounded-md"
-                      style={{ 
-                        backgroundColor: 'white',
-                        borderColor: '#BDC3C7',
-                        boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)'
-                      }}
-                    >
-                      {availableClasses.map((cls) => (
-                        <SelectItem key={cls} value={cls} className="hover:bg-gray-100 focus:bg-gray-100" style={{ color: '#3C3C3C' }}>
-                          {cls}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <Popover open={open} onOpenChange={setOpen}>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        role="combobox"
+                        className="w-full justify-between border-2 rounded-none"
+                        style={{ borderColor: "#BDC3C7" }}
+                      >
+                        {selected.length > 0 ? selected.join(", ") : "Select class"}
+                        <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-full p-0 bg-white">
+                      <Command>
+                        <CommandGroup>
+                          {availableClasses.map((cls: string) => (
+                            <CommandItem
+                              key={cls}
+                              onSelect={() => toggleClass(cls)}
+                              className="cursor-pointer"
+                            >
+                              <Check
+                                className={`mr-2 h-4 w-4 ${
+                                  selected.join(",").includes(cls) ? "opacity-100" : "opacity-0"
+                                }`}
+                              />
+                              {cls}
+                            </CommandItem>
+                          ))}
+                        </CommandGroup>
+                      </Command>
+                    </PopoverContent>
+                  </Popover>
                 </div>
 
                 {/* Date of joining */}
