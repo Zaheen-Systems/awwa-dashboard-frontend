@@ -28,4 +28,25 @@ export interface Student {
   created_at: string; // ISO datetime string
   iep_goals: IndividualIEPGoal[];
   class_name?: string;
+  gco_theme?: string;
+}
+
+export interface StudentUpdate {
+  id: string; // UUID
+  name: string;
+  chronological_age: number;
+  age_band?: string | null;
+  functional_age?: string | null;
+  primary_diagnosis?: string | null;
+  secondary_diagnosis?: string | null;
+  entry_type: string;
+  ct?: UserName | null;
+  last_gco_date?: string | null; // ISO date string
+  gco_1_functional_age?: string | null;
+  gco_2_functional_age?: string | null;
+  gco_3_functional_age?: string | null;
+  created_at: string; // ISO datetime string
+  iep_goals: string[];
+  class_name?: string;
+  gco_theme?: string;
 }

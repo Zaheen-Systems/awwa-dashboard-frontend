@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { Textarea } from './ui/textarea';
 import { Plus, Minus } from 'lucide-react';
 import { useClasses } from '../hooks/useClasses';
-import { Student } from '../types/students';
+import { StudentUpdate } from '../types/students';
 
 interface IEPGoal {
   id: number;
@@ -17,8 +17,8 @@ interface IEPGoal {
 interface EditStudentModalProps {
   isOpen: boolean;
   onClose: () => void;
-  student: Student | null;
-  onSubmit: (updatedStudent: Student) => void;
+  student: StudentUpdate | null;
+  onSubmit: (updatedStudent: StudentUpdate) => void;
 }
 
 export function EditStudentModal({ isOpen, onClose, student, onSubmit }: EditStudentModalProps) {
@@ -38,7 +38,8 @@ export function EditStudentModal({ isOpen, onClose, student, onSubmit }: EditStu
     // Functional age fields - empty for manual selection
     gco1: '',
     gco2: '',
-    gco3: ''
+    gco3: '',
+    gcoTheme: ''
   });
 
   const [iepGoals, setIepGoals] = useState<IEPGoal[]>([
@@ -60,9 +61,10 @@ export function EditStudentModal({ isOpen, onClose, student, onSubmit }: EditStu
         lastGCODate: '',
         status: student.entry_type,
         // Functional age fields - empty for manual selection
-        gco1: '',
-        gco2: '',
-        gco3: ''
+        gco1: student.gco_1_functional_age? student.gco_1_functional_age: '',
+        gco2: student.gco_2_functional_age? student.gco_2_functional_age: '',
+        gco3: student.gco_3_functional_age? student.gco_3_functional_age: '',
+        gcoTheme: student.gco_theme? student.gco_theme: '',
       });
       
       // Reset IEP goals to empty for teacher input
@@ -100,7 +102,7 @@ export function EditStudentModal({ isOpen, onClose, student, onSubmit }: EditStu
 
   const handleSubmit = () => {
     if (student) {
-      const updatedStudent: Student = {
+      const updatedStudent: StudentUpdate = {
         ...student,
         name: formData.name,
         chronological_age: formData.chronologicalAge,
@@ -109,7 +111,11 @@ export function EditStudentModal({ isOpen, onClose, student, onSubmit }: EditStu
         secondary_diagnosis: formData.secondaryDiagnosis,
         class_name: formData.className,
         last_gco_date: formData.lastGCODate,
-        entry_type: formData.status
+        entry_type: formData.status,
+        iep_goals: iepGoals.map(e => e.text),
+        gco_1_functional_age: formData.gco1,
+        gco_2_functional_age: formData.gco2,
+        gco_3_functional_age: formData.gco3,
       };
       onSubmit(updatedStudent);
       onClose();
@@ -457,9 +463,9 @@ export function EditStudentModal({ isOpen, onClose, student, onSubmit }: EditStu
                       boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)'
                     }}
                   >
-                    <SelectItem value="0-6" className="hover:bg-gray-100 focus:bg-gray-100" style={{ color: '#3C3C3C' }}>GCO 1</SelectItem>
-                    <SelectItem value="7-12" className="hover:bg-gray-100 focus:bg-gray-100" style={{ color: '#3C3C3C' }}>GCO 2</SelectItem>
-                    <SelectItem value="13-18" className="hover:bg-gray-100 focus:bg-gray-100" style={{ color: '#3C3C3C' }}>GCO 3</SelectItem>
+                    <SelectItem value="GCO 1" className="hover:bg-gray-100 focus:bg-gray-100" style={{ color: '#3C3C3C' }}>GCO 1</SelectItem>
+                    <SelectItem value="GCO 2" className="hover:bg-gray-100 focus:bg-gray-100" style={{ color: '#3C3C3C' }}>GCO 2</SelectItem>
+                    <SelectItem value="GCO 3" className="hover:bg-gray-100 focus:bg-gray-100" style={{ color: '#3C3C3C' }}>GCO 3</SelectItem>
                   </SelectContent>
                 </Select>
               </div>

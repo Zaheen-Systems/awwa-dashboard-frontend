@@ -1,5 +1,5 @@
 import { useState } from 'react';
-// import { useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from './ui/table';
@@ -8,10 +8,11 @@ import { Search, Edit } from 'lucide-react';
 import { EditStudentModal } from './EditStudentModal';
 import { useQuery } from "@tanstack/react-query";
 import api from "../lib/axios";
-import { Student } from '../types/students';
+import { Student, StudentUpdate } from '../types/students';
+import { useUpdateStudent } from '../hooks/useStudents';
 
 interface DashboardProps {
-  onStudentClick: (student: Student) => void;
+  onStudentClick: (student: StudentUpdate) => void;
   onSwitchToAdminDashboard?: () => void;
   userType?: 'teacher' | 'admin' | 'ct';
   is_ct?: string;
@@ -22,12 +23,14 @@ export function Dashboard({ onStudentClick, onSwitchToAdminDashboard, userType, 
   const [sortColumn, setSortColumn] = useState<keyof Student | null>(null);
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
   const [showEditModal, setShowEditModal] = useState(false);
-  const [selectedStudentForEdit, setSelectedStudentForEdit] = useState<Student | null>(null);
+  const [selectedStudentForEdit, setSelectedStudentForEdit] = useState<StudentUpdate | null>(null);
   const [activeTab, setActiveTab] = useState<"team" | "ct">(userType == "teacher"? "team": "ct");
-  // const queryClient = useQueryClient();
+  const queryClient = useQueryClient();
+
+  const updateStudent = useUpdateStudent();
 
 
-  async function fetchStudents(): Promise<Student[]> {
+  async function fetchStudents(): Promise<StudentUpdate[]> {
     console.log("ctct", activeTab)
     const queryparam = activeTab == "ct"? "?filter_ct_students=true": ""
     const res = await api.get(`/api/students/${queryparam}`);
@@ -38,7 +41,7 @@ export function Dashboard({ onStudentClick, onSwitchToAdminDashboard, userType, 
       data: students = [], 
       // isLoading, 
       // isError
-     } = useQuery<Student[]>({
+     } = useQuery<StudentUpdate[]>({
     queryKey: ["students", activeTab],
     queryFn: fetchStudents,
   });
@@ -85,7 +88,7 @@ export function Dashboard({ onStudentClick, onSwitchToAdminDashboard, userType, 
     }
   };
 
-  const handleEditStudent = (student: Student, event: React.MouseEvent) => {
+  const handleEditStudent = (student: StudentUpdate, event: React.MouseEvent) => {
     event.stopPropagation(); // Prevent row click navigation
     setSelectedStudentForEdit(student);
     setShowEditModal(true);
@@ -93,6 +96,10 @@ export function Dashboard({ onStudentClick, onSwitchToAdminDashboard, userType, 
 
   const handleEditStudentSubmit = (studentData: any) => {
     console.log('Student edited:', studentData);
+    updateStudent.mutate(
+        { id: studentData.id, data: studentData },
+        { onSuccess: () => queryClient.invalidateQueries({ queryKey: ["students", activeTab] }) }
+      );
     // In a real implementation, this would save to backend
     setShowEditModal(false);
     setSelectedStudentForEdit(null);
