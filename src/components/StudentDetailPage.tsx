@@ -7,6 +7,7 @@ import { Checkbox } from './ui/checkbox';
 import { Filter, ArrowLeft } from 'lucide-react';
 import { AddNewBDModal } from './AddNewBDModal';
 import { SelectBDsModal } from './SelectBDsModal';
+import { BDsFilterModal, BDFilters } from './BDsFilterModal';
 import api from "../lib/axios";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
@@ -100,13 +101,36 @@ const fetchGroupedDescriptors = async (studentId: number) => {
 export function StudentDetailPage({ student, onBack, onBehaviorDescriptorClick }: StudentDetailPageProps) {
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
+  const [isRangeMode, setIsRangeMode] = useState(false);
   const queryClient = useQueryClient();
   const [behaviourDescriptors, setBehaviourDescriptors] = useState<BehavioralDescriptorUI[]>([]);
   const [iepBehaviourDescriptors, setIepBehaviourDescriptors] = useState<BehaviorDescriptor[]>([]);
 
   const { data: behaviourDescriptorsAll } = useBehavioralDescriptors(parseInt(student.id));
 
-  // Filter behavior descriptors based on date range
+  // Filter states
+  const [gcoFilters, setGcoFilters] = useState<BDFilters>({
+    trigger: '',
+    source: 'all',
+    context: '',
+    startDate: '',
+    endDate: '',
+    gcoClassification: 'all',
+    hasAction: false,
+    hasTrigger: false
+  });
+  const [iepFilters, setIepFilters] = useState<BDFilters>({
+    trigger: '',
+    source: 'all',
+    context: '',
+    startDate: '',
+    endDate: '',
+    gcoClassification: 'all',
+    hasAction: false,
+    hasTrigger: false
+  });
+
+  // Filter behavior descriptors based on date range or single date
   const filterDescriptorsByDateRange = (descriptors: BehavioralDescriptorUI[]) => {
     if (!startDate && !endDate) return descriptors;
     
@@ -115,12 +139,29 @@ export function StudentDetailPage({ student, onBack, onBehaviorDescriptorClick }
       const start = startDate ? new Date(startDate) : null;
       const end = endDate ? new Date(endDate) : null;
       
-      if (start && end) {
-        return descriptorDate >= start && descriptorDate <= end;
-      } else if (start) {
-        return descriptorDate >= start;
-      } else if (end) {
-        return descriptorDate <= end;
+      if (isRangeMode) {
+        // Range mode: both start and end dates must be present
+        if (start && end) {
+          return descriptorDate >= start && descriptorDate <= end;
+        }
+        // If only one date in range mode, use it as start date
+        else if (start) {
+          return descriptorDate >= start;
+        }
+        else if (end) {
+          return descriptorDate <= end;
+        }
+      } else {
+        // Single date mode: if only startDate is provided, show that specific date
+        if (start && !end) {
+          const descriptorDateStr = descriptorDate.toISOString().split('T')[0];
+          const startDateStr = start.toISOString().split('T')[0];
+          return descriptorDateStr === startDateStr;
+        }
+        // If both dates are provided in single mode, treat as range
+        else if (start && end) {
+          return descriptorDate >= start && descriptorDate <= end;
+        }
       }
       return true;
     });
@@ -129,10 +170,16 @@ export function StudentDetailPage({ student, onBack, onBehaviorDescriptorClick }
   useEffect(() => {
     if (behaviourDescriptorsAll) {
       const filteredAll = filterDescriptorsByDateRange(behaviourDescriptorsAll);
-      setBehaviourDescriptors(filteredAll.filter(bd => !bd.iep_goal));
-      setIepBehaviourDescriptors(filteredAll.filter(bd => Boolean(bd.iep_goal)));
+      
+      // Apply GCO filters to non-IEP descriptors
+      const gcoFiltered = applyFilters(filteredAll.filter(bd => !bd.iep_goal), gcoFilters);
+      setBehaviourDescriptors(gcoFiltered);
+      
+      // Apply IEP filters to IEP descriptors
+      const iepFiltered = applyFilters(filteredAll.filter(bd => Boolean(bd.iep_goal)), iepFilters);
+      setIepBehaviourDescriptors(iepFiltered);
     }
-  }, [behaviourDescriptorsAll, startDate, endDate]);
+  }, [behaviourDescriptorsAll, startDate, endDate, isRangeMode, gcoFilters, iepFilters]);
 
     const { data: mockGCOData  } = useQuery<GroupedDescriptors>({
     queryKey: ["groupedDescriptors", student.id],
@@ -140,8 +187,8 @@ export function StudentDetailPage({ student, onBack, onBehaviorDescriptorClick }
     enabled: !!student.id, // don't run until we have a studentId
   });
 
-  // Count behavior descriptors for each GCO number
-  const getCountForGCO = (gcoNumber: string) => {
+  // Count behavior descriptors for specific GCO items (e.g., "1.2.2")
+  const getCountForGCOItem = (gcoItem: string) => {
     if (!behaviourDescriptors) return 0;
     
     const count = behaviourDescriptors.filter(descriptor => {
@@ -150,12 +197,9 @@ export function StudentDetailPage({ student, onBack, onBehaviorDescriptorClick }
         return false;
       }
       
-      // Check if the descriptor matches the GCO number (convert both to strings for comparison)
-      return String(descriptor.gco_classification) === String(gcoNumber);
+      // Check if the descriptor's gco_classification matches the specific GCO item
+      return String(descriptor.gco_classification) === String(gcoItem);
     }).length;
-    
-    // Debug logging
-    console.log(`GCO ${gcoNumber} count:`, count, 'Total BDs:', behaviourDescriptors.length);
     
     return count;
   };
@@ -163,6 +207,9 @@ export function StudentDetailPage({ student, onBack, onBehaviorDescriptorClick }
   // Modal states
   const [showAddBDModal, setShowAddBDModal] = useState(false);
   const [showSelectBDsModal, setShowSelectBDsModal] = useState(false);
+  const [showGCOFilterModal, setShowGCOFilterModal] = useState(false);
+  const [showIEPFilterModal, setShowIEPFilterModal] = useState(false);
+
 
   const handleBehaviourSelect = (id: number, selected: boolean) => {
     console.log(id, selected)
@@ -244,6 +291,99 @@ export function StudentDetailPage({ student, onBack, onBehaviorDescriptorClick }
     //   gco_id: bdData.gcoClassification
     // };
     // setBehaviourDescriptors(prev => [...prev, newBD]);
+  };
+
+  const handleResetDates = () => {
+    setStartDate("");
+    setEndDate("");
+    setIsRangeMode(false);
+  };
+
+  // Filter behavior descriptors based on applied filters
+  const applyFilters = (descriptors: BehavioralDescriptorUI[], filters: BDFilters): BehavioralDescriptorUI[] => {
+    return descriptors.filter(descriptor => {
+      // Trigger filter
+      if (filters.trigger && !descriptor.trigger.toLowerCase().includes(filters.trigger.toLowerCase())) {
+        return false;
+      }
+
+      // Source filter
+      if (filters.source && filters.source !== 'all' && descriptor.source !== filters.source) {
+        return false;
+      }
+
+      // Context filter
+      if (filters.context && !descriptor.context.toLowerCase().includes(filters.context.toLowerCase())) {
+        return false;
+      }
+
+      // GCO Classification filter
+      if (filters.gcoClassification && filters.gcoClassification !== 'all' && descriptor.gco_classification !== filters.gcoClassification) {
+        return false;
+      }
+
+      // Date range filter
+      if (filters.startDate || filters.endDate) {
+        const descriptorDate = new Date(descriptor.created_at);
+        const start = filters.startDate ? new Date(filters.startDate) : null;
+        const end = filters.endDate ? new Date(filters.endDate) : null;
+        
+        if (start && descriptorDate < start) {
+          return false;
+        }
+        if (end && descriptorDate > end) {
+          return false;
+        }
+      }
+
+      // Has action filter
+      if (filters.hasAction && (!descriptor.action || descriptor.action.trim() === '')) {
+        return false;
+      }
+
+      // Has trigger filter
+      if (filters.hasTrigger && (!descriptor.trigger || descriptor.trigger.trim() === '')) {
+        return false;
+      }
+
+      return true;
+    });
+  };
+
+  // Handler for GCO filter modal
+  const handleGCOFilterApply = (filters: BDFilters) => {
+    setGcoFilters(filters);
+  };
+
+  const handleGCOFilterClear = () => {
+    setGcoFilters({
+      trigger: '',
+      source: 'all',
+      context: '',
+      startDate: '',
+      endDate: '',
+      gcoClassification: 'all',
+      hasAction: false,
+      hasTrigger: false
+    });
+  };
+
+  // Handler for IEP filter modal
+  const handleIEPFilterApply = (filters: BDFilters) => {
+    setIepFilters(filters);
+  };
+
+  const handleIEPFilterClear = () => {
+    setIepFilters({
+      trigger: '',
+      source: 'all',
+      context: '',
+      startDate: '',
+      endDate: '',
+      gcoClassification: 'all',
+      hasAction: false,
+      hasTrigger: false
+    });
   };
 
   const handleGenerateReportClick = () => {
@@ -408,40 +548,111 @@ function useGenerateReport() {
             </Table>
           </div>
 
-          {/* Date Range Input */}
+          {/* Enhanced Date Selection */}
           <div className="mb-6">
-            <div className="flex flex-col sm:flex-row gap-4">
-              <div className="w-64">
-                <Label htmlFor="startDate" style={{ color: '#3C3C3C' }}>Start Date</Label>
-                <Input
-                  id="startDate"
-                  type="date"
-                  value={startDate}
-                  onChange={(e) => setStartDate(e.target.value)}
-                  className="bg-white border-2 focus:outline-none"
-                  style={{ 
-                    borderColor: '#BDC3C7',
-                    color: '#3C3C3C'
-                  }}
-                  onFocus={(e) => e.target.style.borderColor = '#2C5F7C'}
-                  onBlur={(e) => e.target.style.borderColor = '#BDC3C7'}
-                />
-              </div>
-              <div className="w-64">
-                <Label htmlFor="endDate" style={{ color: '#3C3C3C' }}>End Date</Label>
-                <Input
-                  id="endDate"
-                  type="date"
-                  value={endDate}
-                  onChange={(e) => setEndDate(e.target.value)}
-                  className="bg-white border-2 focus:outline-none"
-                  style={{ 
-                    borderColor: '#BDC3C7',
-                    color: '#3C3C3C'
-                  }}
-                  onFocus={(e) => e.target.style.borderColor = '#2C5F7C'}
-                  onBlur={(e) => e.target.style.borderColor = '#BDC3C7'}
-                />
+            <div className="bg-white rounded-lg shadow-sm p-4">
+              <div className="flex flex-col space-y-4">
+                {/* Mode Selection */}
+                <div className="flex items-center space-x-4">
+                  <Label className="text-sm font-medium" style={{ color: '#3C3C3C' }}>Date Filter Mode:</Label>
+                  <div className="flex space-x-2">
+                    <Button
+                      type="button"
+                      variant={!isRangeMode ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => {
+                        setIsRangeMode(false);
+                        setEndDate(""); // Clear end date when switching to single mode
+                      }}
+                      className="text-xs"
+                      style={{ 
+                        backgroundColor: !isRangeMode ? '#e65039' : 'transparent',
+                        color: !isRangeMode ? 'white' : '#3C3C3C',
+                        borderColor: '#e65039'
+                      }}
+                    >
+                      Single Date
+                    </Button>
+                    <Button
+                      type="button"
+                      variant={isRangeMode ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => setIsRangeMode(true)}
+                      className="text-xs"
+                      style={{ 
+                        backgroundColor: isRangeMode ? '#e65039' : 'transparent',
+                        color: isRangeMode ? 'white' : '#3C3C3C',
+                        borderColor: '#e65039'
+                      }}
+                    >
+                      Date Range
+                    </Button>
+                  </div>
+                </div>
+
+                {/* Date Inputs */}
+                <div className="flex flex-col sm:flex-row gap-4">
+                  <div className="flex-1">
+                    <Label htmlFor="startDate" style={{ color: '#3C3C3C' }}>
+                      {isRangeMode ? 'Start Date' : 'Date'}
+                    </Label>
+                    <Input
+                      id="startDate"
+                      type="date"
+                      value={startDate}
+                      onChange={(e) => setStartDate(e.target.value)}
+                      className="bg-white border-2 focus:outline-none"
+                      style={{ 
+                        borderColor: '#BDC3C7',
+                        color: '#3C3C3C'
+                      }}
+                      onFocus={(e) => e.target.style.borderColor = '#2C5F7C'}
+                      onBlur={(e) => e.target.style.borderColor = '#BDC3C7'}
+                    />
+                  </div>
+                  
+                  {isRangeMode && (
+                    <div className="flex-1">
+                      <Label htmlFor="endDate" style={{ color: '#3C3C3C' }}>End Date</Label>
+                      <Input
+                        id="endDate"
+                        type="date"
+                        value={endDate}
+                        onChange={(e) => setEndDate(e.target.value)}
+                        className="bg-white border-2 focus:outline-none"
+                        style={{ 
+                          borderColor: '#BDC3C7',
+                          color: '#3C3C3C'
+                        }}
+                        onFocus={(e) => e.target.style.borderColor = '#2C5F7C'}
+                        onBlur={(e) => e.target.style.borderColor = '#BDC3C7'}
+                      />
+                    </div>
+                  )}
+                </div>
+
+                {/* Helper Text and Reset Button */}
+                <div className="flex justify-between items-center">
+                  <div className="text-sm" style={{ color: '#6C757D' }}>
+                    {isRangeMode 
+                      ? "Select a date range to filter behavior descriptors" 
+                      : "Select a specific date to view behavior descriptors for that day"
+                    }
+                  </div>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={handleResetDates}
+                    className="text-xs"
+                    style={{ 
+                      borderColor: '#BDC3C7',
+                      color: '#3C3C3C'
+                    }}
+                  >
+                    Reset Dates
+                  </Button>
+                </div>
               </div>
             </div>
           </div>
@@ -479,7 +690,7 @@ function useGenerateReport() {
                       >
                         {(() => {
                           const itemText = mockGCOData.gco1[index];
-                          const count = getCountForGCO('1');
+                          const count = getCountForGCOItem(itemText);
                           return count > 0 ? `${itemText}(${count})` : itemText;
                         })()}
                       </TableCell>
@@ -492,7 +703,7 @@ function useGenerateReport() {
                       >
                         {(() => {
                           const itemText = mockGCOData.gco2[index];
-                          const count = getCountForGCO('2');
+                          const count = getCountForGCOItem(itemText);
                           return count > 0 ? `${itemText}(${count})` : itemText;
                         })()}
                       </TableCell>
@@ -505,7 +716,7 @@ function useGenerateReport() {
                       >
                         {(() => {
                           const itemText = mockGCOData.gco3[index];
-                          const count = getCountForGCO('3');
+                          const count = getCountForGCOItem(itemText);
                           return count > 0 ? `${itemText}(${count})` : itemText;
                         })()}
                       </TableCell>
@@ -518,8 +729,21 @@ function useGenerateReport() {
 
           {/* Behaviour Descriptors for GCO Section */}
           <div className="bg-white rounded-lg shadow-sm overflow-hidden mb-6">
-            <div className="p-4 border-b" style={{ borderColor: '#BDC3C7', backgroundColor: '#F8F9FA' }}>
+            <div className="p-4 border-b flex justify-between items-center" style={{ borderColor: '#BDC3C7', backgroundColor: '#F8F9FA' }}>
               <h3 className="font-medium" style={{ color: '#3C3C3C' }}>Behaviour descriptors for GCO</h3>
+              <Button
+                onClick={() => setShowGCOFilterModal(true)}
+                variant="outline"
+                size="sm"
+                className="flex items-center space-x-2"
+                style={{ 
+                  borderColor: '#BDC3C7',
+                  color: '#3C3C3C'
+                }}
+              >
+                <Filter className="w-4 h-4" />
+                <span>Filter</span>
+              </Button>
             </div>
             <div className="max-h-[400px] sm:max-h-[500px] lg:max-h-[600px] overflow-y-auto">
               <Table>
@@ -576,8 +800,21 @@ function useGenerateReport() {
 
           {/* Behaviour Descriptors for IEP Section */}
           <div className="bg-white rounded-lg shadow-sm overflow-hidden mb-6">
-            <div className="p-4 border-b" style={{ borderColor: '#BDC3C7', backgroundColor: '#F8F9FA' }}>
+            <div className="p-4 border-b flex justify-between items-center" style={{ borderColor: '#BDC3C7', backgroundColor: '#F8F9FA' }}>
               <h3 className="font-medium" style={{ color: '#3C3C3C' }}>Behaviour descriptors for IEP</h3>
+              <Button
+                onClick={() => setShowIEPFilterModal(true)}
+                variant="outline"
+                size="sm"
+                className="flex items-center space-x-2"
+                style={{ 
+                  borderColor: '#BDC3C7',
+                  color: '#3C3C3C'
+                }}
+              >
+                <Filter className="w-4 h-4" />
+                <span>Filter</span>
+              </Button>
             </div>
             <div className="overflow-x-auto">
               <Table>
@@ -632,7 +869,9 @@ function useGenerateReport() {
                       <TableCell style={{ color: descriptor.selected ? 'white' : '#3C3C3C' }}>{descriptor.action}</TableCell>
                       <TableCell style={{ color: descriptor.selected ? 'white' : '#3C3C3C' }}>{descriptor.trigger}</TableCell>
                       <TableCell style={{ color: descriptor.selected ? 'white' : '#3C3C3C' }}>{descriptor.context}</TableCell>
-                      <TableCell style={{ color: descriptor.selected ? 'white' : '#3C3C3C' }}>{descriptor.iep_goal?.description}</TableCell>
+                      <TableCell style={{ color: descriptor.selected ? 'white' : '#3C3C3C' }}>
+                        {descriptor.iep_goal ? `Goal ${student.iep_goals.findIndex(goal => goal.id === descriptor.iep_goal?.id) + 1}` : 'N/A'}
+                      </TableCell>
                       <TableCell style={{ color: descriptor.selected ? 'white' : '#3C3C3C' }}>GCO {descriptor.gco_classification}</TableCell>
                     </TableRow>
                   ))}
@@ -686,6 +925,25 @@ function useGenerateReport() {
         behaviourDescriptors={behaviourDescriptors? behaviourDescriptors: []}
         iepBehaviourDescriptors={iepBehaviourDescriptors? iepBehaviourDescriptors: []}
         onGenerate={handleReportGenerate}
+      />
+
+      {/* Filter Modals */}
+      <BDsFilterModal
+        isOpen={showGCOFilterModal}
+        onClose={() => setShowGCOFilterModal(false)}
+        onApplyFilters={handleGCOFilterApply}
+        onClearFilters={handleGCOFilterClear}
+        behaviorDescriptors={behaviourDescriptorsAll || []}
+        title="GCO Behaviour Descriptors"
+      />
+
+      <BDsFilterModal
+        isOpen={showIEPFilterModal}
+        onClose={() => setShowIEPFilterModal(false)}
+        onApplyFilters={handleIEPFilterApply}
+        onClearFilters={handleIEPFilterClear}
+        behaviorDescriptors={behaviourDescriptorsAll || []}
+        title="IEP Behaviour Descriptors"
       />
     </div>
   );

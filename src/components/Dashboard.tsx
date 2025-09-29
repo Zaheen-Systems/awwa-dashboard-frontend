@@ -75,6 +75,16 @@ export function Dashboard({ onStudentClick, onSwitchToAdminDashboard, userType, 
       return 0;
     });
 
+  // Group students by class for team member view
+  const groupedStudentsByClass = filteredAndSortedStudents.reduce((acc, student) => {
+    const className = student.class_name || 'Unassigned';
+    if (!acc[className]) {
+      acc[className] = [];
+    }
+    acc[className].push(student);
+    return acc;
+  }, {} as Record<string, Student[]>);
+
   const getStatusBadgeStyle = (status: string) => {
     switch (status.toLowerCase()) {
       case 'entry':
@@ -109,6 +119,153 @@ export function Dashboard({ onStudentClick, onSwitchToAdminDashboard, userType, 
     setShowEditModal(false);
     setSelectedStudentForEdit(null);
   };
+
+  // Component to render student table
+  const renderStudentTable = (studentsList: Student[], title?: string) => (
+    <div className="mb-8">
+      {title && (
+        <div className="mb-4">
+          <h3 className="text-xl font-semibold mb-2" style={{ color: '#3C3C3C' }}>
+            {title}
+          </h3>
+          <div className="w-12 h-1 rounded" style={{ backgroundColor: '#FF8C42' }}></div>
+        </div>
+      )}
+      <div className="bg-white rounded-lg shadow-sm overflow-hidden">
+        <div className="overflow-x-auto">
+          <Table>
+            <TableHeader>
+              <TableRow className="border-b-2" style={{ borderColor: '#BDC3C7', backgroundColor: '#F8F9FA' }}>
+                <TableHead 
+                  className="cursor-pointer hover:bg-gray-100 transition-colors"
+                  onClick={() => handleSort('name')}
+                  style={{ color: '#3C3C3C' }}
+                >
+                  Name {sortColumn === 'name' && (sortDirection === 'asc' ? '↑' : '↓')}
+                </TableHead>
+                <TableHead 
+                  className="cursor-pointer hover:bg-gray-100 transition-colors"
+                  onClick={() => handleSort('class_name')}
+                  style={{ color: '#3C3C3C' }}
+                >
+                  Class {sortColumn === 'chronological_age' && (sortDirection === 'asc' ? '↑' : '↓')}
+                </TableHead>
+                <TableHead 
+                  className="cursor-pointer hover:bg-gray-100 transition-colors"
+                  onClick={() => handleSort('class_name')}
+                  style={{ color: '#3C3C3C' }}
+                >
+                  Chronological Age (months) {sortColumn === 'chronological_age' && (sortDirection === 'asc' ? '↑' : '↓')}
+                </TableHead>
+                <TableHead 
+                  className="cursor-pointer hover:bg-gray-100 transition-colors"
+                  onClick={() => handleSort('age_band')}
+                  style={{ color: '#3C3C3C' }}
+                >
+                  Age Band (Months) {sortColumn === 'age_band' && (sortDirection === 'asc' ? '↑' : '↓')}
+                </TableHead>
+                <TableHead 
+                  className="cursor-pointer hover:bg-gray-100 transition-colors"
+                  onClick={() => handleSort('primary_diagnosis')}
+                  style={{ color: '#3C3C3C' }}
+                >
+                  Primary Diagnosis {sortColumn === 'primary_diagnosis' && (sortDirection === 'asc' ? '↑' : '↓')}
+                </TableHead>
+                <TableHead 
+                  className="cursor-pointer hover:bg-gray-100 transition-colors"
+                  onClick={() => handleSort('secondary_diagnosis')}
+                  style={{ color: '#3C3C3C' }}
+                >
+                  Secondary Diagnosis {sortColumn === 'secondary_diagnosis' && (sortDirection === 'asc' ? '↑' : '↓')}
+                </TableHead>
+                <TableHead 
+                  className="cursor-pointer hover:bg-gray-100 transition-colors"
+                  onClick={() => handleSort('ct')}
+                  style={{ color: '#3C3C3C' }}
+                >
+                  CT Assigned {sortColumn === 'ct' && (sortDirection === 'asc' ? '↑' : '↓')}
+                </TableHead>
+                <TableHead 
+                  className="cursor-pointer hover:bg-gray-100 transition-colors"
+                  onClick={() => handleSort('last_gco_date')}
+                  style={{ color: '#3C3C3C' }}
+                >
+                  Last GCO {sortColumn === 'last_gco_date' && (sortDirection === 'asc' ? '↑' : '↓')}
+                </TableHead>
+                <TableHead 
+                  className="cursor-pointer hover:bg-gray-100 transition-colors"
+                  onClick={() => handleSort('entry_type')}
+                  style={{ color: '#3C3C3C' }}
+                >
+                  Status {sortColumn === 'entry_type' && (sortDirection === 'asc' ? '↑' : '↓')}
+                </TableHead>
+                <TableHead style={{ color: '#3C3C3C' }}>
+                  Actions
+                </TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {studentsList.map((student, index) => (
+                <TableRow 
+                  key={student.id} 
+                  className={`${index < studentsList.length - 1 ? "border-b" : ""} cursor-pointer hover:bg-gray-50 transition-colors`} 
+                  style={{ borderColor: '#BDC3C7' }}
+                  onClick={() => onStudentClick(student)}
+                >
+                  <TableCell style={{ color: '#e65039' }} className="hover:underline">
+                    {student.name}
+                  </TableCell>
+                  <TableCell style={{ color: '#3C3C3C' }}>{student?.class_name}</TableCell>
+                  <TableCell style={{ color: '#3C3C3C' }}>{student?.chronological_age}</TableCell>
+                  <TableCell style={{ color: '#3C3C3C' }}>{student.age_band}</TableCell>
+                  <TableCell style={{ color: '#3C3C3C' }}>{student.primary_diagnosis}</TableCell>
+                  <TableCell style={{ color: '#3C3C3C' }}>{student.secondary_diagnosis}</TableCell>
+                  <TableCell style={{ color: '#3C3C3C' }}>{student.ct?.first_name}</TableCell>
+                  <TableCell style={{ color: '#3C3C3C' }}>{student.last_gco_date}</TableCell>
+                  <TableCell>
+                    <Badge 
+                      variant="outline" 
+                      className="border-0"
+                      style={getStatusBadgeStyle(student.entry_type)}
+                    >
+                      {student.entry_type}
+                    </Badge>
+                  </TableCell>
+                  <TableCell>
+                    <Button
+                      onClick={(e) => handleEditStudent(student, e)}
+                      className="flex items-center space-x-1 px-3 py-1 border-2 rounded-none font-medium transition-all duration-200 hover:opacity-90"
+                      style={{ 
+                        backgroundColor: 'white',
+                        borderColor: '#BDC3C7',
+                        color: '#3C3C3C'
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.backgroundColor = '#F8F9FA';
+                        e.currentTarget.style.borderColor = '#e65039';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.backgroundColor = 'white';
+                        e.currentTarget.style.borderColor = '#BDC3C7';
+                      }}
+                    >
+                      <Edit className="w-3 h-3" />
+                      <span>Edit</span>
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
+      </div>
+      {title && (
+        <div className="mt-2 text-sm" style={{ color: '#6C757D' }}>
+          Showing {studentsList.length} students in {title}
+        </div>
+      )}
+    </div>
+  );
 
   return (
     <div className="px-4 sm:px-6 py-6 sm:py-8" style={{ backgroundColor: '#F8F9FA' }}>
@@ -197,139 +354,30 @@ export function Dashboard({ onStudentClick, onSwitchToAdminDashboard, userType, 
           </div>
         </div>
 
-        {/* Students Table */}
-        <div className="bg-white rounded-lg shadow-sm overflow-hidden">
-          <div className="overflow-x-auto">
-            <Table>
-              <TableHeader>
-                <TableRow className="border-b-2" style={{ borderColor: '#BDC3C7', backgroundColor: '#F8F9FA' }}>
-                  <TableHead 
-                    className="cursor-pointer hover:bg-gray-100 transition-colors"
-                    onClick={() => handleSort('name')}
-                    style={{ color: '#3C3C3C' }}
-                  >
-                    Name {sortColumn === 'name' && (sortDirection === 'asc' ? '↑' : '↓')}
-                  </TableHead>
-                  <TableHead 
-                    className="cursor-pointer hover:bg-gray-100 transition-colors"
-                    onClick={() => handleSort('class_name')}
-                    style={{ color: '#3C3C3C' }}
-                  >
-                    Class {sortColumn === 'chronological_age' && (sortDirection === 'asc' ? '↑' : '↓')}
-                  </TableHead>
-                  <TableHead 
-                    className="cursor-pointer hover:bg-gray-100 transition-colors"
-                    onClick={() => handleSort('class_name')}
-                    style={{ color: '#3C3C3C' }}
-                  >
-                    Chronological Age (months) {sortColumn === 'chronological_age' && (sortDirection === 'asc' ? '↑' : '↓')}
-                  </TableHead>
-                  <TableHead 
-                    className="cursor-pointer hover:bg-gray-100 transition-colors"
-                    onClick={() => handleSort('age_band')}
-                    style={{ color: '#3C3C3C' }}
-                  >
-                    Age Band (Months) {sortColumn === 'age_band' && (sortDirection === 'asc' ? '↑' : '↓')}
-                  </TableHead>
-                  <TableHead 
-                    className="cursor-pointer hover:bg-gray-100 transition-colors"
-                    onClick={() => handleSort('primary_diagnosis')}
-                    style={{ color: '#3C3C3C' }}
-                  >
-                    Primary Diagnosis {sortColumn === 'primary_diagnosis' && (sortDirection === 'asc' ? '↑' : '↓')}
-                  </TableHead>
-                  <TableHead 
-                    className="cursor-pointer hover:bg-gray-100 transition-colors"
-                    onClick={() => handleSort('secondary_diagnosis')}
-                    style={{ color: '#3C3C3C' }}
-                  >
-                    Secondary Diagnosis {sortColumn === 'secondary_diagnosis' && (sortDirection === 'asc' ? '↑' : '↓')}
-                  </TableHead>
-                  <TableHead 
-                    className="cursor-pointer hover:bg-gray-100 transition-colors"
-                    onClick={() => handleSort('ct')}
-                    style={{ color: '#3C3C3C' }}
-                  >
-                    CT Assigned {sortColumn === 'ct' && (sortDirection === 'asc' ? '↑' : '↓')}
-                  </TableHead>
-                  <TableHead 
-                    className="cursor-pointer hover:bg-gray-100 transition-colors"
-                    onClick={() => handleSort('last_gco_date')}
-                    style={{ color: '#3C3C3C' }}
-                  >
-                    Last GCO {sortColumn === 'last_gco_date' && (sortDirection === 'asc' ? '↑' : '↓')}
-                  </TableHead>
-                  <TableHead 
-                    className="cursor-pointer hover:bg-gray-100 transition-colors"
-                    onClick={() => handleSort('entry_type')}
-                    style={{ color: '#3C3C3C' }}
-                  >
-                    Status {sortColumn === 'entry_type' && (sortDirection === 'asc' ? '↑' : '↓')}
-                  </TableHead>
-                  <TableHead style={{ color: '#3C3C3C' }}>
-                    Actions
-                  </TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredAndSortedStudents.map((student, index) => (
-                  <TableRow 
-                    key={student.id} 
-                    className={`${index < filteredAndSortedStudents.length - 1 ? "border-b" : ""} cursor-pointer hover:bg-gray-50 transition-colors`} 
-                    style={{ borderColor: '#BDC3C7' }}
-                    onClick={() => onStudentClick(student)}
-                  >
-                    <TableCell style={{ color: '#e65039' }} className="hover:underline">
-                      {student.name}
-                    </TableCell>
-                    <TableCell style={{ color: '#3C3C3C' }}>{student?.class_name}</TableCell>
-                    <TableCell style={{ color: '#3C3C3C' }}>{student?.chronological_age}</TableCell>
-                    <TableCell style={{ color: '#3C3C3C' }}>{student.age_band}</TableCell>
-                    <TableCell style={{ color: '#3C3C3C' }}>{student.primary_diagnosis}</TableCell>
-                    <TableCell style={{ color: '#3C3C3C' }}>{student.secondary_diagnosis}</TableCell>
-                    <TableCell style={{ color: '#3C3C3C' }}>{student.ct?.first_name}</TableCell>
-                    <TableCell style={{ color: '#3C3C3C' }}>{student.last_gco_date}</TableCell>
-                    <TableCell>
-                      <Badge 
-                        variant="outline" 
-                        className="border-0"
-                        style={getStatusBadgeStyle(student.entry_type)}
-                      >
-                        {student.entry_type}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <Button
-                        onClick={(e) => handleEditStudent(student, e)}
-                        className="flex items-center space-x-1 px-3 py-1 border-2 rounded-none font-medium transition-all duration-200 hover:opacity-90"
-                        style={{ 
-                          backgroundColor: 'white',
-                          borderColor: '#BDC3C7',
-                          color: '#3C3C3C'
-                        }}
-                        onMouseEnter={(e) => {
-                          e.currentTarget.style.backgroundColor = '#F8F9FA';
-                          e.currentTarget.style.borderColor = '#e65039';
-                        }}
-                        onMouseLeave={(e) => {
-                          e.currentTarget.style.backgroundColor = 'white';
-                          e.currentTarget.style.borderColor = '#BDC3C7';
-                        }}
-                      >
-                        <Edit className="w-3 h-3" />
-                        <span>Edit</span>
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
-        </div>
+        {/* Students Tables - Grouped by class for team members, single table for CT */}
+        {activeTab === "team" ? (
+          // Team member view - show separate tables for each class
+          Object.keys(groupedStudentsByClass).length > 0 ? (
+            Object.entries(groupedStudentsByClass).map(([className, classStudents]) => 
+              renderStudentTable(classStudents, className)
+            )
+          ) : (
+            <div className="text-center py-8" style={{ color: '#6C757D' }}>
+              No students found
+            </div>
+          )
+        ) : (
+          // CT view - show single table
+          renderStudentTable(filteredAndSortedStudents)
+        )}
 
         {/* Results Summary */}
         <div className="mt-4 text-sm" style={{ color: '#6C757D' }}>
-          Showing {filteredAndSortedStudents.length} of {students.length} students
+          {activeTab === "team" ? (
+            <>Showing {filteredAndSortedStudents.length} of {students.length} students across {Object.keys(groupedStudentsByClass).length} classes</>
+          ) : (
+            <>Showing {filteredAndSortedStudents.length} of {students.length} students</>
+          )}
         </div>
       </div>
 

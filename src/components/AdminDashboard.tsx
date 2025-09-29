@@ -137,7 +137,7 @@ export function AdminDashboard({  onClassClick }: AdminDashboardProps) {
                         className="hover:underline transition-all duration-200"
                         style={{ color: '#e65039' }}
                       >
-                        {classItem.name}
+                        {classItem.name.replace(/,/g, ', ')}
                       </button>
                     </TableCell>
                     <TableCell style={{ color: '#3C3C3C' }}>{classItem.days}</TableCell>
