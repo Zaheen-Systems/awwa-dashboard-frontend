@@ -83,7 +83,7 @@ export function Dashboard({ onStudentClick, onSwitchToAdminDashboard, userType, 
     }
     acc[className].push(student);
     return acc;
-  }, {} as Record<string, Student[]>);
+  }, {} as Record<string, StudentUpdate[]>);
 
   const getStatusBadgeStyle = (status: string) => {
     switch (status.toLowerCase()) {
@@ -121,7 +121,7 @@ export function Dashboard({ onStudentClick, onSwitchToAdminDashboard, userType, 
   };
 
   // Component to render student table
-  const renderStudentTable = (studentsList: Student[], title?: string) => (
+  const renderStudentTable = (studentsList: StudentUpdate[], title?: string) => (
     <div className="mb-8">
       {title && (
         <div className="mb-4">
