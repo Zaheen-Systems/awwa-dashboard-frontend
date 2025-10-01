@@ -790,10 +790,6 @@ export function StudentDetailPage({ student, onBack, onBehaviorDescriptorClick }
                           behaviourDescriptors.length > 0 &&
                           behaviourDescriptors.every(d => d.selected)
                         }
-                        indeterminate={
-                          behaviourDescriptors.some(d => d.selected) &&
-                          !behaviourDescriptors.every(d => d.selected)
-                        }
                         onCheckedChange={(checked) => {
                           behaviourDescriptors.forEach(d => {
                             handleBehaviourSelect(d.id, checked as boolean);
@@ -884,10 +880,6 @@ export function StudentDetailPage({ student, onBack, onBehaviorDescriptorClick }
                         checked={
                           iepBehaviourDescriptors.length > 0 &&
                           iepBehaviourDescriptors.every(d => d.selected)
-                        }
-                        indeterminate={
-                          iepBehaviourDescriptors.some(d => d.selected) &&
-                          !iepBehaviourDescriptors.every(d => d.selected)
                         }
                         onCheckedChange={(checked) => {
                           iepBehaviourDescriptors.forEach(d => {
