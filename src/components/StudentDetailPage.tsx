@@ -191,7 +191,7 @@ export function StudentDetailPage({ student, onBack, onBehaviorDescriptorClick }
     }
   }, [behaviourDescriptorsAll, startDate, endDate, isRangeMode, gcoFilters, iepFilters]);
 
-  const { data: mockGCOData } = useQuery<GroupedDescriptors>({
+  const { data: gcoData } = useQuery<GroupedDescriptors>({
     queryKey: ["groupedDescriptors", student.id],
     queryFn: () => fetchGroupedDescriptors(parseInt(student.id)),
     enabled: !!student.id, // don't run until we have a studentId
@@ -443,6 +443,42 @@ export function StudentDetailPage({ student, onBack, onBehaviorDescriptorClick }
     // generateReport(student.id)
   };
 
+  // Helpers (keep near your component)
+  const normalizeToTwoDecimals = (code: string) => {
+    const parts = (code || "").split(".").filter(Boolean);
+    if (parts.length === 0) return "";
+    if (parts.length === 1) return `${parts[0]}.0`;
+    return `${parts[0]}.${parts[1]}`;
+  };
+
+  const groupByTwoDecimals = (
+    arr: string[] | undefined,
+    getCountForGCOItem: (s: string) => number
+  ): Array<[string, number]> => {
+    if (!Array.isArray(arr)) return [];
+    const totals = new Map<string, number>();
+    for (const item of arr) {
+      if (!item) continue;
+      const key = normalizeToTwoDecimals(item);
+      const count = getCountForGCOItem(item) || 0;
+      totals.set(key, (totals.get(key) || 0) + count);
+    }
+    // sort naturally by major.minor numeric
+    return Array.from(totals.entries()).sort((a, b) => {
+      const [amaj, amin] = a[0].split(".").map(Number);
+      const [bmaj, bmin] = b[0].split(".").map(Number);
+      return amaj !== bmaj ? amaj - bmaj : amin - bmin;
+    });
+  };
+
+  // In your render:
+  const g1 = groupByTwoDecimals(gcoData?.gco1, getCountForGCOItem);
+  const g2 = groupByTwoDecimals(gcoData?.gco2, getCountForGCOItem);
+  const g3 = groupByTwoDecimals(gcoData?.gco3, getCountForGCOItem);
+
+  // Render by max length to keep 3 columns aligned (like your current layout)
+  const maxLen = Math.max(g1.length, g2.length, g3.length);
+
   return (
     <div className="min-h-screen" style={{ backgroundColor: '#F8F9FA' }}>
       {/* Tabs Section */}
@@ -689,55 +725,37 @@ export function StudentDetailPage({ student, onBack, onBehaviorDescriptorClick }
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {mockGCOData?.gco1.map((_, index) => (
-                    <TableRow key={index} className={index < mockGCOData.gco1.length - 1 ? "border-b" : ""} style={{ borderColor: '#BDC3C7' }}>
-                      <TableCell className="w-12 text-center text-sm" style={{
-                        color: '#3C3C3C',
-                        backgroundColor: 'transparent'
-                      }}>
-                        {index + 1}
-                      </TableCell>
-                      <TableCell
-                        className="text-center"
-                        style={{
-                          color: '#3C3C3C',
-                          backgroundColor: 'transparent'
-                        }}
+                  {Array.from({ length: maxLen }).map((_, index) => {
+                    const c1 = g1[index]; // [key, total] | undefined
+                    const c2 = g2[index];
+                    const c3 = g3[index];
+                    return (
+                      <TableRow
+                        key={index}
+                        className={index < maxLen - 1 ? "border-b" : ""}
+                        style={{ borderColor: "#BDC3C7" }}
                       >
-                        {(() => {
-                          const itemText = mockGCOData.gco1[index];
-                          const count = getCountForGCOItem(itemText);
-                          return count > 0 ? `${itemText}(${count})` : itemText;
-                        })()}
-                      </TableCell>
-                      <TableCell
-                        className="text-center"
-                        style={{
-                          color: '#3C3C3C',
-                          backgroundColor: 'transparent'
-                        }}
-                      >
-                        {(() => {
-                          const itemText = mockGCOData.gco2[index];
-                          const count = getCountForGCOItem(itemText);
-                          return count > 0 ? `${itemText}(${count})` : itemText;
-                        })()}
-                      </TableCell>
-                      <TableCell
-                        className="text-center"
-                        style={{
-                          color: '#3C3C3C',
-                          backgroundColor: 'transparent'
-                        }}
-                      >
-                        {(() => {
-                          const itemText = mockGCOData.gco3[index];
-                          const count = getCountForGCOItem(itemText);
-                          return count > 0 ? `${itemText}(${count})` : itemText;
-                        })()}
-                      </TableCell>
-                    </TableRow>
-                  ))}
+                        <TableCell
+                          className="w-12 text-center text-sm"
+                          style={{ color: "#3C3C3C", backgroundColor: "transparent" }}
+                        >
+                          {index + 1}
+                        </TableCell>
+
+                        <TableCell className="text-center" style={{ color: "#3C3C3C", backgroundColor: "transparent" }}>
+                          {c1 ? `${c1[0]} (${c1[1]})` : ""}
+                        </TableCell>
+
+                        <TableCell className="text-center" style={{ color: "#3C3C3C", backgroundColor: "transparent" }}>
+                          {c2 ? `${c2[0]} (${c2[1]})` : ""}
+                        </TableCell>
+
+                        <TableCell className="text-center" style={{ color: "#3C3C3C", backgroundColor: "transparent" }}>
+                          {c3 ? `${c3[0]} (${c3[1]})` : ""}
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
                 </TableBody>
               </Table>
             </div>
@@ -765,6 +783,28 @@ export function StudentDetailPage({ student, onBack, onBehaviorDescriptorClick }
               <Table>
                 <TableHeader className="sticky top-0 bg-white z-10">
                   <TableRow className="border-b-2" style={{ borderColor: '#BDC3C7', backgroundColor: '#F8F9FA' }}>
+
+                    <TableHead className="w-16 text-center" style={{ color: '#3C3C3C' }}>
+                      <Checkbox
+                        checked={
+                          behaviourDescriptors.length > 0 &&
+                          behaviourDescriptors.every(d => d.selected)
+                        }
+                        indeterminate={
+                          behaviourDescriptors.some(d => d.selected) &&
+                          !behaviourDescriptors.every(d => d.selected)
+                        }
+                        onCheckedChange={(checked) => {
+                          behaviourDescriptors.forEach(d => {
+                            handleBehaviourSelect(d.id, checked as boolean);
+                          });
+                        }}
+                        className="border-2 data-[state=checked]:bg-primary data-[state=checked]:border-primary"
+                        style={{
+                          borderColor: '#BDC3C7',
+                        }}
+                      />
+                    </TableHead>
                     <TableHead className="w-16" style={{ color: '#3C3C3C' }}>Select</TableHead>
                     <TableHead style={{ color: '#3C3C3C' }}>Date</TableHead>
                     <TableHead style={{ color: '#3C3C3C' }}>Time</TableHead>
@@ -835,8 +875,32 @@ export function StudentDetailPage({ student, onBack, onBehaviorDescriptorClick }
             <div className="overflow-x-auto">
               <Table>
                 <TableHeader>
-                  <TableRow className="border-b-2" style={{ borderColor: '#BDC3C7', backgroundColor: '#F8F9FA' }}>
-                    <TableHead className="w-16" style={{ color: '#3C3C3C' }}>Select</TableHead>
+                  <TableRow
+                    className="border-b-2"
+                    style={{ borderColor: '#BDC3C7', backgroundColor: '#F8F9FA' }}
+                  >
+                    <TableHead className="w-16 text-center" style={{ color: '#3C3C3C' }}>
+                      <Checkbox
+                        checked={
+                          iepBehaviourDescriptors.length > 0 &&
+                          iepBehaviourDescriptors.every(d => d.selected)
+                        }
+                        indeterminate={
+                          iepBehaviourDescriptors.some(d => d.selected) &&
+                          !iepBehaviourDescriptors.every(d => d.selected)
+                        }
+                        onCheckedChange={(checked) => {
+                          iepBehaviourDescriptors.forEach(d => {
+                            handleIepBehaviourSelect(d.id, checked as boolean);
+                          });
+                        }}
+                        className="border-2 data-[state=checked]:bg-primary data-[state=checked]:border-primary"
+                        style={{
+                          borderColor: '#BDC3C7',
+                        }}
+                      />
+                    </TableHead>
+
                     <TableHead style={{ color: '#3C3C3C' }}>Date</TableHead>
                     <TableHead style={{ color: '#3C3C3C' }}>Time</TableHead>
                     <TableHead style={{ color: '#3C3C3C' }}>Source</TableHead>
@@ -857,6 +921,7 @@ export function StudentDetailPage({ student, onBack, onBehaviorDescriptorClick }
                     </TableHead>
                   </TableRow>
                 </TableHeader>
+
                 <TableBody>
                   {iepBehaviourDescriptors?.map((descriptor, index) => (
                     <TableRow
