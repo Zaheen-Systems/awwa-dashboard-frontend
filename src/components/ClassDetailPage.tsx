@@ -5,7 +5,7 @@ import { ArrowLeft, Trash2, Camera } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from './ui/dialog';
 
 import { ClassData } from '../types/class';
-import { useClassDetail } from '../hooks/useClasses';
+import { useClassDetail, useDeleteClass } from '../hooks/useClasses';
 import { StudentBaseRead, UserRead } from '../types/class';
 
 interface ClassDetailPageProps {
@@ -18,6 +18,8 @@ interface ClassDetailPageProps {
 
 export function ClassDetailPage({ classData, onBack }: ClassDetailPageProps) {
   const { data: clients } = useClassDetail(classData.id);
+
+  const deleteClassMutation = useDeleteClass();
 
   const [selectedPhoto, setSelectedPhoto] = useState<{ name: string; photo?: string } | null>(null);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
@@ -263,6 +265,7 @@ export function ClassDetailPage({ classData, onBack }: ClassDetailPageProps) {
             <Button
               onClick={() => {
                 console.log('Deleted class:', classData);
+                deleteClassMutation.mutate(classData.id);
                 setIsDeleteOpen(false);
                 onBack();
               }}

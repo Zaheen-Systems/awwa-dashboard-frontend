@@ -57,3 +57,22 @@ export const useCreateClass = () => {
     },
   });
 };
+
+export const useDeleteClass = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (classId: number) => {
+      const response = await api.delete(`/api/classes/${classId}`);
+      return response.data;
+    },
+    onSuccess: () => {
+      // ✅ Optionally invalidate cached class list
+      queryClient.invalidateQueries({ queryKey: ["classes"] });
+      console.log(`Class deleted successfully`);
+    },
+    onError: (error: any) => {
+      console.error("Error deleting class:", error);
+    },
+  });
+};

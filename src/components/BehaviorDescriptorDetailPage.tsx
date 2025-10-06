@@ -1,4 +1,4 @@
-import { useRef, useEffect } from 'react';
+import { useRef } from 'react';
 import { Button } from './ui/button';
 // import { Textarea } from './ui/textarea';
 // import { Label } from './ui/label';
@@ -70,33 +70,33 @@ export function BehaviorDescriptorDetailPage({
   const videoRef = useRef<HTMLVideoElement | null>(null);
 
   // Start and end times in seconds
-  const startTime = 80;  // 1 min 20 sec
-  const endTime = 100;   // 2 min 20 sec
+//   const startTime = 80;  // 1 min 20 sec
+//   const endTime = 100;   // 2 min 20 sec
 
-  useEffect(() => {
-    const video = videoRef.current;
-    if (!video) return;
+//   useEffect(() => {
+//     const video = videoRef.current;
+//     if (!video) return;
 
-    const handleTimeUpdate = () => {
-      if (video.currentTime >= endTime) {
-        video.pause(); // stop at end time
-      }
-    };
+//     const handleTimeUpdate = () => {
+//       if (video.currentTime >= endTime) {
+//         video.pause(); // stop at end time
+//       }
+//     };
 
-    video.addEventListener("timeupdate", handleTimeUpdate);
+//     video.addEventListener("timeupdate", handleTimeUpdate);
 
-    // Seek to start time once metadata is loaded
-    const handleLoadedMetadata = () => {
-      video.currentTime = startTime;
-      video.play();
-    };
-    video.addEventListener("loadedmetadata", handleLoadedMetadata);
+//     // Seek to start time once metadata is loaded
+//     const handleLoadedMetadata = () => {
+//       video.currentTime = startTime;
+//       video.play();
+//     };
+//     video.addEventListener("loadedmetadata", handleLoadedMetadata);
 
-    return () => {
-      video.removeEventListener("timeupdate", handleTimeUpdate);
-      video.removeEventListener("loadedmetadata", handleLoadedMetadata);
-    };
-}, [startTime, endTime]);
+//     return () => {
+//       video.removeEventListener("timeupdate", handleTimeUpdate);
+//       video.removeEventListener("loadedmetadata", handleLoadedMetadata);
+//     };
+// }, [startTime, endTime]);
 
   // const handleSave = () => {
   //   if (newComment.trim()) {
