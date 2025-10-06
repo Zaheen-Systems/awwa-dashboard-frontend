@@ -51,16 +51,19 @@ export function EditTeamMemberPage({
 
   const [open, setOpen] = useState(false)
   const [selected, setSelected] = useState<string[]>(
-    formData.classes ? formData.classes.split(",") : []
+    formData.classes
+      ? formData.classes.split(",").map((cls) => cls.trim())
+      : []
   )
 
   const toggleClass = (cls: string) => {
     let updated: string[]
-    if (selected.includes(cls)) {
-      updated = selected.filter((c) => c !== cls)
+    if (selected.includes(cls.trim())) {
+      updated = selected.filter((c) => c !== cls.trim())
     } else {
-      updated = [...selected, cls]
+      updated = [...selected, cls.trim()]
     }
+    console.log(selected)
     setSelected(updated)
     handleInputChange("classes", updated.join(",")) // 🔹 update as comma string
   }
