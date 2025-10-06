@@ -495,12 +495,6 @@ export function StudentDetailPage({ student, onBack, onBehaviorDescriptorClick }
   const g2 = groupByTwoDecimals(gcoData?.gco2);
   const g3 = groupByTwoDecimals(gcoData?.gco3);
 
-  // Combine and calculate the total count of all classifications
-  const total = g1.concat(g2, g3).reduce((acc, [, count]) => acc + count, 0);
-  console.log("Filtered Data Length: ", gcoData); // Check length of filtered data
-  console.log("Total count:", total);
-
-
   // Render by max length to keep 3 columns aligned (like your current layout)
   const maxLen = Math.max(g1.length, g2.length, g3.length);
 
@@ -826,7 +820,6 @@ export function StudentDetailPage({ student, onBack, onBehaviorDescriptorClick }
                         }}
                       />
                     </TableHead>
-                    <TableHead className="w-16" style={{ color: '#3C3C3C' }}>Select</TableHead>
                     <TableHead style={{ color: '#3C3C3C' }}>Date</TableHead>
                     <TableHead style={{ color: '#3C3C3C' }}>Time</TableHead>
                     <TableHead style={{ color: '#3C3C3C' }}>Source</TableHead>
