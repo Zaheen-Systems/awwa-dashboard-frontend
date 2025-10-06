@@ -14,6 +14,15 @@ import { format } from "date-fns";
 import { Student } from '../types/students';
 // import awwaLogo from 'figma:asset/71b57c03c5488fc89f49e890a42dd4691fd017ee.png';
 
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "./ui/dialog";
+
 interface IEPGoalBasic {
   id: number;
   description?: string | null;
@@ -102,6 +111,7 @@ export function StudentDetailPage({ student, onBack, onBehaviorDescriptorClick }
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [isRangeMode, setIsRangeMode] = useState(false);
+  const [showNoSelectDialog, setShowNoSelectDialog] = useState(false);
   const queryClient = useQueryClient();
   const [behaviourDescriptors, setBehaviourDescriptors] = useState<BehavioralDescriptorUI[]>([]);
   const [iepBehaviourDescriptors, setIepBehaviourDescriptors] = useState<BehaviorDescriptor[]>([]);
@@ -133,12 +143,24 @@ export function StudentDetailPage({ student, onBack, onBehaviorDescriptorClick }
   // Filter behavior descriptors based on date range or single date
   const filterDescriptorsByDateRange = (descriptors: BehavioralDescriptorUI[]) => {
     if (!startDate && !endDate) return descriptors;
-    
+
+    console.log("descriptors:", descriptors);
+
+    // Helper function to convert the 'DD.MM.YY' format to a Date object
+    const convertToDate = (dateStr: string): Date => {
+      const [day, month, year] = dateStr.split('.');
+      // Use full year (e.g., '25' becomes '2025')
+      const fullYear = `20${year}`;
+      // Date object: Month is 0-based in JavaScript (0 = January, 11 = December)
+      return new Date(`${fullYear}-${month}-${day}`);
+    };
+
     return descriptors.filter(descriptor => {
-      const descriptorDate = new Date(descriptor.created_at);
+      const descriptorDate = convertToDate(descriptor.date);
+
       const start = startDate ? new Date(startDate) : null;
       const end = endDate ? new Date(endDate) : null;
-      
+
       if (isRangeMode) {
         // Range mode: both start and end dates must be present
         if (start && end) {
@@ -170,18 +192,19 @@ export function StudentDetailPage({ student, onBack, onBehaviorDescriptorClick }
   useEffect(() => {
     if (behaviourDescriptorsAll) {
       const filteredAll = filterDescriptorsByDateRange(behaviourDescriptorsAll);
-      
+      console.log("Filtered by date:", filteredAll);
+
       // Apply GCO filters to non-IEP descriptors
       const gcoFiltered = applyFilters(filteredAll.filter(bd => !bd.iep_goal), gcoFilters);
       setBehaviourDescriptors(gcoFiltered);
-      
+
       // Apply IEP filters to IEP descriptors
       const iepFiltered = applyFilters(filteredAll.filter(bd => Boolean(bd.iep_goal)), iepFilters);
       setIepBehaviourDescriptors(iepFiltered);
     }
   }, [behaviourDescriptorsAll, startDate, endDate, isRangeMode, gcoFilters, iepFilters]);
 
-    const { data: mockGCOData  } = useQuery<GroupedDescriptors>({
+  const { data: gcoData } = useQuery<GroupedDescriptors>({
     queryKey: ["groupedDescriptors", student.id],
     queryFn: () => fetchGroupedDescriptors(parseInt(student.id)),
     enabled: !!student.id, // don't run until we have a studentId
@@ -190,17 +213,17 @@ export function StudentDetailPage({ student, onBack, onBehaviorDescriptorClick }
   // Count behavior descriptors for specific GCO items (e.g., "1.2.2")
   const getCountForGCOItem = (gcoItem: string) => {
     if (!behaviourDescriptors) return 0;
-    
+
     const count = behaviourDescriptors.filter(descriptor => {
-      if (!descriptor.action || descriptor.action.trim() === '' || 
-          !descriptor.trigger || descriptor.trigger.trim() === '') {
+      if (!descriptor.action || descriptor.action.trim() === '' ||
+        !descriptor.trigger || descriptor.trigger.trim() === '') {
         return false;
       }
-      
+
       // Check if the descriptor's gco_classification matches the specific GCO item
       return String(descriptor.gco_classification) === String(gcoItem);
     }).length;
-    
+
     return count;
   };
 
@@ -213,8 +236,8 @@ export function StudentDetailPage({ student, onBack, onBehaviorDescriptorClick }
 
   const handleBehaviourSelect = (id: number, selected: boolean) => {
     console.log(id, selected)
-    setBehaviourDescriptors(prev => 
-      prev.map(item => 
+    setBehaviourDescriptors(prev =>
+      prev.map(item =>
         item.id === id ? { ...item, selected } : item
       )
     );
@@ -222,8 +245,8 @@ export function StudentDetailPage({ student, onBack, onBehaviorDescriptorClick }
 
   const handleIepBehaviourSelect = (id: number, selected: boolean) => {
     console.log(id, selected)
-    setIepBehaviourDescriptors(prev => 
-      prev.map(item => 
+    setIepBehaviourDescriptors(prev =>
+      prev.map(item =>
         item.id === id ? { ...item, selected } : item
       )
     );
@@ -231,8 +254,8 @@ export function StudentDetailPage({ student, onBack, onBehaviorDescriptorClick }
 
   const handleRowClick = (descriptor: BehaviorDescriptor, event: React.MouseEvent) => {
     // Don't navigate if clicking on checkbox
-    if ((event.target as HTMLElement).closest('input[type="checkbox"]') || 
-        (event.target as HTMLElement).closest('[role="checkbox"]')) {
+    if ((event.target as HTMLElement).closest('input[type="checkbox"]') ||
+      (event.target as HTMLElement).closest('[role="checkbox"]')) {
       return;
     }
     onBehaviorDescriptorClick(descriptor);
@@ -243,15 +266,15 @@ export function StudentDetailPage({ student, onBack, onBehaviorDescriptorClick }
   };
 
   const createBehaviorDescriptor = async (data: BDFormData) => {
-  const payload = {
-    source: data.source,
-    action: data.action,
-    trigger: data.trigger,
-    timestamp: data.time,               // maps to Time column
-    gco_classification: data.gcoClassification,    // maps to FK
-    iep_goal_id: Number(data.iep_goal_id), // ensure it's number
-    student_id: student.id,
-  };
+    const payload = {
+      source: data.source,
+      action: data.action,
+      trigger: data.trigger,
+      timestamp: data.time,               // maps to Time column
+      gco_classification: data.gcoClassification,    // maps to FK
+      iep_goal_id: Number(data.iep_goal_id), // ensure it's number
+      student_id: student.id,
+    };
 
     const res = await api.post("/api/behavioral-descriptors/", payload);
     return res.data;
@@ -327,7 +350,7 @@ export function StudentDetailPage({ student, onBack, onBehaviorDescriptorClick }
         const descriptorDate = new Date(descriptor.created_at);
         const start = filters.startDate ? new Date(filters.startDate) : null;
         const end = filters.endDate ? new Date(filters.endDate) : null;
-        
+
         if (start && descriptorDate < start) {
           return false;
         }
@@ -386,38 +409,44 @@ export function StudentDetailPage({ student, onBack, onBehaviorDescriptorClick }
     });
   };
 
+  console.log(behaviourDescriptors.filter(d => d.selected));
+
   const handleGenerateReportClick = () => {
     const selectedIds = behaviourDescriptors.filter(d => d.selected).map(d => d.id);
     const selectediepIds = iepBehaviourDescriptors.filter(d => d.selected).map(d => d.id);
-    const allIds = [...selectedIds,  ...selectediepIds]
-    console.log(allIds)
-    // setShowSelectBDsModal(true);
-    generateReport({ studentId: student.id, ids: allIds })
+    const allIds = [...selectedIds, ...selectediepIds];
+
+    if (allIds.length === 0) {
+      setShowNoSelectDialog(true); // just show popup
+      return;
+    }
+
+    generateReport({ studentId: student.id, ids: allIds });
   };
 
-function useGenerateReport() {
-  return useMutation({
-    mutationFn: async ({ studentId, ids }: { studentId: string; ids: number[] }) => {
-      const queryParams = ids && ids.length > 0 
-        ? `?${ids.map(id => `ids=${id}`).join("&")}` 
-        : "";
-      const response = await api.get(`/api/students/${studentId}/gcowmr${queryParams}`);
-      return response.data; // expects { download_url: string }
-    },
-    onSuccess: (data) => {
-      const { download_url } = data;
-      if (!download_url) return;
+  function useGenerateReport() {
+    return useMutation({
+      mutationFn: async ({ studentId, ids }: { studentId: string; ids: number[] }) => {
+        const queryParams = ids && ids.length > 0
+          ? `?${ids.map(id => `ids=${id}`).join("&")}`
+          : "";
+        const response = await api.get(`/api/students/${studentId}/gcowmr${queryParams}`);
+        return response.data; // expects { download_url: string }
+      },
+      onSuccess: (data) => {
+        const { download_url } = data;
+        if (!download_url) return;
 
-      // trigger download automatically
-      const link = document.createElement("a");
-      link.href = download_url;
-      link.setAttribute("download", "report.xlsx"); // optional filename
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-    },
-  });
-}
+        // trigger download automatically
+        const link = document.createElement("a");
+        link.href = download_url;
+        link.setAttribute("download", "report.xlsx"); // optional filename
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+      },
+    });
+  }
 
   const { mutate: generateReport, isPending: isReportPending } = useGenerateReport();
 
@@ -426,6 +455,48 @@ function useGenerateReport() {
     // onGenerateReport(selectedBDs);
     // generateReport(student.id)
   };
+
+  // Helper to normalize the GCO classification to 2 decimal places
+  const normalizeToTwoDecimals = (code: string) => {
+    const parts = (code || "").split(".").filter(Boolean);
+    if (parts.length === 0) return "";
+    if (parts.length === 1) return `${parts[0]}.0`;
+    return `${parts[0]}.${parts[1]}`;
+  };
+
+  // Group by two decimals and count the total occurrences
+  const groupByTwoDecimals = (
+    arr: string[] | undefined
+  ): Array<[string, number]> => {
+    if (!Array.isArray(arr)) return [];
+    const totals = new Map<string, number>();
+
+    // Iterate over each item in the array
+    for (const item of arr) {
+      if (!item) continue;
+
+      // Normalize the classification code to two decimals (e.g., "1.2" from "1.2.1")
+      const key = normalizeToTwoDecimals(item);
+
+      // Increment the count for this classification
+      totals.set(key, (totals.get(key) || 0) + 1);
+    }
+
+    // Sort naturally by major.minor numeric (e.g., "1.1" < "1.2" < "2.1")
+    return Array.from(totals.entries()).sort((a, b) => {
+      const [amaj, amin] = a[0].split(".").map(Number);
+      const [bmaj, bmin] = b[0].split(".").map(Number);
+      return amaj !== bmaj ? amaj - bmaj : amin - bmin;
+    });
+  };
+
+  // In your render, use the updated groupByTwoDecimals function:
+  const g1 = groupByTwoDecimals(gcoData?.gco1);
+  const g2 = groupByTwoDecimals(gcoData?.gco2);
+  const g3 = groupByTwoDecimals(gcoData?.gco3);
+
+  // Render by max length to keep 3 columns aligned (like your current layout)
+  const maxLen = Math.max(g1.length, g2.length, g3.length);
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: '#F8F9FA' }}>
@@ -466,12 +537,12 @@ function useGenerateReport() {
               <ArrowLeft className="w-4 h-4" style={{ color: '#e65039' }} />
               <span style={{ color: '#e65039' }}>Home &gt; {student?.name}</span>
             </div>
-            
+
             <Button
               onClick={onBack}
               className="flex items-center space-x-2 px-6 py-2 font-medium transition-all duration-200 hover:opacity-90"
-              style={{ 
-                backgroundColor: '#e65039', 
+              style={{
+                backgroundColor: '#e65039',
                 color: 'white',
                 borderColor: '#e65039'
               }}
@@ -522,7 +593,7 @@ function useGenerateReport() {
                 </TableRow>
                 <TableRow>
                   <TableCell className="font-medium" style={{ color: '#3C3C3C', backgroundColor: '#F8F9FA' }}>Last GCO</TableCell>
-                  <TableCell style={{ color: '#3C3C3C' }}>{student?.last_gco_date }</TableCell>
+                  <TableCell style={{ color: '#3C3C3C' }}>{student?.last_gco_date}</TableCell>
                   <TableCell className="font-medium" style={{ color: '#3C3C3C', backgroundColor: '#F8F9FA' }}>GCO 3</TableCell>
                   <TableCell style={{ color: '#3C3C3C' }}>{student.gco_3_functional_age}</TableCell>
                 </TableRow>
@@ -565,7 +636,7 @@ function useGenerateReport() {
                         setEndDate(""); // Clear end date when switching to single mode
                       }}
                       className="text-xs"
-                      style={{ 
+                      style={{
                         backgroundColor: !isRangeMode ? '#e65039' : 'transparent',
                         color: !isRangeMode ? 'white' : '#3C3C3C',
                         borderColor: '#e65039'
@@ -579,7 +650,7 @@ function useGenerateReport() {
                       size="sm"
                       onClick={() => setIsRangeMode(true)}
                       className="text-xs"
-                      style={{ 
+                      style={{
                         backgroundColor: isRangeMode ? '#e65039' : 'transparent',
                         color: isRangeMode ? 'white' : '#3C3C3C',
                         borderColor: '#e65039'
@@ -602,7 +673,7 @@ function useGenerateReport() {
                       value={startDate}
                       onChange={(e) => setStartDate(e.target.value)}
                       className="bg-white border-2 focus:outline-none"
-                      style={{ 
+                      style={{
                         borderColor: '#BDC3C7',
                         color: '#3C3C3C'
                       }}
@@ -610,7 +681,7 @@ function useGenerateReport() {
                       onBlur={(e) => e.target.style.borderColor = '#BDC3C7'}
                     />
                   </div>
-                  
+
                   {isRangeMode && (
                     <div className="flex-1">
                       <Label htmlFor="endDate" style={{ color: '#3C3C3C' }}>End Date</Label>
@@ -620,7 +691,7 @@ function useGenerateReport() {
                         value={endDate}
                         onChange={(e) => setEndDate(e.target.value)}
                         className="bg-white border-2 focus:outline-none"
-                        style={{ 
+                        style={{
                           borderColor: '#BDC3C7',
                           color: '#3C3C3C'
                         }}
@@ -634,8 +705,8 @@ function useGenerateReport() {
                 {/* Helper Text and Reset Button */}
                 <div className="flex justify-between items-center">
                   <div className="text-sm" style={{ color: '#6C757D' }}>
-                    {isRangeMode 
-                      ? "Select a date range to filter behavior descriptors" 
+                    {isRangeMode
+                      ? "Select a date range to filter behavior descriptors"
                       : "Select a specific date to view behavior descriptors for that day"
                     }
                   </div>
@@ -645,7 +716,7 @@ function useGenerateReport() {
                     size="sm"
                     onClick={handleResetDates}
                     className="text-xs"
-                    style={{ 
+                    style={{
                       borderColor: '#BDC3C7',
                       color: '#3C3C3C'
                     }}
@@ -673,55 +744,37 @@ function useGenerateReport() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {mockGCOData?.gco1.map((_, index) => (
-                    <TableRow key={index} className={index < mockGCOData.gco1.length - 1 ? "border-b" : ""} style={{ borderColor: '#BDC3C7' }}>
-                      <TableCell className="w-12 text-center text-sm" style={{ 
-                        color: '#3C3C3C', 
-                        backgroundColor: 'transparent' 
-                      }}>
-                        {index + 1}
-                      </TableCell>
-                      <TableCell 
-                        className="text-center" 
-                        style={{ 
-                          color: '#3C3C3C', 
-                          backgroundColor: 'transparent' 
-                        }}
+                  {Array.from({ length: maxLen }).map((_, index) => {
+                    const c1 = g1[index]; // [key, total] | undefined
+                    const c2 = g2[index];
+                    const c3 = g3[index];
+                    return (
+                      <TableRow
+                        key={index}
+                        className={index < maxLen - 1 ? "border-b" : ""}
+                        style={{ borderColor: "#BDC3C7" }}
                       >
-                        {(() => {
-                          const itemText = mockGCOData.gco1[index];
-                          const count = getCountForGCOItem(itemText);
-                          return count > 0 ? `${itemText}(${count})` : itemText;
-                        })()}
-                      </TableCell>
-                      <TableCell 
-                        className="text-center" 
-                        style={{ 
-                          color: '#3C3C3C', 
-                          backgroundColor: 'transparent' 
-                        }}
-                      >
-                        {(() => {
-                          const itemText = mockGCOData.gco2[index];
-                          const count = getCountForGCOItem(itemText);
-                          return count > 0 ? `${itemText}(${count})` : itemText;
-                        })()}
-                      </TableCell>
-                      <TableCell 
-                        className="text-center" 
-                        style={{ 
-                          color: '#3C3C3C', 
-                          backgroundColor: 'transparent' 
-                        }}
-                      >
-                        {(() => {
-                          const itemText = mockGCOData.gco3[index];
-                          const count = getCountForGCOItem(itemText);
-                          return count > 0 ? `${itemText}(${count})` : itemText;
-                        })()}
-                      </TableCell>
-                    </TableRow>
-                  ))}
+                        <TableCell
+                          className="w-12 text-center text-sm"
+                          style={{ color: "#3C3C3C", backgroundColor: "transparent" }}
+                        >
+                          {index + 1}
+                        </TableCell>
+
+                        <TableCell className="text-center" style={{ color: "#3C3C3C", backgroundColor: "transparent" }}>
+                          {c1 ? `${c1[0]} (${c1[1]})` : ""}
+                        </TableCell>
+
+                        <TableCell className="text-center" style={{ color: "#3C3C3C", backgroundColor: "transparent" }}>
+                          {c2 ? `${c2[0]} (${c2[1]})` : ""}
+                        </TableCell>
+
+                        <TableCell className="text-center" style={{ color: "#3C3C3C", backgroundColor: "transparent" }}>
+                          {c3 ? `${c3[0]} (${c3[1]})` : ""}
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
                 </TableBody>
               </Table>
             </div>
@@ -736,7 +789,7 @@ function useGenerateReport() {
                 variant="outline"
                 size="sm"
                 className="flex items-center space-x-2"
-                style={{ 
+                style={{
                   borderColor: '#BDC3C7',
                   color: '#3C3C3C'
                 }}
@@ -749,7 +802,24 @@ function useGenerateReport() {
               <Table>
                 <TableHeader className="sticky top-0 bg-white z-10">
                   <TableRow className="border-b-2" style={{ borderColor: '#BDC3C7', backgroundColor: '#F8F9FA' }}>
-                    <TableHead className="w-16" style={{ color: '#3C3C3C' }}>Select</TableHead>
+
+                    <TableHead className="w-16 text-center" style={{ color: '#3C3C3C' }}>
+                      <Checkbox
+                        checked={
+                          behaviourDescriptors.length > 0 &&
+                          behaviourDescriptors.every(d => d.selected)
+                        }
+                        onCheckedChange={(checked) => {
+                          behaviourDescriptors.forEach(d => {
+                            handleBehaviourSelect(d.id, checked as boolean);
+                          });
+                        }}
+                        className="border-2 data-[state=checked]:bg-primary data-[state=checked]:border-primary"
+                        style={{
+                          borderColor: '#BDC3C7',
+                        }}
+                      />
+                    </TableHead>
                     <TableHead style={{ color: '#3C3C3C' }}>Date</TableHead>
                     <TableHead style={{ color: '#3C3C3C' }}>Time</TableHead>
                     <TableHead style={{ color: '#3C3C3C' }}>Source</TableHead>
@@ -760,14 +830,14 @@ function useGenerateReport() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {behaviourDescriptors?.filter(descriptor => 
-                    descriptor.action && descriptor.action.trim() !== '' && 
+                  {behaviourDescriptors?.filter(descriptor =>
+                    descriptor.action && descriptor.action.trim() !== '' &&
                     descriptor.trigger && descriptor.trigger.trim() !== ''
                   ).map((descriptor, index, filteredArray) => (
-                    <TableRow 
-                      key={descriptor.id} 
-                      className={`${index < filteredArray.length - 1 ? "border-b" : ""} cursor-pointer hover:bg-gray-50 transition-colors`} 
-                      style={{ 
+                    <TableRow
+                      key={descriptor.id}
+                      className={`${index < filteredArray.length - 1 ? "border-b" : ""} cursor-pointer hover:bg-gray-50 transition-colors`}
+                      style={{
                         borderColor: '#BDC3C7',
                         backgroundColor: descriptor.selected ? '#e65039' : 'transparent'
                       }}
@@ -778,7 +848,7 @@ function useGenerateReport() {
                           checked={descriptor.selected}
                           onCheckedChange={(checked) => handleBehaviourSelect(descriptor.id, checked as boolean)}
                           className="border-2 data-[state=checked]:bg-primary data-[state=checked]:border-primary"
-                          style={{ 
+                          style={{
                             borderColor: descriptor.selected ? '#e65039' : '#BDC3C7',
                             backgroundColor: descriptor.selected ? '#e65039' : 'transparent'
                           }}
@@ -807,7 +877,7 @@ function useGenerateReport() {
                 variant="outline"
                 size="sm"
                 className="flex items-center space-x-2"
-                style={{ 
+                style={{
                   borderColor: '#BDC3C7',
                   color: '#3C3C3C'
                 }}
@@ -819,8 +889,28 @@ function useGenerateReport() {
             <div className="overflow-x-auto">
               <Table>
                 <TableHeader>
-                  <TableRow className="border-b-2" style={{ borderColor: '#BDC3C7', backgroundColor: '#F8F9FA' }}>
-                    <TableHead className="w-16" style={{ color: '#3C3C3C' }}>Select</TableHead>
+                  <TableRow
+                    className="border-b-2"
+                    style={{ borderColor: '#BDC3C7', backgroundColor: '#F8F9FA' }}
+                  >
+                    <TableHead className="w-16 text-center" style={{ color: '#3C3C3C' }}>
+                      <Checkbox
+                        checked={
+                          iepBehaviourDescriptors.length > 0 &&
+                          iepBehaviourDescriptors.every(d => d.selected)
+                        }
+                        onCheckedChange={(checked) => {
+                          iepBehaviourDescriptors.forEach(d => {
+                            handleIepBehaviourSelect(d.id, checked as boolean);
+                          });
+                        }}
+                        className="border-2 data-[state=checked]:bg-primary data-[state=checked]:border-primary"
+                        style={{
+                          borderColor: '#BDC3C7',
+                        }}
+                      />
+                    </TableHead>
+
                     <TableHead style={{ color: '#3C3C3C' }}>Date</TableHead>
                     <TableHead style={{ color: '#3C3C3C' }}>Time</TableHead>
                     <TableHead style={{ color: '#3C3C3C' }}>Source</TableHead>
@@ -841,12 +931,13 @@ function useGenerateReport() {
                     </TableHead>
                   </TableRow>
                 </TableHeader>
+
                 <TableBody>
                   {iepBehaviourDescriptors?.map((descriptor, index) => (
-                    <TableRow 
-                      key={descriptor.id} 
-                      className={`${index < iepBehaviourDescriptors.length - 1 ? "border-b" : ""} cursor-pointer hover:bg-gray-50 transition-colors`} 
-                      style={{ 
+                    <TableRow
+                      key={descriptor.id}
+                      className={`${index < iepBehaviourDescriptors.length - 1 ? "border-b" : ""} cursor-pointer hover:bg-gray-50 transition-colors`}
+                      style={{
                         borderColor: '#BDC3C7',
                         backgroundColor: descriptor.selected ? '#e65039' : 'transparent'
                       }}
@@ -857,7 +948,7 @@ function useGenerateReport() {
                           checked={descriptor.selected}
                           onCheckedChange={(checked) => handleIepBehaviourSelect(descriptor.id, checked as boolean)}
                           className="border-2 data-[state=checked]:bg-primary data-[state=checked]:border-primary"
-                          style={{ 
+                          style={{
                             borderColor: descriptor.selected ? '#e65039' : '#BDC3C7',
                             backgroundColor: descriptor.selected ? '#e65039' : 'transparent'
                           }}
@@ -885,27 +976,54 @@ function useGenerateReport() {
             <Button
               onClick={handleAddNewBDs}
               className="px-6 py-2 font-medium transition-all duration-200 hover:opacity-90"
-              style={{ 
-                backgroundColor: '#e65039', 
+              style={{
+                backgroundColor: '#e65039',
                 color: 'white',
                 borderColor: '#e65039'
               }}
             >
               Add New BDs
             </Button>
-            
+
             <Button
               onClick={handleGenerateReportClick}
               className="px-6 py-2 font-medium transition-all duration-200 hover:opacity-90"
               disabled={isReportPending}
-              style={{ 
-                backgroundColor: '#e65039', 
+              style={{
+                backgroundColor: '#e65039',
                 color: 'white',
                 borderColor: '#e65039'
               }}
             >
               {isReportPending ? "Generating..." : "Generate Report"}
             </Button>
+
+            <Dialog open={showNoSelectDialog} onOpenChange={setShowNoSelectDialog}>
+              <DialogContent
+                className="sm:max-w-md rounded-2xl bg-white shadow-lg border border-gray-200 p-6"
+              >
+                <DialogHeader className="space-y-2">
+                  <DialogTitle className="flex items-center gap-2 text-lg font-semibold text-gray-900">
+                    <span className="text-yellow-500">
+                      ⚠️
+                    </span>
+                    No Selection
+                  </DialogTitle>
+                  <DialogDescription className="text-gray-600">
+                    Please select at least one behaviour descriptor before generating a report.
+                  </DialogDescription>
+                </DialogHeader>
+                <DialogFooter className="mt-4">
+                  <Button
+                    onClick={() => setShowNoSelectDialog(false)}
+                    className="bg-yellow-500 hover:bg-yellow-600 text-white rounded-lg px-4"
+                  >
+                    Okay
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+
           </div>
         </div>
       </div>
@@ -922,8 +1040,8 @@ function useGenerateReport() {
       <SelectBDsModal
         isOpen={showSelectBDsModal}
         onClose={() => setShowSelectBDsModal(false)}
-        behaviourDescriptors={behaviourDescriptors? behaviourDescriptors: []}
-        iepBehaviourDescriptors={iepBehaviourDescriptors? iepBehaviourDescriptors: []}
+        behaviourDescriptors={behaviourDescriptors ? behaviourDescriptors : []}
+        iepBehaviourDescriptors={iepBehaviourDescriptors ? iepBehaviourDescriptors : []}
         onGenerate={handleReportGenerate}
       />
 
