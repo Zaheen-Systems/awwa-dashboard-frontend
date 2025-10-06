@@ -211,21 +211,21 @@ export function StudentDetailPage({ student, onBack, onBehaviorDescriptorClick }
   });
 
   // Count behavior descriptors for specific GCO items (e.g., "1.2.2")
-  const getCountForGCOItem = (gcoItem: string) => {
-    if (!behaviourDescriptors) return 0;
+  // const getCountForGCOItem = (gcoItem: string) => {
+  //   if (!behaviourDescriptors) return 0;
 
-    const count = behaviourDescriptors.filter(descriptor => {
-      if (!descriptor.action || descriptor.action.trim() === '' ||
-        !descriptor.trigger || descriptor.trigger.trim() === '') {
-        return false;
-      }
+  //   const count = behaviourDescriptors.filter(descriptor => {
+  //     if (!descriptor.action || descriptor.action.trim() === '' ||
+  //       !descriptor.trigger || descriptor.trigger.trim() === '') {
+  //       return false;
+  //     }
 
-      // Check if the descriptor's gco_classification matches the specific GCO item
-      return String(descriptor.gco_classification) === String(gcoItem);
-    }).length;
+  //     // Check if the descriptor's gco_classification matches the specific GCO item
+  //     return String(descriptor.gco_classification) === String(gcoItem);
+  //   }).length;
 
-    return count;
-  };
+  //   return count;
+  // };
 
   // Modal states
   const [showAddBDModal, setShowAddBDModal] = useState(false);
