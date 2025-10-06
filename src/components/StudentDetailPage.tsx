@@ -143,9 +143,9 @@ export function StudentDetailPage({ student, onBack, onBehaviorDescriptorClick }
   // Filter behavior descriptors based on date range or single date
   const filterDescriptorsByDateRange = (descriptors: BehavioralDescriptorUI[]) => {
     if (!startDate && !endDate) return descriptors;
-    
+
     console.log("descriptors:", descriptors);
-  
+
     // Helper function to convert the 'DD.MM.YY' format to a Date object
     const convertToDate = (dateStr: string): Date => {
       const [day, month, year] = dateStr.split('.');
@@ -154,13 +154,13 @@ export function StudentDetailPage({ student, onBack, onBehaviorDescriptorClick }
       // Date object: Month is 0-based in JavaScript (0 = January, 11 = December)
       return new Date(`${fullYear}-${month}-${day}`);
     };
-  
+
     return descriptors.filter(descriptor => {
       const descriptorDate = convertToDate(descriptor.date);
-  
+
       const start = startDate ? new Date(startDate) : null;
       const end = endDate ? new Date(endDate) : null;
-  
+
       if (isRangeMode) {
         // Range mode: both start and end dates must be present
         if (start && end) {
@@ -187,7 +187,7 @@ export function StudentDetailPage({ student, onBack, onBehaviorDescriptorClick }
       }
       return true;
     });
-  };  
+  };
 
   useEffect(() => {
     if (behaviourDescriptorsAll) {
@@ -456,7 +456,7 @@ export function StudentDetailPage({ student, onBack, onBehaviorDescriptorClick }
     // generateReport(student.id)
   };
 
-  // Helpers (keep near your component)
+  // Helper to normalize the GCO classification to 2 decimal places
   const normalizeToTwoDecimals = (code: string) => {
     const parts = (code || "").split(".").filter(Boolean);
     if (parts.length === 0) return "";
@@ -464,19 +464,25 @@ export function StudentDetailPage({ student, onBack, onBehaviorDescriptorClick }
     return `${parts[0]}.${parts[1]}`;
   };
 
+  // Group by two decimals and count the total occurrences
   const groupByTwoDecimals = (
-    arr: string[] | undefined,
-    getCountForGCOItem: (s: string) => number
+    arr: string[] | undefined
   ): Array<[string, number]> => {
     if (!Array.isArray(arr)) return [];
     const totals = new Map<string, number>();
+
+    // Iterate over each item in the array
     for (const item of arr) {
       if (!item) continue;
+
+      // Normalize the classification code to two decimals (e.g., "1.2" from "1.2.1")
       const key = normalizeToTwoDecimals(item);
-      const count = getCountForGCOItem(item) || 0;
-      totals.set(key, (totals.get(key) || 0) + count);
+
+      // Increment the count for this classification
+      totals.set(key, (totals.get(key) || 0) + 1);
     }
-    // sort naturally by major.minor numeric
+
+    // Sort naturally by major.minor numeric (e.g., "1.1" < "1.2" < "2.1")
     return Array.from(totals.entries()).sort((a, b) => {
       const [amaj, amin] = a[0].split(".").map(Number);
       const [bmaj, bmin] = b[0].split(".").map(Number);
@@ -484,10 +490,16 @@ export function StudentDetailPage({ student, onBack, onBehaviorDescriptorClick }
     });
   };
 
-  // In your render:
-  const g1 = groupByTwoDecimals(gcoData?.gco1, getCountForGCOItem);
-  const g2 = groupByTwoDecimals(gcoData?.gco2, getCountForGCOItem);
-  const g3 = groupByTwoDecimals(gcoData?.gco3, getCountForGCOItem);
+  // In your render, use the updated groupByTwoDecimals function:
+  const g1 = groupByTwoDecimals(gcoData?.gco1);
+  const g2 = groupByTwoDecimals(gcoData?.gco2);
+  const g3 = groupByTwoDecimals(gcoData?.gco3);
+
+  // Combine and calculate the total count of all classifications
+  const total = g1.concat(g2, g3).reduce((acc, [, count]) => acc + count, 0);
+  console.log("Filtered Data Length: ", gcoData); // Check length of filtered data
+  console.log("Total count:", total);
+
 
   // Render by max length to keep 3 columns aligned (like your current layout)
   const maxLen = Math.max(g1.length, g2.length, g3.length);
