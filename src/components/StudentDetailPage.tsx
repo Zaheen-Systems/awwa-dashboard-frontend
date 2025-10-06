@@ -143,12 +143,24 @@ export function StudentDetailPage({ student, onBack, onBehaviorDescriptorClick }
   // Filter behavior descriptors based on date range or single date
   const filterDescriptorsByDateRange = (descriptors: BehavioralDescriptorUI[]) => {
     if (!startDate && !endDate) return descriptors;
-
+    
+    console.log("descriptors:", descriptors);
+  
+    // Helper function to convert the 'DD.MM.YY' format to a Date object
+    const convertToDate = (dateStr: string): Date => {
+      const [day, month, year] = dateStr.split('.');
+      // Use full year (e.g., '25' becomes '2025')
+      const fullYear = `20${year}`;
+      // Date object: Month is 0-based in JavaScript (0 = January, 11 = December)
+      return new Date(`${fullYear}-${month}-${day}`);
+    };
+  
     return descriptors.filter(descriptor => {
-      const descriptorDate = new Date(descriptor.created_at);
+      const descriptorDate = convertToDate(descriptor.date);
+  
       const start = startDate ? new Date(startDate) : null;
       const end = endDate ? new Date(endDate) : null;
-
+  
       if (isRangeMode) {
         // Range mode: both start and end dates must be present
         if (start && end) {
@@ -175,11 +187,12 @@ export function StudentDetailPage({ student, onBack, onBehaviorDescriptorClick }
       }
       return true;
     });
-  };
+  };  
 
   useEffect(() => {
     if (behaviourDescriptorsAll) {
       const filteredAll = filterDescriptorsByDateRange(behaviourDescriptorsAll);
+      console.log("Filtered by date:", filteredAll);
 
       // Apply GCO filters to non-IEP descriptors
       const gcoFiltered = applyFilters(filteredAll.filter(bd => !bd.iep_goal), gcoFilters);
