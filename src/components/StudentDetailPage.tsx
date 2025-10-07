@@ -831,8 +831,8 @@ export function StudentDetailPage({ student, onBack, onBehaviorDescriptorClick }
                 </TableHeader>
                 <TableBody>
                   {behaviourDescriptors?.filter(descriptor =>
-                    descriptor.action && descriptor.action.trim() !== '' &&
-                    descriptor.trigger && descriptor.trigger.trim() !== ''
+                    descriptor.action && descriptor.action.trim() !== '' && descriptor.action.toLowerCase() !== 'null' &&
+                    descriptor.trigger && descriptor.trigger.trim() !== '' && descriptor.trigger.toLowerCase() !== 'null'
                   ).map((descriptor, index, filteredArray) => (
                     <TableRow
                       key={descriptor.id}
@@ -933,10 +933,13 @@ export function StudentDetailPage({ student, onBack, onBehaviorDescriptorClick }
                 </TableHeader>
 
                 <TableBody>
-                  {iepBehaviourDescriptors?.map((descriptor, index) => (
+                  {iepBehaviourDescriptors?.filter(descriptor =>
+                    descriptor.action && descriptor.action.trim() !== '' && descriptor.action.toLowerCase() !== 'null' &&
+                    descriptor.trigger && descriptor.trigger.trim() !== '' && descriptor.trigger.toLowerCase() !== 'null'
+                  ).map((descriptor, index, filteredArray) => (
                     <TableRow
                       key={descriptor.id}
-                      className={`${index < iepBehaviourDescriptors.length - 1 ? "border-b" : ""} cursor-pointer hover:bg-gray-50 transition-colors`}
+                      className={`${index < filteredArray.length - 1 ? "border-b" : ""} cursor-pointer hover:bg-gray-50 transition-colors`}
                       style={{
                         borderColor: '#BDC3C7',
                         backgroundColor: descriptor.selected ? '#e65039' : 'transparent'
