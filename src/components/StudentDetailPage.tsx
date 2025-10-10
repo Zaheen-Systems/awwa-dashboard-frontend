@@ -90,9 +90,7 @@ function useBehavioralDescriptors(studentId: number) {
 
       return data.map((item) => {
         // created_at will be a Date object thanks to axios interceptor
-        const createdAt = item.created_at instanceof Date 
-          ? item.created_at 
-          : new Date(item.created_at);
+        const createdAt = new Date(item.created_at);
 
         return {
           ...item,
@@ -350,9 +348,7 @@ export function StudentDetailPage({ student, onBack, onBehaviorDescriptorClick }
 
       // Date range filter
       if (filters.startDate || filters.endDate) {
-        const descriptorDate = descriptor.created_at instanceof Date 
-          ? descriptor.created_at 
-          : new Date(descriptor.created_at);
+        const descriptorDate = new Date(descriptor.created_at);
         const start = filters.startDate ? new Date(filters.startDate) : null;
         const end = filters.endDate ? new Date(filters.endDate) : null;
 
