@@ -10,7 +10,7 @@ import { SelectBDsModal } from './SelectBDsModal';
 import { BDsFilterModal, BDFilters } from './BDsFilterModal';
 import api from "../lib/axios";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { format } from "date-fns";
+import { formatSingaporeTime } from "../lib/dateUtils";
 import { Student } from '../types/students';
 // import awwaLogo from 'figma:asset/71b57c03c5488fc89f49e890a42dd4691fd017ee.png';
 
@@ -89,13 +89,16 @@ function useBehavioralDescriptors(studentId: number) {
       );
 
       return data.map((item) => {
-        const createdAt = new Date(item.created_at);
+        // created_at will be a Date object thanks to axios interceptor
+        const createdAt = item.created_at instanceof Date 
+          ? item.created_at 
+          : new Date(item.created_at);
 
         return {
           ...item,
           selected: false,
-          date: format(createdAt, "dd.MM.yy"),
-          time: format(createdAt, "h:mm a"),
+          date: formatSingaporeTime(createdAt, "dd.MM.yy"),
+          time: formatSingaporeTime(createdAt, "h:mm a"),
         };
       });
     },
@@ -347,7 +350,9 @@ export function StudentDetailPage({ student, onBack, onBehaviorDescriptorClick }
 
       // Date range filter
       if (filters.startDate || filters.endDate) {
-        const descriptorDate = new Date(descriptor.created_at);
+        const descriptorDate = descriptor.created_at instanceof Date 
+          ? descriptor.created_at 
+          : new Date(descriptor.created_at);
         const start = filters.startDate ? new Date(filters.startDate) : null;
         const end = filters.endDate ? new Date(filters.endDate) : null;
 

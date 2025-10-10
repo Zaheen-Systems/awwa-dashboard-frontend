@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useComments, useAddComment } from "../hooks/useComments";
+import { formatSingaporeDateTimeDisplay } from "../lib/dateUtils";
 
 interface CommentsSectionProps {
   descriptorId: number;
@@ -68,10 +69,9 @@ function CommentItem({ comment, onReply }: any) {
   const [reply, setReply] = useState("");
   const [showReplyBox, setShowReplyBox] = useState(false);
 
-  // Format timestamp
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleString(); // e.g., "9/20/2025, 3:45 PM"
+  // Format timestamp in Singapore time
+  const formatDate = (dateString: string | Date) => {
+    return formatSingaporeDateTimeDisplay(dateString);
   };
 
   return (

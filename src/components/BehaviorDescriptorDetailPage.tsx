@@ -4,6 +4,7 @@ import { Button } from './ui/button';
 // import { Label } from './ui/label';
 import {  ChevronLeft } from 'lucide-react';
 import CommentsSection from './CommentSection';
+import { formatSingaporeDateDisplay } from '../lib/dateUtils';
 // import { Description } from '@radix-ui/react-dialog';
 
 // import awwaLogo from 'figma:asset/71b57c03c5488fc89f49e890a42dd4691fd017ee.png';
@@ -260,7 +261,7 @@ export function BehaviorDescriptorDetailPage({
                         {getAuthorDisplayName(comment.author, comment.authorType)}
                       </span>
                       <span className="text-xs" style={{ color: '#6C757D' }}>
-                        {new Date(comment.timestamp).toLocaleDateString()}
+                        {formatSingaporeDateDisplay(comment.timestamp)}
                       </span>
                     </div>
                     <p style={{ color: '#3C3C3C' }}>{comment.text}</p>
