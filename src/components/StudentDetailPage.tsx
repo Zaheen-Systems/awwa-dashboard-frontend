@@ -832,8 +832,8 @@ export function StudentDetailPage({ student, onBack, onBehaviorDescriptorClick }
                 </TableHeader>
                 <TableBody>
                   {behaviourDescriptors?.filter(descriptor =>
-                    descriptor.action && descriptor.action.trim() !== '' && descriptor.action.toLowerCase() !== 'null' &&
-                    descriptor.trigger && descriptor.trigger.trim() !== '' && descriptor.trigger.toLowerCase() !== 'null'
+                    descriptor.action && descriptor.action.trim() !== '' && descriptor.action.toLowerCase() !== 'null' && descriptor.action.toLowerCase() !== 'none' &&
+                    descriptor.trigger && descriptor.trigger.trim() !== '' && descriptor.trigger.toLowerCase() !== 'null' && descriptor.trigger.toLowerCase() !== 'none'
                   ).map((descriptor, index, filteredArray) => (
                     <TableRow
                       key={descriptor.id}
@@ -935,8 +935,8 @@ export function StudentDetailPage({ student, onBack, onBehaviorDescriptorClick }
 
                 <TableBody>
                   {iepBehaviourDescriptors?.filter(descriptor =>
-                    descriptor.action && descriptor.action.trim() !== '' && descriptor.action.toLowerCase() !== 'null' &&
-                    descriptor.trigger && descriptor.trigger.trim() !== '' && descriptor.trigger.toLowerCase() !== 'null'
+                    descriptor.action && descriptor.action.trim() !== '' && descriptor.action.toLowerCase() !== 'null' && descriptor.action.toLowerCase() !== 'none' &&
+                    descriptor.trigger && descriptor.trigger.trim() !== '' && descriptor.trigger.toLowerCase() !== 'null' && descriptor.trigger.toLowerCase() !== 'none'
                   ).map((descriptor, index, filteredArray) => (
                     <TableRow
                       key={descriptor.id}
